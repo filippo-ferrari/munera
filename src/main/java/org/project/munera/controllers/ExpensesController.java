@@ -28,6 +28,11 @@ public class ExpensesController {
         return this.expenseService.addNewExpense(expense);
     }
 
+    @PatchMapping("/expenses/{expense}")
+    public Expense patch(@PathVariable("expense") Expense expenseToPatch, @RequestBody Expense expensePatched) {
+        return this.expenseService.patchExpense(expenseToPatch, expensePatched);
+    }
+
     @DeleteMapping("/expenses/{expense}")
     public void delete(@PathVariable Expense expense) {
         this.expenseService.deleteExpense(expense);

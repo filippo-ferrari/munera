@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Entity
 @Getter
@@ -31,4 +32,7 @@ public class Expense {
 
     @Column(name = "Description")
     private String description;
+
+    @Column(name = "Date", nullable = false, columnDefinition = "DATE DEFAULT CURRENT_DATE")
+    private LocalDate date;
 }
