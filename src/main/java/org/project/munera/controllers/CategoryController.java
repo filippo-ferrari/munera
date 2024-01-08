@@ -4,7 +4,6 @@ import org.project.munera.entities.Category;
 import org.project.munera.services.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
