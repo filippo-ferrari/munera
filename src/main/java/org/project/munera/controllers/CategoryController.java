@@ -28,6 +28,11 @@ public class CategoryController {
         return this.categoryService.addNewCategory(category);
     }
 
+    @PatchMapping("/categories/{category}")
+    public Category patch(@PathVariable("category") Category categoryToPatch, @RequestBody Category categoryPatched){
+        return this.categoryService.patchCategory(categoryToPatch, categoryPatched);
+    }
+
     @DeleteMapping("/categories/{category}")
     public void delete(@PathVariable Category category) {
         this.categoryService.deleteCategory(category);
