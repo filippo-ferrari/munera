@@ -14,8 +14,11 @@ import java.util.Objects;
 @Service
 public class ExpenseService {
 
-    @Autowired
-    private ExpenseRepository expenseRepository;
+    private final ExpenseRepository expenseRepository;
+
+    public ExpenseService(ExpenseRepository expenseRepository) {
+        this.expenseRepository = expenseRepository;
+    }
 
     public List<Expense> fetchExpenses() {
         return this.expenseRepository.findAll();

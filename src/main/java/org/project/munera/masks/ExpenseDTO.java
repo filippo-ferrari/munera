@@ -1,4 +1,4 @@
 package org.project.munera.masks;
 
-public class ExpenseMask {
+public class ExpenseDTO {
 }

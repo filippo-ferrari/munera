@@ -13,8 +13,11 @@ import java.util.List;
 @Service
 public class PeriodicExpenseService {
 
-    @Autowired
-    private PeriodicExpenseRepository periodicExpenseRepository;
+    private final PeriodicExpenseRepository periodicExpenseRepository;
+
+    public PeriodicExpenseService(PeriodicExpenseRepository periodicExpenseRepository) {
+        this.periodicExpenseRepository = periodicExpenseRepository;
+    }
 
     public List<PeriodicExpense> fetchPeriodicExpenses() {
         return this.periodicExpenseRepository.findAll();
