@@ -38,7 +38,7 @@ public class Expense {
     @JoinTable(
             name = "Creditor_expenses",
             joinColumns = @JoinColumn(name = "expense_id"),
-            inverseJoinColumns = @JoinColumn(name = "person_id"))
+            inverseJoinColumns = @JoinColumn(name = "people_id"))
     private Set<Person> creditors;
 
     @Column(name = "Date", nullable = false, columnDefinition = "DATE DEFAULT CURRENT_DATE")
