@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -32,6 +33,13 @@ public class Expense {
 
     @Column(name = "Description")
     private String description;
+
+    @ManyToMany
+    @JoinTable(
+            name = "Creditor_expenses",
+            joinColumns = @JoinColumn(name = "expense_id"),
+            inverseJoinColumns = @JoinColumn(name = "person_id"))
+    private Set<Person> creditors;
 
     @Column(name = "Date", nullable = false, columnDefinition = "DATE DEFAULT CURRENT_DATE")
     private LocalDate date;
