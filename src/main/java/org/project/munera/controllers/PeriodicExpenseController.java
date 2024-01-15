@@ -7,7 +7,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class PeriodicExpenseController {
 
-    @Autowired
-    private PeriodicExpenseService expenseService;
+    private final PeriodicExpenseService expenseService;
 
+    public PeriodicExpenseController(PeriodicExpenseService expenseService){
+        this.expenseService = expenseService;
+    }
 }

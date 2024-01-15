@@ -10,8 +10,11 @@ import java.util.List;
 @RestController
 public class ExpensesController {
 
-    @Autowired
-    private ExpenseService expenseService;
+    private final ExpenseService expenseService;
+
+    public ExpensesController(ExpenseService expenseService) {
+        this.expenseService = expenseService;
+    }
 
     @GetMapping("/expenses")
     public List<Expense> list() {
