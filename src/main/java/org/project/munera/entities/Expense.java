@@ -34,6 +34,15 @@ public class Expense {
     @Column(name = "Description")
     private String description;
 
+    @Column(name = "PeriodicExpense", nullable = false)
+    private Boolean isPeriodic;
+
+    @Column(name = "PeriodUnit")
+    private PeriodUnit periodUnit;
+
+    @Column(name = "PeriodInterval")
+    private Integer periodInterval;
+
     @ManyToMany
     @JoinTable(
             name = "Creditor_expenses",
