@@ -15,30 +15,28 @@ public class PeopleController {
         this.peopleService = peopleService;
     }
 
-    @GetMapping("/creditors")
+    @GetMapping("/people")
     public List<Person> list() {
-        return this.peopleService.fetchCreditors();
+        return this.peopleService.fetchPerson();
     }
 
-    @GetMapping("/creditors/{creditor}")
-    public Person reference(@PathVariable Person creditor) {
-        return creditor;
+    @GetMapping("/people/{person}")
+    public Person reference(@PathVariable Person person) {
+        return person;
     }
 
-    @PostMapping("/creditors")
-    public Person create(@RequestBody Person creditor) {
-        return this.peopleService.addNewCreditor(creditor);
+    @PostMapping("/people")
+    public Person create(@RequestBody Person person) {
+        return this.peopleService.addNewPerson(person);
     }
 
-    @PatchMapping("/creditors/{creditor}")
-    public Person patch(@PathVariable("creditor") Person creditorToPatch, @RequestBody Person creditorPatched) {
-        return this.peopleService.patchCreditor(creditorToPatch, creditorPatched);
+    @PatchMapping("/people/{person}")
+    public Person patch(@PathVariable("person") Person personToPatch, @RequestBody Person personPatched) {
+        return this.peopleService.patchPerson(personToPatch, personPatched);
     }
 
-    @DeleteMapping("/creditors/{creditor}")
-    public void delete(@PathVariable Person creditor) {
-        this.peopleService.deleteCreditor(creditor);
+    @DeleteMapping("/people/{person}")
+    public void delete(@PathVariable Person person) {
+        this.peopleService.deletePerson(person);
     }
-
-
 }
