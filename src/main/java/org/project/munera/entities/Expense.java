@@ -41,6 +41,13 @@ public class Expense {
             inverseJoinColumns = @JoinColumn(name = "people_id"))
     private Set<Person> creditors;
 
+    @ManyToMany
+    @JoinTable(
+            name = "Debtors_expenses",
+            joinColumns = @JoinColumn(name = "expense_id"),
+            inverseJoinColumns = @JoinColumn(name = "people_id"))
+    private Set<Person> debtors;
+
     @Column(name = "Date", nullable = false, columnDefinition = "DATE DEFAULT CURRENT_DATE")
     private LocalDate date;
 }

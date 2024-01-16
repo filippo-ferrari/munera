@@ -1,5 +1,6 @@
 package org.project.munera.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -26,6 +27,11 @@ public class Person {
     @Column(name = "LastName", nullable = false)
     private String lastName;
 
+    @JsonIgnore
     @ManyToMany(mappedBy = "creditors")
-    private Set<Expense> expenses;
+    private Set<Expense> creditorExpenses;
+
+    @JsonIgnore
+    @ManyToMany(mappedBy = "debtors")
+    private Set<Expense> debtorExpenses;
 }
