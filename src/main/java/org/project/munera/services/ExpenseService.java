@@ -5,8 +5,12 @@ import jakarta.transaction.Transactional;
 import lombok.NonNull;
 import org.project.munera.entities.Expense;
 import org.project.munera.repositories.ExpenseRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.project.munera.utils.Query;
+import org.project.munera.utils.Sort;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.stereotype.Service;
+
+import java.awt.print.Pageable;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
@@ -14,13 +18,18 @@ import java.util.Objects;
 @Service
 public class ExpenseService {
 
+    private final BeanFactory beanFactory;
     private final ExpenseRepository expenseRepository;
 
-    public ExpenseService(ExpenseRepository expenseRepository) {
+    public ExpenseService(ExpenseRepository expenseRepository, BeanFactory beanFactory) {
         this.expenseRepository = expenseRepository;
+        this.beanFactory = beanFactory;
     }
 
-    public List<Expense> fetchExpenses() {
+    public List<Expense> fetchExpenses(final @NonNull Query query, @NonNull Pageable page) {
+        if (query.hasNoSorting()) query.setSort(Sort.of(Expense.INSERTED_AT_FIELD, Sort.Direction.DESC));
+        final var specification = this.beanFactory.getBean(ExpenseSpecification.class, query);
+
         return this.expenseRepository.findAll();
     }
 
