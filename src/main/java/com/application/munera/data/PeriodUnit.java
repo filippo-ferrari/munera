@@ -1,4 +1,8 @@
 package com.application.munera.data;
 
-public class PeriodUnit {
+
+public enum PeriodUnit {
+    DAY,
+    WEEK,
+    MONTH
 }

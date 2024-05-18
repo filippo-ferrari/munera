@@ -1,17 +1,18 @@
 package com.application.munera.data;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Set;
 
 @Entity
 @Getter
 @Setter
+@Table(name = "expenses")
 public class Expense  {
 
     @Id
@@ -41,4 +42,21 @@ public class Expense  {
 
     @Column(name = "PeriodInterval")
     private Integer periodInterval;
-    }
+
+    @ManyToMany
+    @JoinTable(
+            name = "Creditor_expenses",
+            joinColumns = @JoinColumn(name = "expense_id"),
+            inverseJoinColumns = @JoinColumn(name = "people_id"))
+    private Set<Person> creditors;
+
+    @ManyToMany
+    @JoinTable(
+            name = "Debtors_expenses",
+            joinColumns = @JoinColumn(name = "expense_id"),
+            inverseJoinColumns = @JoinColumn(name = "people_id"))
+    private Set<Person> debtors;
+
+    @Column(name = "Date", nullable = false, columnDefinition = "DATE DEFAULT CURRENT_DATE")
+    private LocalDate date;
+}
