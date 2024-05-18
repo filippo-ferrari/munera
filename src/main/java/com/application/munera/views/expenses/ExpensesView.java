@@ -6,8 +6,6 @@ import com.application.munera.views.MainLayout;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.checkbox.Checkbox;
-import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
@@ -40,21 +38,19 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
 
     private final Grid<Expense> grid = new Grid<>(Expense.class, false);
 
-    private TextField firstName;
-    private TextField lastName;
-    private TextField email;
-    private TextField phone;
-    private DatePicker dateOfBirth;
-    private TextField occupation;
-    private TextField role;
-    private Checkbox important;
+    private TextField name;
+    private TextField category;
+    private TextField cost;
+    private TextField isPeriodic;
+    private TextField periodUnit;
+    private TextField periodInterval;
 
     private final Button cancel = new Button("Cancel");
     private final Button save = new Button("Save");
 
     private final BeanValidationBinder<Expense> binder;
 
-    private Expense samplePerson;
+    private Expense expense;
 
     private final SamplePersonService samplePersonService;
 
@@ -71,13 +67,12 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         add(splitLayout);
 
         // Configure Grid
-        grid.addColumn("firstName").setAutoWidth(true);
-        grid.addColumn("lastName").setAutoWidth(true);
-        grid.addColumn("email").setAutoWidth(true);
-        grid.addColumn("phone").setAutoWidth(true);
-        grid.addColumn("dateOfBirth").setAutoWidth(true);
-        grid.addColumn("occupation").setAutoWidth(true);
-        grid.addColumn("role").setAutoWidth(true);
+        grid.addColumn("name").setAutoWidth(true);
+        grid.addColumn("category").setAutoWidth(true);
+        grid.addColumn("cost").setAutoWidth(true);
+        grid.addColumn("isPeriodic").setAutoWidth(true);
+        grid.addColumn("periodUnit").setAutoWidth(true);
+        grid.addColumn("periodInterval").setAutoWidth(true);
 //        LitRenderer<Expense> importantRenderer = LitRenderer.<Expense>of(
 //                "<vaadin-icon icon='vaadin:${item.icon}' style='width: var(--lumo-icon-size-s); height: var(--lumo-icon-size-s); color: ${item.color};'></vaadin-icon>")
 //                .withProperty("icon", important -> important.isImportant() ? "check" : "minus").withProperty("color",
@@ -116,11 +111,11 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
 
         save.addClickListener(e -> {
             try {
-                if (this.samplePerson == null) {
-                    this.samplePerson = new Expense();
+                if (this.expense == null) {
+                    this.expense = new Expense();
                 }
-                binder.writeBean(this.samplePerson);
-                samplePersonService.update(this.samplePerson);
+                binder.writeBean(this.expense);
+                samplePersonService.update(this.expense);
                 clearForm();
                 refreshGrid();
                 Notification.show("Data updated");
@@ -164,15 +159,14 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         editorLayoutDiv.add(editorDiv);
 
         FormLayout formLayout = new FormLayout();
-        firstName = new TextField("First Name");
-        lastName = new TextField("Last Name");
-        email = new TextField("Email");
-        phone = new TextField("Phone");
-        dateOfBirth = new DatePicker("Date Of Birth");
-        occupation = new TextField("Occupation");
-        role = new TextField("Role");
-        important = new Checkbox("Important");
-        formLayout.add(firstName, lastName, email, phone, dateOfBirth, occupation, role, important);
+        name = new TextField("First Name");
+        category = new TextField("Last Name");
+        cost = new TextField("Email");
+        isPeriodic = new TextField("Phone");
+        periodUnit = new TextField("Date Of Birth");
+        periodInterval = new TextField("Occupation");
+//        important = new Checkbox("Important");
+        formLayout.add(name, category, cost, isPeriodic, periodUnit, periodInterval);
 
         editorDiv.add(formLayout);
         createButtonLayout(editorLayoutDiv);
@@ -206,8 +200,8 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
     }
 
     private void populateForm(Expense value) {
-        this.samplePerson = value;
-        binder.readBean(this.samplePerson);
+        this.expense = value;
+        binder.readBean(this.expense);
 
     }
 }
