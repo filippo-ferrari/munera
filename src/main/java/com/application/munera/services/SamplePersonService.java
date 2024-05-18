@@ -1,6 +1,6 @@
 package com.application.munera.services;
 
-import com.application.munera.data.SamplePerson;
+import com.application.munera.data.Expense;
 import com.application.munera.data.SamplePersonRepository;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -17,11 +17,11 @@ public class SamplePersonService {
         this.repository = repository;
     }
 
-    public Optional<SamplePerson> get(Long id) {
+    public Optional<Expense> get(Long id) {
         return repository.findById(id);
     }
 
-    public SamplePerson update(SamplePerson entity) {
+    public Expense update(Expense entity) {
         return repository.save(entity);
     }
 
@@ -29,11 +29,11 @@ public class SamplePersonService {
         repository.deleteById(id);
     }
 
-    public Page<SamplePerson> list(Pageable pageable) {
+    public Page<Expense> list(Pageable pageable) {
         return repository.findAll(pageable);
     }
 
-    public Page<SamplePerson> list(Pageable pageable, Specification<SamplePerson> filter) {
+    public Page<Expense> list(Pageable pageable, Specification<Expense> filter) {
         return repository.findAll(filter, pageable);
     }
 

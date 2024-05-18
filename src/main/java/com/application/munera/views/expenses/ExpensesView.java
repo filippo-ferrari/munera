@@ -1,6 +1,6 @@
 package com.application.munera.views.expenses;
 
-import com.application.munera.data.SamplePerson;
+import com.application.munera.data.Expense;
 import com.application.munera.services.SamplePersonService;
 import com.application.munera.views.MainLayout;
 import com.vaadin.flow.component.UI;
@@ -42,7 +42,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
     private final String SAMPLEPERSON_ID = "samplePersonID";
     private final String SAMPLEPERSON_EDIT_ROUTE_TEMPLATE = "/%s/edit";
 
-    private final Grid<SamplePerson> grid = new Grid<>(SamplePerson.class, false);
+    private final Grid<Expense> grid = new Grid<>(Expense.class, false);
 
     private TextField firstName;
     private TextField lastName;
@@ -56,9 +56,9 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
     private final Button cancel = new Button("Cancel");
     private final Button save = new Button("Save");
 
-    private final BeanValidationBinder<SamplePerson> binder;
+    private final BeanValidationBinder<Expense> binder;
 
-    private SamplePerson samplePerson;
+    private Expense samplePerson;
 
     private final SamplePersonService samplePersonService;
 
@@ -82,7 +82,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         grid.addColumn("dateOfBirth").setAutoWidth(true);
         grid.addColumn("occupation").setAutoWidth(true);
         grid.addColumn("role").setAutoWidth(true);
-        LitRenderer<SamplePerson> importantRenderer = LitRenderer.<SamplePerson>of(
+        LitRenderer<Expense> importantRenderer = LitRenderer.<Expense>of(
                 "<vaadin-icon icon='vaadin:${item.icon}' style='width: var(--lumo-icon-size-s); height: var(--lumo-icon-size-s); color: ${item.color};'></vaadin-icon>")
                 .withProperty("icon", important -> important.isImportant() ? "check" : "minus").withProperty("color",
                         important -> important.isImportant()
@@ -107,7 +107,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         });
 
         // Configure Form
-        binder = new BeanValidationBinder<>(SamplePerson.class);
+        binder = new BeanValidationBinder<>(Expense.class);
 
         // Bind fields. This is where you'd define e.g. validation rules
 
@@ -121,7 +121,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         save.addClickListener(e -> {
             try {
                 if (this.samplePerson == null) {
-                    this.samplePerson = new SamplePerson();
+                    this.samplePerson = new Expense();
                 }
                 binder.writeBean(this.samplePerson);
                 samplePersonService.update(this.samplePerson);
@@ -144,7 +144,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
     public void beforeEnter(BeforeEnterEvent event) {
         Optional<Long> samplePersonId = event.getRouteParameters().get(SAMPLEPERSON_ID).map(Long::parseLong);
         if (samplePersonId.isPresent()) {
-            Optional<SamplePerson> samplePersonFromBackend = samplePersonService.get(samplePersonId.get());
+            Optional<Expense> samplePersonFromBackend = samplePersonService.get(samplePersonId.get());
             if (samplePersonFromBackend.isPresent()) {
                 populateForm(samplePersonFromBackend.get());
             } else {
@@ -209,7 +209,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         populateForm(null);
     }
 
-    private void populateForm(SamplePerson value) {
+    private void populateForm(Expense value) {
         this.samplePerson = value;
         binder.readBean(this.samplePerson);
 
