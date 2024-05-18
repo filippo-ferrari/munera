@@ -1,19 +1,20 @@
 package com.application.munera.services;
 
 import com.application.munera.data.Expense;
-import com.application.munera.data.SamplePersonRepository;
-import java.util.Optional;
+import com.application.munera.repositories.ExpenseRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
-public class SamplePersonService {
+public class ExpenseService {
 
-    private final SamplePersonRepository repository;
+    private final ExpenseRepository repository;
 
-    public SamplePersonService(SamplePersonRepository repository) {
+    public ExpenseService(ExpenseRepository repository) {
         this.repository = repository;
     }
 

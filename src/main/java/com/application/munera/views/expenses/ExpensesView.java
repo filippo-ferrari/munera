@@ -1,7 +1,7 @@
 package com.application.munera.views.expenses;
 
 import com.application.munera.data.Expense;
-import com.application.munera.services.SamplePersonService;
+import com.application.munera.services.ExpenseService;
 import com.application.munera.views.MainLayout;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -52,10 +52,10 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
 
     private Expense expense;
 
-    private final SamplePersonService samplePersonService;
+    private final ExpenseService expenseService;
 
-    public ExpensesView(SamplePersonService samplePersonService) {
-        this.samplePersonService = samplePersonService;
+    public ExpensesView(ExpenseService expenseService) {
+        this.expenseService = expenseService;
         addClassNames("expenses-view");
 
         // Create UI
@@ -82,7 +82,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
 //
 //        grid.addColumn(importantRenderer).setHeader("Important").setAutoWidth(true);
 
-        grid.setItems(query -> samplePersonService.list(
+        grid.setItems(query -> expenseService.list(
                 PageRequest.of(query.getPage(), query.getPageSize(), VaadinSpringDataHelpers.toSpringDataSort(query)))
                 .stream());
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
@@ -115,7 +115,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
                     this.expense = new Expense();
                 }
                 binder.writeBean(this.expense);
-                samplePersonService.update(this.expense);
+                expenseService.update(this.expense);
                 clearForm();
                 refreshGrid();
                 Notification.show("Data updated");
@@ -135,7 +135,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
     public void beforeEnter(BeforeEnterEvent event) {
         Optional<Long> samplePersonId = event.getRouteParameters().get(SAMPLEPERSON_ID).map(Long::parseLong);
         if (samplePersonId.isPresent()) {
-            Optional<Expense> samplePersonFromBackend = samplePersonService.get(samplePersonId.get());
+            Optional<Expense> samplePersonFromBackend = expenseService.get(samplePersonId.get());
             if (samplePersonFromBackend.isPresent()) {
                 populateForm(samplePersonFromBackend.get());
             } else {
