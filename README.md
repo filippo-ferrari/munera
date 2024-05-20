@@ -1,45 +1,40 @@
-# Munera
+# Munera: Expense Tracking Application
 
-This project can be used as a starting point to create your own Vaadin application with Spring Boot.
-It contains all the necessary configuration and some placeholder files to get you started.
+## Overview
 
-## Running the application
+Munera is an application designed to help users efficiently track their expenses. The backend of the application is currently functional, allowing users to perform CRUD (Create, Read, Update, Delete) operations on expenses, creditors, debtors, and categories. The application is built on a PostgreSQL database to securely store expense-related information.
 
-The project is a standard Maven project. To run it from the command line,
-type `mvnw` (Windows), or `./mvnw` (Mac & Linux), then open
-http://localhost:8080 in your browser.
+### 1. Expense Management
 
-You can also import the project to your IDE of choice as you would with any
-Maven project. Read more on [how to import Vaadin projects to different IDEs](https://vaadin.com/docs/latest/guide/step-by-step/importing) (Eclipse, IntelliJ IDEA, NetBeans, and VS Code).
+- Create, read, update, and delete expenses with the following details:
+    - Name
+    - Date
+    - Category
+    - Cost
+    - Description
+    - Period Interval (1, 2, 3)
+    - Period Unit (days, weeks, months)
+    - Creditors and debtors
 
-## Deploying to Production
+## Completed Features
 
-To create a production build, call `mvnw clean package -Pproduction` (Windows),
-or `./mvnw clean package -Pproduction` (Mac & Linux).
-This will build a JAR file with all the dependencies and front-end resources,
-ready to be deployed. The file can be found in the `target` folder after the build completes.
+- [x] Create concept of creditors and debtors for each expense
+- [x] Insert expenses of the past and of the future
+- [x] Have an option to set up recurring expenses
 
-Once the JAR file is built, you can run it using
-`java -jar target/munera-1.0-SNAPSHOT.jar`
+## Next Steps
 
-## Project structure
+1. **Frontend Structure**
+    - Decide on the frontend structure, most likely a Command Line Interface (CLI).
 
-- `MainLayout.java` in `src/main/java` contains the navigation setup (i.e., the
-  side/top bar and the main menu). This setup uses
-  [App Layout](https://vaadin.com/docs/components/app-layout).
-- `views` package in `src/main/java` contains the server-side Java views of your application.
-- `views` folder in `src/main/frontend` contains the client-side JavaScript views of your application.
-- `themes` folder in `src/main/frontend` contains the custom CSS styles.
+2. **CLI Design**
+    - If a CLI is implemented, consider designing tables and a calendar view for enhanced user experience.
 
-## Useful links
+3. **Filtering and Sorting**
+    - Implement filtering and sorting functionalities for all major entities to enhance data organization.
 
-- Read the documentation at [vaadin.com/docs](https://vaadin.com/docs).
-- Follow the tutorial at [vaadin.com/docs/latest/tutorial/overview](https://vaadin.com/docs/latest/tutorial/overview).
-- Create new projects at [start.vaadin.com](https://start.vaadin.com/).
-- Search UI components and their usage examples at [vaadin.com/docs/latest/components](https://vaadin.com/docs/latest/components).
-- View use case applications that demonstrate Vaadin capabilities at [vaadin.com/examples-and-demos](https://vaadin.com/examples-and-demos).
-- Build any UI without custom CSS by discovering Vaadin's set of [CSS utility classes](https://vaadin.com/docs/styling/lumo/utility-classes). 
-- Find a collection of solutions to common use cases at [cookbook.vaadin.com](https://cookbook.vaadin.com/).
-- Find add-ons at [vaadin.com/directory](https://vaadin.com/directory).
-- Ask questions on [Stack Overflow](https://stackoverflow.com/questions/tagged/vaadin) or join our [Discord channel](https://discord.gg/MYFq5RTbBn).
-- Report issues, create pull requests in [GitHub](https://github.com/vaadin).
+4. **Weekly and Monthly Summaries**
+    - Create functionality to generate weekly and monthly summaries, including filtering and sorting options.
+
+5. **Reports for Creditors and Debtors**
+    - Develop reports outlining debts or credits for each creditor and debtor to provide users with a comprehensive overview.
