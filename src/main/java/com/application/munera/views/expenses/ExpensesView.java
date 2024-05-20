@@ -1,8 +1,7 @@
 package com.application.munera.views.expenses;
 
-import com.application.munera.data.Category;
 import com.application.munera.data.Expense;
-import com.application.munera.repositories.ExpenseRepository;
+import com.application.munera.services.ExpenseService;
 import com.application.munera.views.MainLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -17,12 +16,12 @@ import java.util.List;
 @PermitAll
 public class ExpensesView extends VerticalLayout {
 
-    private final ExpenseRepository expenseRepository;
+    private final ExpenseService expenseService;
     private final Grid<Expense> grid;
 
     @Autowired
-    public ExpensesView(ExpenseRepository expenseRepository) {
-        this.expenseRepository = expenseRepository;
+    public ExpensesView(ExpenseService expenseService) {
+        this.expenseService = expenseService;
         this.grid = new Grid<>(Expense.class);
         addClassName("expenses-view");
         setSizeFull();
@@ -40,7 +39,7 @@ public class ExpensesView extends VerticalLayout {
     }
 
     private void updateList() {
-        List<Expense> expenses = expenseRepository.findAll();
+        List<Expense> expenses = expenseService.findAll();
         grid.setItems(expenses);
     }
 }
