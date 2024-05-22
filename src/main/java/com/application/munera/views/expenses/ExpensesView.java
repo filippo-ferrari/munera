@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 
 @PageTitle("Expenses")
-@Route(value = "expenses", layout = MainLayout.class)
+@Route(value = "/", layout = MainLayout.class)
 @PermitAll
 public class ExpensesView extends VerticalLayout {
 
@@ -22,10 +22,10 @@ public class ExpensesView extends VerticalLayout {
     @Autowired
     public ExpensesView(ExpenseService expenseService) {
         this.expenseService = expenseService;
-        this.grid = new Grid<>(Expense.class);
+        this.grid = new Grid<>(Expense.class, false);
+
         addClassName("expenses-view");
         setSizeFull();
-
         configureGrid();
         add(grid);
         updateList();
@@ -34,7 +34,12 @@ public class ExpensesView extends VerticalLayout {
     private void configureGrid() {
         grid.addClassNames("expense-grid");
         grid.setSizeFull();
-        grid.setColumns("id", "name", "category.name", "cost", "description", "isPeriodic", "periodUnit", "periodInterval", "date");
+        grid.addColumn(Expense::getName).setHeader("Name").setSortable(true);
+        grid.addColumn(Expense::getCost).setHeader("Amount").setSortable(true);
+        grid.addColumn(Expense::getCategory).setHeader("Category").setSortable(true);
+        grid.addColumn(Expense::getPeriodInterval).setHeader("Period Interval").setSortable(true);
+        grid.addColumn(Expense::getPeriodUnit).setHeader("Period Unit").setSortable(true);
+        grid.addColumn(Expense::getDate).setHeader("Date").setSortable(true);
         grid.getColumns().forEach(col -> col.setAutoWidth(true));
     }
 
