@@ -41,7 +41,7 @@ import java.util.Optional;
 public class ExpensesView extends Div implements BeforeEnterObserver {
 
     private final String EXPENSE_ID = "ExpenseID";
-    private final String SAMPLEPERSON_EDIT_ROUTE_TEMPLATE = "/%s/edit";
+    private final String EXPENSE_EDIT_ROUTE_TEMPLATE = "/%s/edit";
 
     private final Grid<Expense> grid = new Grid<>(Expense.class, false);
 
@@ -93,7 +93,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         // when a row is selected or deselected, populate form
         grid.asSingleSelect().addValueChangeListener(event -> {
             if (event.getValue() != null) {
-                UI.getCurrent().navigate(String.format(SAMPLEPERSON_EDIT_ROUTE_TEMPLATE, event.getValue().getId()));
+                UI.getCurrent().navigate(String.format(EXPENSE_EDIT_ROUTE_TEMPLATE, event.getValue().getId()));
             } else {
                 clearForm();
                 UI.getCurrent().navigate(ExpensesView.class);
@@ -138,9 +138,9 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
     public void beforeEnter(BeforeEnterEvent event) {
         Optional<Long> expenseId = event.getRouteParameters().get(EXPENSE_ID).map(Long::parseLong);
         if (expenseId.isPresent()) {
-            Optional<Expense> samplePersonFromBackend = expenseService.get(expenseId.get());
-            if (samplePersonFromBackend.isPresent()) {
-                populateForm(samplePersonFromBackend.get());
+            Optional<Expense> expenseFromBackend = expenseService.get(expenseId.get());
+            if (expenseFromBackend.isPresent()) {
+                populateForm(expenseFromBackend.get());
             } else {
                 Notification.show(
                         String.format("The requested samplePerson was not found, ID = %s", expenseId.get()), 3000,
