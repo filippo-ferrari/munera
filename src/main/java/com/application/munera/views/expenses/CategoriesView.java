@@ -32,8 +32,8 @@ import java.util.Optional;
 @Uses(Icon.class)
 public class CategoriesView extends Div implements BeforeEnterObserver {
 
-    private final String CATEGORY_ID = "categoryID";
-    private final String CATEGORY_EDIT_ROUTE_TEMPLATE = "categories/%s/edit";
+    private static final String CATEGORY_ID = "categoryID";
+    private static final String CATEGORY_EDIT_ROUTE_TEMPLATE = "categories/%s/edit";
 
     private final Grid<Category> grid = new Grid<>(Category.class, false);
 

@@ -41,8 +41,8 @@ import java.util.Optional;
 @Uses(Icon.class)
 public class ExpensesView extends Div implements BeforeEnterObserver {
 
-    private final String EXPENSE_ID = "expenseID";
-    private final String EXPENSE_EDIT_ROUTE_TEMPLATE = "/%s/edit";
+    private static final String EXPENSE_ID = "expenseID";
+    private static final String EXPENSE_EDIT_ROUTE_TEMPLATE = "/%s/edit";
 
     private final Grid<Expense> grid = new Grid<>(Expense.class, false);
 
