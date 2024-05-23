@@ -40,7 +40,7 @@ import java.util.Optional;
 @Uses(Icon.class)
 public class ExpensesView extends Div implements BeforeEnterObserver {
 
-    private final String EXPENSE_ID = "ExpenseID";
+    private final String EXPENSE_ID = "expenseID";
     private final String EXPENSE_EDIT_ROUTE_TEMPLATE = "/%s/edit";
 
     private final Grid<Expense> grid = new Grid<>(Expense.class, false);
@@ -143,7 +143,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
                 populateForm(expenseFromBackend.get());
             } else {
                 Notification.show(
-                        String.format("The requested samplePerson was not found, ID = %s", expenseId.get()), 3000,
+                        String.format("The requested expense was not found, ID = %s", expenseId.get()), 3000,
                         Notification.Position.BOTTOM_START);
                 // when a row is selected but the data is no longer available,
                 // refresh grid

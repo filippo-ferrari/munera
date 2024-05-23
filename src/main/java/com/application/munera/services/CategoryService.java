@@ -2,10 +2,10 @@ package com.application.munera.services;
 
 import com.application.munera.data.Category;
 import com.application.munera.repositories.CategoryRepository;
-import jakarta.persistence.Cache;
-import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -18,7 +18,7 @@ public class CategoryService {
         this.categoryRepository = categoryRepository;
     }
 
-    public Optional<Category> get(Long id) {
+    public Optional<Category> findById(Long id) {
         return categoryRepository.findById(id);
     }
 
