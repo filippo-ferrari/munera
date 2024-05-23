@@ -16,6 +16,7 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
+import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.ValidationException;
@@ -46,6 +47,8 @@ public class CategoriesView extends Div implements BeforeEnterObserver {
     private final CategoryService categoryService;
     private TextField name;
 
+    private TextArea description;
+
     public CategoriesView(CategoryService categoryService) {
         this.categoryService = categoryService;
         addClassNames("categories-view");
@@ -60,6 +63,7 @@ public class CategoriesView extends Div implements BeforeEnterObserver {
 
         // Configure Grid
         grid.addColumn(Category::getName).setHeader("Name").setSortable(true);
+        grid.addColumn(Category::getDescription).setHeader("Description").setSortable(true);
         grid.getColumns().forEach(col -> col.setAutoWidth(true));
 
         grid.setItems(query -> categoryService.list(
@@ -139,7 +143,8 @@ public class CategoriesView extends Div implements BeforeEnterObserver {
 
         FormLayout formLayout = new FormLayout();
         name = new TextField("Name");
-        formLayout.add(name);
+        description = new TextArea("Description");
+        formLayout.add(name, description);
         editorDiv.add(formLayout);
         createButtonLayout(editorLayoutDiv);
 

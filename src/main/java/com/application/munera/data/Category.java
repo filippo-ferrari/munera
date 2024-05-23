@@ -18,4 +18,7 @@ public class Category {
     @Size(max = 100)
     @Column(name = "Name", nullable = false)
     private String name;
+
+    @Column(name = "Description")
+    private String description;
 }
