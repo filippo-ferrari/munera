@@ -27,6 +27,7 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.ValidationException;
+import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.router.*;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 import org.springframework.data.domain.PageRequest;
@@ -173,8 +174,15 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         periodUnit.setItems(PeriodUnit.values());
         periodInterval = new TextField("Period Interval");
         date = new DatePicker("Date");
+        LitRenderer<Expense> importantRenderer = LitRenderer.<Expense>of(
+                        "<vaadin-icon icon='vaadin:${item.icon}' style='width: var(--lumo-icon-size-s); height: var(--lumo-icon-size-s); color: ${item.color};'></vaadin-icon>")
+                .withProperty("icon", important -> important.getIsPeriodic() ? "check" : "minus").withProperty("color",
+                        important -> important.getIsPeriodic()
+                                ? "var(--lumo-primary-text-color)"
+                                : "var(--lumo-disabled-text-color)");
 
         formLayout.add(name, cost, category, description, isPeriodic, periodUnit, periodInterval, date);
+        grid.addColumn(importantRenderer).setHeader("Important").setAutoWidth(true);
         editorDiv.add(formLayout);
         createButtonLayout(editorLayoutDiv);
 
