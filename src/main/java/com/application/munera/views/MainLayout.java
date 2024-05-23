@@ -1,5 +1,6 @@
 package com.application.munera.views;
 
+import com.application.munera.views.expenses.CategoriesView;
 import com.application.munera.views.expenses.ExpensesView;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
@@ -51,6 +52,7 @@ public class MainLayout extends AppLayout {
         SideNav nav = new SideNav();
 
         nav.addItem(new SideNavItem("Expenses", ExpensesView.class, LineAwesomeIcon.COLUMNS_SOLID.create()));
+        nav.addItem(new SideNavItem("Categories", CategoriesView.class, LineAwesomeIcon.COLUMNS_SOLID.create()));
 
         return nav;
     }
