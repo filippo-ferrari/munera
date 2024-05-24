@@ -35,6 +35,10 @@ public class PersonService {
         this.personRepository.deleteById(id);
     }
 
+    public Page<Person> list(Pageable pageable){
+        return personRepository.findAll(pageable);
+    }
+
     public Page<Person> list(Pageable pageable, Specification<Person> filter) {
         return  this.personRepository.findAll(filter, pageable);
     }
