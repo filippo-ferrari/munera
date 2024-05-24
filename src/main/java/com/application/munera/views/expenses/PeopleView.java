@@ -1,8 +1,6 @@
 package com.application.munera.views.expenses;
 
 import com.application.munera.data.Person;
-import com.application.munera.services.CategoryService;
-import com.application.munera.services.ExpenseService;
 import com.application.munera.services.PersonService;
 import com.application.munera.views.MainLayout;
 import com.vaadin.flow.component.UI;
@@ -19,10 +17,14 @@ import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
+import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.ValidationException;
-import com.vaadin.flow.router.*;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
+import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -45,16 +47,12 @@ public class PeopleView extends Div implements BeforeEnterObserver {
     private final BeanValidationBinder<Person> binder;
 
     private Person person;
-
-    private final ExpenseService expenseService;
-    private final CategoryService categoryService;
     private final PersonService personService;
     private TextField firstName;
     private TextField lastName;
+    private EmailField email;
 
-    public PeopleView(ExpenseService expenseService, CategoryService categoryService, PersonService personService) {
-        this.expenseService = expenseService;
-        this.categoryService = categoryService;
+    public PeopleView(PersonService personService) {
         this.personService = personService;
         addClassNames("people-view");
 
@@ -69,6 +67,7 @@ public class PeopleView extends Div implements BeforeEnterObserver {
         // Configure Grid
         grid.addColumn(Person::getFirstName).setHeader("First Name").setSortable(true);
         grid.addColumn(Person::getLastName).setHeader("Last Name").setSortable(true);
+        grid.addColumn(Person::getEmail).setHeader("Email").setSortable(true);
         grid.getColumns().forEach(col -> col.setAutoWidth(true));
 
         grid.setItems(query -> personService.list(
@@ -150,7 +149,8 @@ public class PeopleView extends Div implements BeforeEnterObserver {
         FormLayout formLayout = new FormLayout();
         firstName = new TextField("Name");
         lastName = new TextField("Cost");
-        formLayout.add(firstName, lastName);
+        email = new EmailField("Email");
+        formLayout.add(firstName, lastName, email);
         editorDiv.add(formLayout);
         createButtonLayout(editorLayoutDiv);
 

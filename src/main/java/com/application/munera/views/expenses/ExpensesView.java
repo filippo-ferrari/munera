@@ -182,7 +182,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
                                 : "var(--lumo-disabled-text-color)");
 
         formLayout.add(name, cost, category, description, isPeriodic, periodUnit, periodInterval, date);
-        grid.addColumn(importantRenderer).setHeader("Important").setAutoWidth(true);
+        grid.addColumn(importantRenderer).setHeader("Periodic").setAutoWidth(true);
         editorDiv.add(formLayout);
         createButtonLayout(editorLayoutDiv);
 

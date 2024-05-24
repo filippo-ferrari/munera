@@ -1,6 +1,7 @@
 package com.application.munera.data;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
@@ -25,6 +26,11 @@ public class Person {
     @Size(max = 100)
     @Column(name = "LastName", nullable = false)
     private String lastName;
+
+    @Email
+    @Size(max = 100)
+    @Column(name = "email")
+    private String email;
 
 //    @JsonIgnore
     @ManyToMany(mappedBy = "creditors")
