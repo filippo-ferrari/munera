@@ -35,3 +35,7 @@ Munera is a companion for managing expenses efficiently and effortlessly, whethe
 3. **Reports for Creditors and Debtors**
     - Develop reports outlining debts or credits for each creditor and debtor to provide users with a comprehensive overview.
     - CRUD operations for creditors and debtors
+
+## Known Issues
+
+- Form still needs more validation when empty, some entities can be created with all null values, even the ones that have constraints throw SQL errors, they need to be gracefully handled.
