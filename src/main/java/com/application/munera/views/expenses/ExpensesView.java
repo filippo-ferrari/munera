@@ -1,5 +1,4 @@
 package com.application.munera.views.expenses;
-
 import com.application.munera.data.Category;
 import com.application.munera.data.Expense;
 import com.application.munera.data.PeriodUnit;
@@ -33,6 +32,7 @@ import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
+import java.util.Objects;
 import java.util.Optional;
 
 @PageTitle("Expenses")
@@ -48,7 +48,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
 
     private final Button cancel = new Button("Cancel");
     private final Button save = new Button("Save");
-
+    private final Button delete = new Button("Delete");
     private final BeanValidationBinder<Expense> binder;
 
     private Expense expense;
@@ -135,6 +135,23 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
                 Notification.show("Failed to update the data. Check again that all values are valid");
             }
         });
+
+        delete.addClickListener(e -> {
+            try {
+                if (Objects.isNull(this.expense)) throw new RuntimeException("Expense is null!"); //TODO: create proper exception
+                expenseService.delete(this.expense.getId());
+                clearForm();
+                refreshGrid();
+                Notification.show("Data deleted");
+                UI.getCurrent().navigate(ExpensesView.class);
+            } catch (ObjectOptimisticLockingFailureException exception) {
+                Notification n = Notification.show(
+                        "Error updating the data. Somebody else has updated the record while you were making changes.");
+                n.setPosition(Position.MIDDLE);
+                n.addThemeVariants(NotificationVariant.LUMO_ERROR);
+            }
+        });
+
     }
 
     @Override
@@ -196,7 +213,8 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         buttonLayout.setClassName("button-layout");
         cancel.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         save.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        buttonLayout.add(save, cancel);
+        delete.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        buttonLayout.add(save, delete,cancel);
         editorLayoutDiv.add(buttonLayout);
     }
 
