@@ -37,12 +37,13 @@ import java.util.Optional;
 public class PeopleView extends Div implements BeforeEnterObserver {
 
     private static final String PERSON_ID = "personID";
-    private static final String PERSON_EDIT_ROUTE_TEMPLATE = "/%s/edit";
+    private static final String PERSON_EDIT_ROUTE_TEMPLATE = "people/%s/edit";
 
     private final Grid<Person> grid = new Grid<>(Person.class, false);
 
     private final Button cancel = new Button("Cancel");
     private final Button save = new Button("Save");
+    private final Button delete = new Button("Delete");
 
     private final BeanValidationBinder<Person> binder;
 
@@ -117,6 +118,22 @@ public class PeopleView extends Div implements BeforeEnterObserver {
                 Notification.show("Failed to update the data. Check again that all values are valid");
             }
         });
+
+        delete.addClickListener(e -> {
+            try {
+                if (this.person == null) throw new RuntimeException("The person is null!"); //TODO: create proper exception
+                personService.delete(this.person.getId());
+                clearForm();
+                refreshGrid();
+                Notification.show("Data delete");
+                UI.getCurrent().navigate(PeopleView.class);
+            } catch (ObjectOptimisticLockingFailureException exception) {
+                Notification n = Notification.show(
+                        "Error updating the data. Somebody else has updated the record while you were making changes.");
+                n.setPosition(Position.MIDDLE);
+                n.addThemeVariants(NotificationVariant.LUMO_ERROR);
+            }
+        });
     }
 
     @Override
@@ -162,7 +179,8 @@ public class PeopleView extends Div implements BeforeEnterObserver {
         buttonLayout.setClassName("button-layout");
         cancel.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         save.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        buttonLayout.add(save, cancel);
+        delete.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        buttonLayout.add(save, delete, cancel);
         editorLayoutDiv.add(buttonLayout);
     }
 
