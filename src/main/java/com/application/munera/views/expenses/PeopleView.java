@@ -147,8 +147,8 @@ public class PeopleView extends Div implements BeforeEnterObserver {
         editorLayoutDiv.add(editorDiv);
 
         FormLayout formLayout = new FormLayout();
-        firstName = new TextField("Name");
-        lastName = new TextField("Cost");
+        firstName = new TextField("First Name");
+        lastName = new TextField("Last Name");
         email = new EmailField("Email");
         formLayout.add(firstName, lastName, email);
         editorDiv.add(formLayout);
