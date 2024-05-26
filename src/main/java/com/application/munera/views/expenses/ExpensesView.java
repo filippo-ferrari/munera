@@ -107,8 +107,25 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         binder = new BeanValidationBinder<>(Expense.class);
 
         // Bind fields. This is where you'd define e.g. validation rules
-
         binder.bindInstanceFields(this);
+
+        // We set initial value of isPeriodic to true and show period fields
+        isPeriodic.setValue(true);
+        periodUnit.setVisible(true);
+        periodInterval.setVisible(true);
+
+        // We show the periodic fields only when the isPeriodic boolean is true
+        isPeriodic.addValueChangeListener(event -> {
+            boolean isPeriodicChecked = event.getValue();
+            periodUnit.setVisible(isPeriodicChecked);
+            periodInterval.setVisible(isPeriodicChecked);
+
+            // Clear periodUnit and periodInterval if isPeriodic is unchecked
+            if (!isPeriodicChecked) {
+                periodUnit.clear();
+                periodInterval.clear();
+            }
+        });
 
         cancel.addClickListener(e -> {
             clearForm();
@@ -151,7 +168,6 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
                 n.addThemeVariants(NotificationVariant.LUMO_ERROR);
             }
         });
-
     }
 
     @Override
@@ -193,7 +209,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         periodUnit.setItems(PeriodUnit.values());
         periodInterval = new TextField("Period Interval");
         date = new DatePicker("Date");
-        LitRenderer<Expense> importantRenderer = LitRenderer.<Expense>of(
+        LitRenderer<Expense> isPeriodicRenderer = LitRenderer.<Expense>of(
                         "<vaadin-icon icon='vaadin:${item.icon}' style='width: var(--lumo-icon-size-s); height: var(--lumo-icon-size-s); color: ${item.color};'></vaadin-icon>")
                 .withProperty("icon", important -> important.getIsPeriodic() ? "check" : "minus").withProperty("color",
                         important -> important.getIsPeriodic()
@@ -201,7 +217,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
                                 : "var(--lumo-disabled-text-color)");
 
         formLayout.add(name, cost, category, description, isPeriodic, periodUnit, periodInterval, date);
-        grid.addColumn(importantRenderer).setHeader("Periodic").setAutoWidth(true);
+        grid.addColumn(isPeriodicRenderer).setHeader("Periodic").setAutoWidth(true);
         editorDiv.add(formLayout);
         createButtonLayout(editorLayoutDiv);
 
@@ -214,7 +230,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         cancel.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         save.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         delete.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        buttonLayout.add(save, delete,cancel);
+        buttonLayout.add(save, delete, cancel);
         editorLayoutDiv.add(buttonLayout);
     }
 
@@ -237,6 +253,8 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
     private void populateForm(Expense value) {
         this.expense = value;
         binder.readBean(this.expense);
-
+        boolean isPeriodicChecked = (value != null) && value.getIsPeriodic();
+        periodUnit.setVisible(isPeriodicChecked);
+        periodInterval.setVisible(isPeriodicChecked);
     }
 }
