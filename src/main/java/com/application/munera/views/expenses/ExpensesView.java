@@ -2,14 +2,17 @@ package com.application.munera.views.expenses;
 import com.application.munera.data.Category;
 import com.application.munera.data.Expense;
 import com.application.munera.data.PeriodUnit;
+import com.application.munera.data.Person;
 import com.application.munera.services.CategoryService;
 import com.application.munera.services.ExpenseService;
+import com.application.munera.services.PersonService;
 import com.application.munera.views.MainLayout;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.formlayout.FormLayout;
@@ -55,6 +58,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
 
     private final ExpenseService expenseService;
     private final CategoryService categoryService;
+    private final PersonService personService;
     private TextField name;
     private TextField cost;
     private ComboBox<Category> category;
@@ -63,10 +67,12 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
     private ComboBox<PeriodUnit> periodUnit;
     private TextField periodInterval;
     private DatePicker date;
+    private MultiSelectComboBox<Person> creditors;
 
-    public ExpensesView(ExpenseService expenseService, CategoryService categoryService) {
+    public ExpensesView(ExpenseService expenseService, CategoryService categoryService, PersonService personService) {
         this.expenseService = expenseService;
         this.categoryService = categoryService;
+        this.personService = personService;
         addClassNames("expenses-view");
 
         // Create UI
@@ -175,9 +181,8 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         Optional<Long> expenseId = event.getRouteParameters().get(EXPENSE_ID).map(Long::parseLong);
         if (expenseId.isPresent()) {
             Optional<Expense> expenseFromBackend = expenseService.get(expenseId.get());
-            if (expenseFromBackend.isPresent()) {
-                populateForm(expenseFromBackend.get());
-            } else {
+            if (expenseFromBackend.isPresent()) populateForm(expenseFromBackend.get());
+             else {
                 Notification.show(
                         String.format("The requested expense was not found, ID = %s", expenseId.get()), 3000,
                         Notification.Position.BOTTOM_START);
@@ -208,6 +213,9 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         periodUnit = new ComboBox<>("Period Unit");
         periodUnit.setItems(PeriodUnit.values());
         periodInterval = new TextField("Period Interval");
+        creditors = new MultiSelectComboBox<>("Creditors");
+        creditors.setItems(personService.findAll());
+        creditors.setItemLabelGenerator(Person::getFirstName);
         date = new DatePicker("Date");
         LitRenderer<Expense> isPeriodicRenderer = LitRenderer.<Expense>of(
                         "<vaadin-icon icon='vaadin:${item.icon}' style='width: var(--lumo-icon-size-s); height: var(--lumo-icon-size-s); color: ${item.color};'></vaadin-icon>")
@@ -216,7 +224,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
                                 ? "var(--lumo-primary-text-color)"
                                 : "var(--lumo-disabled-text-color)");
 
-        formLayout.add(name, cost, category, description, isPeriodic, periodUnit, periodInterval, date);
+        formLayout.add(name, cost, category, description, isPeriodic, periodUnit, periodInterval, date, creditors);
         grid.addColumn(isPeriodicRenderer).setHeader("Periodic").setAutoWidth(true);
         editorDiv.add(formLayout);
         createButtonLayout(editorLayoutDiv);

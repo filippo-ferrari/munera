@@ -43,14 +43,14 @@ public class Expense  {
     @Column(name = "PeriodInterval")
     private Integer periodInterval;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "Creditor_expenses",
             joinColumns = @JoinColumn(name = "expense_id"),
             inverseJoinColumns = @JoinColumn(name = "people_id"))
     private Set<Person> creditors;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "Debtors_expenses",
             joinColumns = @JoinColumn(name = "expense_id"),
