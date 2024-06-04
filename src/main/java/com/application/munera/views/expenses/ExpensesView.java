@@ -68,6 +68,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
     private TextField periodInterval;
     private DatePicker date;
     private MultiSelectComboBox<Person> creditors;
+    private MultiSelectComboBox<Person> debtors;
 
     public ExpensesView(ExpenseService expenseService, CategoryService categoryService, PersonService personService) {
         this.expenseService = expenseService;
@@ -216,6 +217,9 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         creditors = new MultiSelectComboBox<>("Creditors");
         creditors.setItems(personService.findAll());
         creditors.setItemLabelGenerator(Person::getFirstName);
+        debtors = new MultiSelectComboBox<>("Debtors");
+        debtors.setItems(personService.findAll());
+        debtors.setItemLabelGenerator(Person::getFirstName);
         date = new DatePicker("Date");
         LitRenderer<Expense> isPeriodicRenderer = LitRenderer.<Expense>of(
                         "<vaadin-icon icon='vaadin:${item.icon}' style='width: var(--lumo-icon-size-s); height: var(--lumo-icon-size-s); color: ${item.color};'></vaadin-icon>")
@@ -224,7 +228,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
                                 ? "var(--lumo-primary-text-color)"
                                 : "var(--lumo-disabled-text-color)");
 
-        formLayout.add(name, cost, category, description, isPeriodic, periodUnit, periodInterval, date, creditors);
+        formLayout.add(name, cost, category, description, isPeriodic, periodUnit, periodInterval, date, creditors, debtors);
         grid.addColumn(isPeriodicRenderer).setHeader("Periodic").setAutoWidth(true);
         editorDiv.add(formLayout);
         createButtonLayout(editorLayoutDiv);
