@@ -196,6 +196,5 @@ public class CategoriesView extends Div implements BeforeEnterObserver {
     private void populateForm(Category value) {
         this.category = value;
         binder.readBean(this.category);
-
     }
 }

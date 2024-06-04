@@ -71,6 +71,7 @@ public class PeopleView extends Div implements BeforeEnterObserver {
         grid.addColumn(Person::getEmail).setHeader("Email").setSortable(true);
         grid.addColumn(personService::calculateDebt).setHeader("Debt").setSortable(true);
         grid.addColumn(personService::calculateCredit).setHeader("Credit").setSortable(true);
+        grid.addColumn(personService::calculateTotalExpenses).setHeader("Total Expenses value").setSortable(true);
         grid.getColumns().forEach(col -> col.setAutoWidth(true));
         grid.setItems(query -> personService.list(
                         PageRequest.of(query.getPage(), query.getPageSize(), VaadinSpringDataHelpers.toSpringDataSort(query)))

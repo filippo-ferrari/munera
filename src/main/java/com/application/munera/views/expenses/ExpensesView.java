@@ -87,9 +87,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         // Configure Grid
         grid.addColumn(Expense::getName).setHeader("Name").setSortable(true);
         grid.addColumn(Expense::getCost).setHeader("Amount").setSortable(true);
-        grid.addColumn(expenseCategory -> expenseCategory.getCategory().getName())
-                .setHeader("Category")
-                .setSortable(true);
+        grid.addColumn(expenseCategory -> expenseCategory.getCategory().getName()).setHeader("Category").setSortable(true);
         grid.addColumn(Expense::getPeriodInterval).setHeader("Period Interval").setSortable(true);
         grid.addColumn(Expense::getPeriodUnit).setHeader("Period Unit").setSortable(true);
         grid.addColumn(Expense::getDate).setHeader("Date").setSortable(true);

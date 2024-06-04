@@ -58,4 +58,10 @@ public class PersonService {
     public BigDecimal calculateCredit(final Person person) {
         return this.expenseService.findCreditByUser(person).stream().map(Expense::getCost).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
+
+    public BigDecimal calculateTotalExpenses(final Person person) {
+        final var credit = this.expenseService.findCreditByUser(person).stream().map(Expense::getCost).reduce(BigDecimal.ZERO, BigDecimal::add);
+        final var debit = this.expenseService.findDebtByUser(person).stream().map(Expense::getCost).reduce(BigDecimal.ZERO, BigDecimal::add);
+        return credit.add(debit);
+    }
 }
