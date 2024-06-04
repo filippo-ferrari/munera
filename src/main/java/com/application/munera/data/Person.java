@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.util.Set;
 
 @Entity
@@ -31,6 +32,12 @@ public class Person {
     @Size(max = 100)
     @Column(name = "email")
     private String email;
+
+    @Column(name = "debt")
+    private BigDecimal debt;
+
+    @Column(name = "credit")
+    private BigDecimal credit;
 
 //    @JsonIgnore
     @ManyToMany(mappedBy = "creditors")

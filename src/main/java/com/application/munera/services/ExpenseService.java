@@ -1,12 +1,14 @@
 package com.application.munera.services;
 
 import com.application.munera.data.Expense;
+import com.application.munera.data.Person;
 import com.application.munera.repositories.ExpenseRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,6 +23,10 @@ public class ExpenseService {
 
     public Optional<Expense> get(Long id) {
         return repository.findById(id);
+    }
+
+    public Collection<Expense> findDebtByUser(final Person person) {
+        return repository.findDebtorsExpensesByPersonId(person.getId());
     }
 
     public List<Expense> findAll() {return repository.findAll();}
