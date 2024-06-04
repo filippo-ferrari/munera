@@ -34,8 +34,8 @@ public class ExpenseService {
     }
     public List<Expense> findAll() {return repository.findAll();}
 
-    public Expense update(Expense entity) {
-        return repository.save(entity);
+    public void update(Expense entity) {
+        repository.save(entity);
     }
 
     public void delete(Long id) {

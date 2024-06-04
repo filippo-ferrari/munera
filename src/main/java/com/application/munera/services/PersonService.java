@@ -31,8 +31,8 @@ public class PersonService {
         return this.personRepository.findAll();
     }
 
-    public Person update(Person person) {
-        return this.personRepository.save(person);
+    public void update(Person person) {
+        this.personRepository.save(person);
     }
 
     public void delete(Long id) {

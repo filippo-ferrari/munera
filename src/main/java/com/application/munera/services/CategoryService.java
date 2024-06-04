@@ -26,8 +26,8 @@ public class CategoryService {
         return categoryRepository.findAll();
     }
 
-    public Category update(Category category) {
-        return categoryRepository.save(category);
+    public void update(Category category) {
+        categoryRepository.save(category);
     }
 
     public void delete(Category category) {
