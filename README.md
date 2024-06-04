@@ -23,6 +23,7 @@ Munera is a companion for managing expenses efficiently and effortlessly, whethe
 - [x] Create concept of creditors and debtors for each expense
 - [x] Insert expenses of the past and of the future
 - [x] Have an option to set up recurring expenses
+- [x] Creditors and debtors total expenses 
 
 ## Next Steps
 
@@ -37,6 +38,12 @@ Munera is a companion for managing expenses efficiently and effortlessly, whethe
     - Develop reports outlining debts or credits for each creditor and debtor to provide users with a comprehensive overview.
     - CRUD operations for creditors and debtors
 
+4. **Create a way to set the currency of each expense**
+    - It should be possible in the form of an expense
+    - The symbol should be added to the cost column
+    - If possible, the calculations should take into account the different currencies
 ## Known Issues
 
 - Form still needs more validation when empty, some entities can be created with all null values, even the ones that have constraints throw SQL errors, they need to be gracefully handled.
+- Creditors and debtors calculations can be improved
+- Creditors and debtors need more validation when set in the form (ex. an expense cant have the same creditor and debtor)
