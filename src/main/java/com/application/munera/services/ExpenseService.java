@@ -29,6 +29,9 @@ public class ExpenseService {
         return repository.findDebtorsExpensesByPersonId(person.getId());
     }
 
+    public Collection<Expense> findCreditByUser(final Person person) {
+        return repository.findCreditorsExpensesByPersonId(person.getId());
+    }
     public List<Expense> findAll() {return repository.findAll();}
 
     public Expense update(Expense entity) {
