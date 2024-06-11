@@ -39,11 +39,12 @@ public class Person {
     @Column(name = "credit")
     private BigDecimal credit;
 
-//    @JsonIgnore
     @ManyToMany(mappedBy = "creditors")
     private Set<Expense> creditorExpenses;
 
-//    @JsonIgnore
     @ManyToMany(mappedBy = "debtors")
     private Set<Expense> debtorExpenses;
+
+    @ManyToMany(mappedBy = "participants")
+    private Set<Event> participants;
 }
