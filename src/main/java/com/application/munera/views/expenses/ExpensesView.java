@@ -85,12 +85,12 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         add(splitLayout);
 
         // Configure Grid
-        grid.addColumn(Expense::getName).setHeader("Name").setSortable(true);
-        grid.addColumn(Expense::getCost).setHeader("Amount").setSortable(true);
-        grid.addColumn(expenseCategory -> expenseCategory.getCategory().getName()).setHeader("Category").setSortable(true);
+        grid.addColumn(Expense::getName).setHeader("Name").setSortable(true).setSortProperty("name");
+        grid.addColumn(Expense::getCost).setHeader("Amount").setSortable(true).setSortProperty("cost");
+        grid.addColumn(expenseCategory -> expenseCategory.getCategory().getName()).setHeader("Category").setSortable(true).setSortProperty("category");
         grid.addColumn(Expense::getPeriodInterval).setHeader("Period Interval").setSortable(true);
         grid.addColumn(Expense::getPeriodUnit).setHeader("Period Unit").setSortable(true);
-        grid.addColumn(Expense::getDate).setHeader("Date").setSortable(true);
+        grid.addColumn(Expense::getDate).setHeader("Date").setSortable(true).setSortProperty("date");
         grid.getColumns().forEach(col -> col.setAutoWidth(true));
 
         grid.setItems(query -> expenseService.list(
