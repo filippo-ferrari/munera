@@ -17,6 +17,7 @@ Munera is a companion for managing expenses efficiently and effortlessly, whethe
     - Creditors and debtors
     - 
 - Create, read, update and delete categories
+- Create, read, update and delete people
 
 ## Completed Features
 - [x] Create categories with CRUD operations
@@ -32,7 +33,7 @@ Munera is a companion for managing expenses efficiently and effortlessly, whethe
 
 2. **Weekly and Monthly Summaries**
     - Create functionality to generate weekly and monthly summaries, including filtering and sorting options.
-    - Create a dashboard or log of "next expenses" that lists the next recurrring expenses that you expect to receive
+    - Create a dashboard or log of "next expenses" that lists the next recurring expenses that you expect to receive
 
 3. **Reports for Creditors and Debtors**
     - Develop reports outlining debts or credits for each creditor and debtor to provide users with a comprehensive overview.
@@ -42,6 +43,12 @@ Munera is a companion for managing expenses efficiently and effortlessly, whethe
     - It should be possible in the form of an expense
     - The symbol should be added to the cost column
     - If possible, the calculations should take into account the different currencies
+
+5. **Events**
+    - Options to create events in which to put expenses (vacations, congress, etc)
+    - Each event has a number of people connected to it, expenses can be added to these people
+    - A reports tells which people need to give/take money to which people in order to be even
+
 ## Known Issues
 
 - Form still needs more validation when empty, some entities can be created with all null values, even the ones that have constraints throw SQL errors, they need to be gracefully handled.
