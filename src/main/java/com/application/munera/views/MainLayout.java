@@ -52,9 +52,9 @@ public class MainLayout extends AppLayout {
     private SideNav createNavigation() {
         SideNav nav = new SideNav();
 
-        nav.addItem(new SideNavItem("Expenses", ExpensesView.class, LineAwesomeIcon.COLUMNS_SOLID.create()));
-        nav.addItem(new SideNavItem("Categories", CategoriesView.class, LineAwesomeIcon.COLUMNS_SOLID.create()));
-        nav.addItem(new SideNavItem("People", PeopleView.class, LineAwesomeIcon.COLUMNS_SOLID.create()));
+        nav.addItem(new SideNavItem("Expenses", ExpensesView.class, LineAwesomeIcon.MONEY_BILL_SOLID.create()));
+        nav.addItem(new SideNavItem("Categories", CategoriesView.class, LineAwesomeIcon.FOLDER.create()));
+        nav.addItem(new SideNavItem("People", PeopleView.class, LineAwesomeIcon.USER.create()));
 
         return nav;
     }
