@@ -1,9 +1,7 @@
 package com.application.munera.views.expenses;
-import com.application.munera.data.Category;
-import com.application.munera.data.Expense;
-import com.application.munera.data.PeriodUnit;
-import com.application.munera.data.Person;
+import com.application.munera.data.*;
 import com.application.munera.services.CategoryService;
+import com.application.munera.services.EventService;
 import com.application.munera.services.ExpenseService;
 import com.application.munera.services.PersonService;
 import com.application.munera.views.MainLayout;
@@ -59,6 +57,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
     private final ExpenseService expenseService;
     private final CategoryService categoryService;
     private final PersonService personService;
+    private final EventService eventService;
     private TextField name;
     private TextField cost;
     private ComboBox<Category> category;
@@ -69,11 +68,12 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
     private DatePicker date;
     private MultiSelectComboBox<Person> creditors;
     private MultiSelectComboBox<Person> debtors;
-
-    public ExpensesView(ExpenseService expenseService, CategoryService categoryService, PersonService personService) {
+    private ComboBox<Event> event;
+    public ExpensesView(ExpenseService expenseService, CategoryService categoryService, PersonService personService, EventService eventService) {
         this.expenseService = expenseService;
         this.categoryService = categoryService;
         this.personService = personService;
+        this.eventService = eventService;
         addClassNames("expenses-view");
 
         // Create UI
@@ -91,6 +91,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         grid.addColumn(Expense::getPeriodInterval).setHeader("Period Interval").setSortable(true);
         grid.addColumn(Expense::getPeriodUnit).setHeader("Period Unit").setSortable(true);
         grid.addColumn(Expense::getDate).setHeader("Date").setSortable(true).setSortProperty("date");
+        grid.addColumn(expenseEvent -> expenseEvent.getEvent().getName()).setHeader("Event").setSortable(true);
         grid.getColumns().forEach(col -> col.setAutoWidth(true));
 
         grid.setItems(query -> expenseService.list(
@@ -218,6 +219,9 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         debtors = new MultiSelectComboBox<>("Debtors");
         debtors.setItems(personService.findAll());
         debtors.setItemLabelGenerator(Person::getFirstName);
+        event = new ComboBox<>("Event");
+        event.setItems(eventService.findAll());
+        event.setItemLabelGenerator(Event::getName);
         date = new DatePicker("Date");
         LitRenderer<Expense> isPeriodicRenderer = LitRenderer.<Expense>of(
                         "<vaadin-icon icon='vaadin:${item.icon}' style='width: var(--lumo-icon-size-s); height: var(--lumo-icon-size-s); color: ${item.color};'></vaadin-icon>")
@@ -226,7 +230,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
                                 ? "var(--lumo-primary-text-color)"
                                 : "var(--lumo-disabled-text-color)");
 
-        formLayout.add(name, cost, category, description, isPeriodic, periodUnit, periodInterval, date, creditors, debtors);
+        formLayout.add(name, cost, category, description, isPeriodic, periodUnit, periodInterval, date, creditors, debtors, event);
         grid.addColumn(isPeriodicRenderer).setHeader("Periodic").setAutoWidth(true);
         editorDiv.add(formLayout);
         createButtonLayout(editorLayoutDiv);
