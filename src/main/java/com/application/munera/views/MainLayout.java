@@ -1,6 +1,7 @@
 package com.application.munera.views;
 
 import com.application.munera.views.expenses.CategoriesView;
+import com.application.munera.views.expenses.EventsView;
 import com.application.munera.views.expenses.ExpensesView;
 import com.application.munera.views.expenses.PeopleView;
 import com.vaadin.flow.component.applayout.AppLayout;
@@ -55,6 +56,7 @@ public class MainLayout extends AppLayout {
         nav.addItem(new SideNavItem("Expenses", ExpensesView.class, LineAwesomeIcon.MONEY_BILL_SOLID.create()));
         nav.addItem(new SideNavItem("Categories", CategoriesView.class, LineAwesomeIcon.FOLDER.create()));
         nav.addItem(new SideNavItem("People", PeopleView.class, LineAwesomeIcon.USER.create()));
+        nav.addItem(new SideNavItem("Events", EventsView.class, LineAwesomeIcon.BANDCAMP.create()));
 
         return nav;
     }
