@@ -57,6 +57,10 @@ public class Expense  {
             inverseJoinColumns = @JoinColumn(name = "people_id"))
     private Set<Person> debtors;
 
+    @ManyToOne
+    @JoinColumn(name = "EventId")
+    private Event event;
+
     @Column(name = "Date", nullable = false, columnDefinition = "DATE DEFAULT CURRENT_DATE")
     private LocalDate date;
 }
