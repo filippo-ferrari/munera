@@ -44,4 +44,7 @@ public class Person {
 
     @ManyToMany(mappedBy = "debtors")
     private Set<Expense> debtorExpenses;
+
+    @ManyToMany(mappedBy = "participants")
+    private Set<Event> events;
 }

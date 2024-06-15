@@ -91,7 +91,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         grid.addColumn(Expense::getPeriodInterval).setHeader("Period Interval").setSortable(true);
         grid.addColumn(Expense::getPeriodUnit).setHeader("Period Unit").setSortable(true);
         grid.addColumn(Expense::getDate).setHeader("Date").setSortable(true).setSortProperty("date");
-        grid.addColumn(expenseEvent -> expenseEvent.getEvent().getName()).setHeader("Event").setSortable(true);
+        // grid.addColumn(expenseEvent -> expenseEvent.getEvent().getName()).setHeader("Event").setSortable(true);
         grid.getColumns().forEach(col -> col.setAutoWidth(true));
 
         grid.setItems(query -> expenseService.list(
@@ -216,12 +216,12 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         creditors = new MultiSelectComboBox<>("Creditors");
         creditors.setItems(personService.findAll());
         creditors.setItemLabelGenerator(Person::getFirstName);
-        debtors = new MultiSelectComboBox<>("Debtors");
-        debtors.setItems(personService.findAll());
-        debtors.setItemLabelGenerator(Person::getFirstName);
         event = new ComboBox<>("Event");
         event.setItems(eventService.findAll());
         event.setItemLabelGenerator(Event::getName);
+        debtors = new MultiSelectComboBox<>("Debtors");
+        debtors.setItems(personService.findAll());
+        debtors.setItemLabelGenerator(Person::getFirstName);
         date = new DatePicker("Date");
         LitRenderer<Expense> isPeriodicRenderer = LitRenderer.<Expense>of(
                         "<vaadin-icon icon='vaadin:${item.icon}' style='width: var(--lumo-icon-size-s); height: var(--lumo-icon-size-s); color: ${item.color};'></vaadin-icon>")
