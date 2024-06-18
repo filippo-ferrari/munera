@@ -1,11 +1,14 @@
 package com.application.munera.views.expenses;
 
 import com.application.munera.data.Event;
+import com.application.munera.data.Person;
 import com.application.munera.services.EventService;
+import com.application.munera.services.PersonService;
 import com.application.munera.views.MainLayout;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
@@ -48,11 +51,14 @@ public class EventsView extends Div implements BeforeEnterObserver {
 
     private Event event;
     private final EventService eventService;
+    private final PersonService personService;
     private TextField name;
     private TextArea description;
+    private MultiSelectComboBox<Person> participants;
 
-    public EventsView(EventService eventService) {
+    public EventsView(EventService eventService, PersonService personService) {
         this.eventService = eventService;
+        this.personService = personService;
         addClassNames("events-view");
 
         // Create UI
@@ -162,7 +168,10 @@ public class EventsView extends Div implements BeforeEnterObserver {
         FormLayout formLayout = new FormLayout();
         name = new TextField("Name");
         description = new TextArea("Description");
-        formLayout.add(name, description);
+        participants = new MultiSelectComboBox<>("Participants");
+        participants.setItems(personService.findAll());
+        participants.setItemLabelGenerator(Person::getFirstName);
+        formLayout.add(name, description, participants);
         editorDiv.add(formLayout);
         createButtonLayout(editorLayoutDiv);
 
