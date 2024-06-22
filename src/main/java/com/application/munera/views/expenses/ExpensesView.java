@@ -1,4 +1,5 @@
 package com.application.munera.views.expenses;
+
 import com.application.munera.data.*;
 import com.application.munera.services.CategoryService;
 import com.application.munera.services.EventService;
@@ -33,8 +34,7 @@ import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 @PageTitle("Expenses")
 @Route(value = "/:expenseID?/:action?(edit)", layout = MainLayout.class)
@@ -116,9 +116,9 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         binder.bindInstanceFields(this);
 
         // We set initial value of isPeriodic to true and show period fields
-        isPeriodic.setValue(true);
-        periodUnit.setVisible(true);
-        periodInterval.setVisible(true);
+        isPeriodic.setValue(false);
+        periodUnit.setVisible(false);
+        periodInterval.setVisible(false);
 
         // We show the periodic fields only when the isPeriodic boolean is true
         isPeriodic.addValueChangeListener(event -> {
@@ -131,6 +131,22 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
                 periodUnit.clear();
                 periodInterval.clear();
             }
+        });
+
+        // Event listeners that will remove the selected creditors from the debtors list and vice versa
+        // Done so that the user cant create an expense with the same person as creditor and debtor
+        debtors.addValueChangeListener(event -> {
+            Set<Person> selectedDebtors = event.getValue();
+            final var creditorsSet = new HashSet<>(personService.findAll());
+            creditorsSet.removeIf(selectedDebtors::contains);
+            creditors.setItems(creditorsSet);
+        });
+
+        creditors.addValueChangeListener(event -> {
+            Set<Person> selectedCreditors = event.getValue();
+            final var debtorsSet = new HashSet<>(personService.findAll());
+            debtorsSet.removeIf(selectedCreditors::contains);
+            debtors.setItems(debtorsSet);
         });
 
         cancel.addClickListener(e -> {
