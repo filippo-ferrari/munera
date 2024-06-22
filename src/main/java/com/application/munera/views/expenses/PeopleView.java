@@ -11,6 +11,7 @@ import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
@@ -21,6 +22,7 @@ import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.ValidationException;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
@@ -29,6 +31,7 @@ import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 @PageTitle("People")
@@ -71,7 +74,13 @@ public class PeopleView extends Div implements BeforeEnterObserver {
         grid.addColumn(Person::getEmail).setHeader("Email").setSortable(true);
         grid.addColumn(personService::calculateDebt).setHeader("Debt").setSortable(true);
         grid.addColumn(personService::calculateCredit).setHeader("Credit").setSortable(true);
-        grid.addColumn(personService::calculateTotalExpenses).setHeader("Total Expenses value").setSortable(true);
+        grid.addColumn(personService::calculateNetBalance).setHeader("Total Expenses value").setSortable(true);
+        grid.addColumn(new ComponentRenderer<>(persona -> {
+            final var netBalance = personService.calculateNetBalance(persona);
+            return createBadge(netBalance);
+        })).setHeader("Balance Status").setSortable(true);
+
+
         grid.getColumns().forEach(col -> col.setAutoWidth(true));
         grid.setItems(query -> personService.list(
                         PageRequest.of(query.getPage(), query.getPageSize(), VaadinSpringDataHelpers.toSpringDataSort(query)))
@@ -207,4 +216,18 @@ public class PeopleView extends Div implements BeforeEnterObserver {
         binder.readBean(this.person);
 
     }
-}
+
+    private Span createBadge(BigDecimal netBalance) {
+        Span badge = new Span();
+        if (netBalance.compareTo(BigDecimal.ZERO) < 0) {
+            badge.setText("Credit");
+            badge.getElement().getThemeList().add("badge success");
+        } else if (netBalance.compareTo(BigDecimal.ZERO) > 0) {
+            badge.setText("Debit");
+            badge.getElement().getThemeList().add("badge error");
+        } else {
+            badge.setText("Nothing");
+            badge.getElement().getThemeList().add("badge contrast");
+        }
+        return badge;
+    }}
