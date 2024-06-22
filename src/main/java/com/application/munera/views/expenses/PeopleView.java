@@ -226,7 +226,7 @@ public class PeopleView extends Div implements BeforeEnterObserver {
             badge.setText("Debit");
             badge.getElement().getThemeList().add("badge error");
         } else {
-            badge.setText("Nothing");
+            badge.setText("Clear");
             badge.getElement().getThemeList().add("badge contrast");
         }
         return badge;
