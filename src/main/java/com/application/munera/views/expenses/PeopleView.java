@@ -58,7 +58,7 @@ public class PeopleView extends Div implements BeforeEnterObserver {
 
     public PeopleView(PersonService personService) {
         this.personService = personService;
-        addClassNames("people-view");
+        addClassNames("expenses-view");
 
         // Create UI
         SplitLayout splitLayout = new SplitLayout();
@@ -178,6 +178,10 @@ public class PeopleView extends Div implements BeforeEnterObserver {
         firstName = new TextField("First Name");
         lastName = new TextField("Last Name");
         email = new EmailField("Email");
+
+        // We set the maximum parallel columns to 1
+        formLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
+
         formLayout.add(firstName, lastName, email);
         editorDiv.add(formLayout);
         createButtonLayout(editorLayoutDiv);

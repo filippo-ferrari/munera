@@ -59,7 +59,7 @@ public class EventsView extends Div implements BeforeEnterObserver {
     public EventsView(EventService eventService, PersonService personService) {
         this.eventService = eventService;
         this.personService = personService;
-        addClassNames("events-view");
+        addClassNames("expenses-view");
 
         // Create UI
         SplitLayout splitLayout = new SplitLayout();

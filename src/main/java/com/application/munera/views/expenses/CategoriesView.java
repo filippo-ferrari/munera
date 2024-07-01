@@ -51,7 +51,7 @@ public class CategoriesView extends Div implements BeforeEnterObserver {
 
     public CategoriesView(CategoryService categoryService) {
         this.categoryService = categoryService;
-        addClassNames("categories-view");
+        addClassNames("expenses-view");
 
         // Create UI
         SplitLayout splitLayout = new SplitLayout();
