@@ -54,4 +54,8 @@ public class ExpenseService {
         return (int) repository.count();
     }
 
+    public List<Expense> findAllByYear(final int year ) {
+        return this.repository.findAllByYear(year);
+    }
+
 }
