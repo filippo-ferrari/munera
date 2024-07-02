@@ -1,9 +1,6 @@
 package com.application.munera.views;
 
-import com.application.munera.views.expenses.CategoriesView;
-import com.application.munera.views.expenses.EventsView;
-import com.application.munera.views.expenses.ExpensesView;
-import com.application.munera.views.expenses.PeopleView;
+import com.application.munera.views.expenses.*;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.html.Footer;
@@ -57,6 +54,7 @@ public class MainLayout extends AppLayout {
         nav.addItem(new SideNavItem("Categories", CategoriesView.class, LineAwesomeIcon.FOLDER.create()));
         nav.addItem(new SideNavItem("People", PeopleView.class, LineAwesomeIcon.USER.create()));
         nav.addItem(new SideNavItem("Events", EventsView.class, LineAwesomeIcon.BANDCAMP.create()));
+        nav.addItem(new SideNavItem("Dashboard", DashboardView.class, LineAwesomeIcon.CHART_LINE_SOLID.create()));
 
         return nav;
     }
