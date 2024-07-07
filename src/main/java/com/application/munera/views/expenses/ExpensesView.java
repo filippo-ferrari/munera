@@ -18,6 +18,7 @@ import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
@@ -28,13 +29,17 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.ValidationException;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.router.*;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 
 @PageTitle("Expenses")
 @Route(value = "/:expenseID?/:action?(edit)", layout = MainLayout.class)
@@ -92,6 +97,8 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         grid.addColumn(Expense::getPeriodUnit).setHeader("Period Unit").setSortable(true);
         grid.addColumn(Expense::getDate).setHeader("Date").setSortable(true).setSortProperty("date");
         // grid.addColumn(expenseEvent -> expenseEvent.getEvent().getName()).setHeader("Event").setSortable(true);
+
+        grid.addColumn(new ComponentRenderer<>(expense1 -> createBadge(expenseService.isExpenseResolved(expense1)))).setHeader("Status").setSortable(true);
         grid.getColumns().forEach(col -> col.setAutoWidth(true));
 
         grid.setItems(query -> expenseService.list(
@@ -286,5 +293,17 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         boolean isPeriodicChecked = (value != null) && value.getIsPeriodic();
         periodUnit.setVisible(isPeriodicChecked);
         periodInterval.setVisible(isPeriodicChecked);
+    }
+
+    private Span createBadge(Boolean isExpenseResolved) {
+        Span badge = new Span();
+        if (Boolean.TRUE.equals(isExpenseResolved)) {
+            badge.setText("Resolved");
+            badge.getElement().getThemeList().add("badge success");
+        } else  {
+            badge.setText("To be Resolved");
+            badge.getElement().getThemeList().add("badge error");
+        }
+        return badge;
     }
 }

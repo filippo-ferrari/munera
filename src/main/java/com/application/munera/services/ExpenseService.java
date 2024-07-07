@@ -58,4 +58,8 @@ public class ExpenseService {
         return this.repository.findAllByYear(year);
     }
 
+    public boolean isExpenseResolved(final Expense expense) {
+        return this.repository.existsByIdAndIsResolvedTrue(expense.getId());
+    }
+
 }

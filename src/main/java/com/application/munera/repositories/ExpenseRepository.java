@@ -20,4 +20,6 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long>, JpaSpec
 
     @Query("SELECT e FROM Expense e WHERE YEAR(e.date) = :year")
     List<Expense> findAllByYear(@Param("year") int year);
+
+    boolean existsByIdAndIsResolvedTrue(Long id);
 }

@@ -13,7 +13,7 @@ import java.util.Set;
 @Getter
 @Setter
 @Table(name = "expenses")
-public class Expense  {
+public class Expense {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -63,4 +63,10 @@ public class Expense  {
 
     @Column(name = "Date", nullable = false, columnDefinition = "DATE DEFAULT CURRENT_DATE")
     private LocalDate date;
+
+    /**
+     * the isResolved field starts as always false, cause at creation an expense cant be already be resolved
+     */
+    @Column(name = "isResolved", nullable = false)
+    private Boolean isResolved = false;
 }

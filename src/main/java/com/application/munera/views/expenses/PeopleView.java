@@ -234,4 +234,5 @@ public class PeopleView extends Div implements BeforeEnterObserver {
             badge.getElement().getThemeList().add("badge contrast");
         }
         return badge;
-    }}
+    }
+}
