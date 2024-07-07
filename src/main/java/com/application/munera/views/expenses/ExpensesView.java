@@ -68,6 +68,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
     private ComboBox<Category> category;
     private TextArea description;
     private Checkbox isPeriodic;
+    private Checkbox isResolved;
     private ComboBox<PeriodUnit> periodUnit;
     private TextField periodInterval;
     private DatePicker date;
@@ -124,6 +125,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
 
         // We set initial value of isPeriodic to true and show period fields
         isPeriodic.setValue(false);
+        isResolved.setValue(false);
         periodUnit.setVisible(false);
         periodInterval.setVisible(false);
 
@@ -233,6 +235,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         category.setItemLabelGenerator(Category::getName);
         description = new TextArea("Description");
         isPeriodic = new Checkbox("Is Periodic");
+        isResolved = new Checkbox("Paid");
         periodUnit = new ComboBox<>("Period Unit");
         periodUnit.setItems(PeriodUnit.values());
         periodInterval = new TextField("Period Interval");
@@ -253,7 +256,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
                                 ? "var(--lumo-primary-text-color)"
                                 : "var(--lumo-disabled-text-color)");
 
-        formLayout.add(name, cost, category, description, isPeriodic, periodUnit, periodInterval, date, creditors, debtors, event);
+        formLayout.add(name, cost, category, description, isPeriodic, isResolved, periodUnit, periodInterval, date, creditors, debtors, event);
         grid.addColumn(isPeriodicRenderer).setHeader("Periodic").setAutoWidth(true);
         editorDiv.add(formLayout);
         createButtonLayout(editorLayoutDiv);
