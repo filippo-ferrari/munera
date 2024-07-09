@@ -82,7 +82,10 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         this.eventService = eventService;
         addClassNames("expenses-view");
 
-        Filters filters = new Filters(this::refreshGrid);
+        final var categoriesNames = this.categoryService.findAll();
+        final var creditorsNames = this.personService.findAllAsList();
+        Filters filters = new Filters(this::refreshGrid, categoriesNames, creditorsNames);
+
         // Create UI
         SplitLayout splitLayout = new SplitLayout();
 

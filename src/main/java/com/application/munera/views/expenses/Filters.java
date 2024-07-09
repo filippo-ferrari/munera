@@ -3,8 +3,6 @@ package com.application.munera.views.expenses;
 import com.application.munera.data.Category;
 import com.application.munera.data.Expense;
 import com.application.munera.data.Person;
-import com.application.munera.services.CategoryService;
-import com.application.munera.services.PersonService;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
@@ -19,7 +17,6 @@ import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.persistence.criteria.*;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.ArrayList;
@@ -34,21 +31,15 @@ public class Filters extends Div implements Specification<Expense> {
     private final MultiSelectComboBox<Person> creditors = new MultiSelectComboBox<>("Creditors");
     private final CheckboxGroup<String> isResolved = new CheckboxGroup<>("Role");
 
-    @Autowired
-    private  PersonService personService;
-    
-    @Autowired
-    private CategoryService categoryService;
-
-    public Filters(Runnable onSearch) {
+    public Filters(Runnable onSearch, List<Category> categoriesNames, List<Person> creditorsNames) {
         setWidthFull();
         addClassName("filter-layout");
         addClassNames(LumoUtility.Padding.Horizontal.LARGE, LumoUtility.Padding.Vertical.MEDIUM,
                 LumoUtility.BoxSizing.BORDER);
         name.setPlaceholder("Expense's name");
-        
-        creditors.setItems(this.personService.findAllAsList());
-        category.setItems(this.categoryService.findAll());
+        final var names = creditorsNames.stream().map(Person::getFirstName).toArray();
+        creditors.setItems((creditorsNames));
+
         isResolved.setItems("Worker", "Supervisor", "Manager", "External");
         isResolved.addClassName("double-width");
 

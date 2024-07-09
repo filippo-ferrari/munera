@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,5 +37,9 @@ public class CategoryService {
 
     public Page<Category> list(Pageable pageable){
         return categoryRepository.findAll(pageable);
+    }
+
+    public Collection<String> findNames() {
+        return categoryRepository.findAll().stream().map(Category::getName).toList();
     }
 }

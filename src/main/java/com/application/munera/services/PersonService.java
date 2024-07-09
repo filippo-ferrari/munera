@@ -69,4 +69,8 @@ public class PersonService {
         final var debit = this.expenseService.findUnpaidDebtByUser(person).stream().map(Expense::getCost).reduce(BigDecimal.ZERO, BigDecimal::add);
         return credit.subtract(debit);
     }
+
+    public List<String> findNames() {
+        return personRepository.findAll().stream().map(Person::getFirstName).toList();
+    }
 }
