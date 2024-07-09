@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -30,7 +31,11 @@ public class PersonService {
     public Collection<Person> findAll() {
         return this.personRepository.findAll();
     }
-
+    
+    public List<Person> findAllAsList() {
+        return this.personRepository.findAll();
+    }
+    
     public void update(Person person) {
         this.personRepository.save(person);
     }

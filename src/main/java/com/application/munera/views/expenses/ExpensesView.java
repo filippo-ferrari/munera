@@ -49,7 +49,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
     private static final String EXPENSE_ID = "expenseID";
     private static final String EXPENSE_EDIT_ROUTE_TEMPLATE = "/%s/edit";
 
-    private final Grid<Expense> grid = new Grid<>(Expense.class, false);
+    private Grid<Expense> grid;
 
     private final Button cancel = new Button("Cancel");
     private final Button save = new Button("Save");
@@ -74,6 +74,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
     private MultiSelectComboBox<Person> creditors;
     private MultiSelectComboBox<Person> debtors;
     private ComboBox<Event> event;
+
     public ExpensesView(ExpenseService expenseService, CategoryService categoryService, PersonService personService, EventService eventService) {
         this.expenseService = expenseService;
         this.categoryService = categoryService;
@@ -81,40 +82,14 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         this.eventService = eventService;
         addClassNames("expenses-view");
 
+        Filters filters = new Filters(this::refreshGrid);
         // Create UI
         SplitLayout splitLayout = new SplitLayout();
 
-        createGridLayout(splitLayout);
+        createGridLayout(splitLayout, filters);
         createEditorLayout(splitLayout);
 
         add(splitLayout);
-
-        // Configure Grid
-        grid.addColumn(Expense::getName).setHeader("Name").setSortable(true).setSortProperty("name");
-        grid.addColumn(Expense::getCost).setHeader("Amount").setSortable(true).setSortProperty("cost");
-        grid.addColumn(expenseCategory -> expenseCategory.getCategory().getName()).setHeader("Category").setSortable(true).setSortProperty("category");
-        grid.addColumn(Expense::getPeriodInterval).setHeader("Period Interval").setSortable(true);
-        grid.addColumn(Expense::getPeriodUnit).setHeader("Period Unit").setSortable(true);
-        grid.addColumn(Expense::getDate).setHeader("Date").setSortable(true).setSortProperty("date");
-        // grid.addColumn(expenseEvent -> expenseEvent.getEvent().getName()).setHeader("Event").setSortable(true);
-
-        grid.addColumn(new ComponentRenderer<>(expense1 -> createBadge(expenseService.isExpenseResolved(expense1)))).setHeader("Status").setSortable(true);
-        grid.getColumns().forEach(col -> col.setAutoWidth(true));
-
-        grid.setItems(query -> expenseService.list(
-                        PageRequest.of(query.getPage(), query.getPageSize(), VaadinSpringDataHelpers.toSpringDataSort(query)))
-                .stream());
-        grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
-
-        // when a row is selected or deselected, populate form
-        grid.asSingleSelect().addValueChangeListener(event -> {
-            if (event.getValue() != null) {
-                UI.getCurrent().navigate(String.format(EXPENSE_EDIT_ROUTE_TEMPLATE, event.getValue().getId()));
-            } else {
-                clearForm();
-                UI.getCurrent().navigate(ExpensesView.class);
-            }
-        });
 
         // Configure Form
         binder = new BeanValidationBinder<>(Expense.class);
@@ -270,11 +245,38 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         editorLayoutDiv.add(buttonLayout);
     }
 
-    private void createGridLayout(SplitLayout splitLayout) {
+    private void createGridLayout(SplitLayout splitLayout, Filters filters) {
+        grid = new Grid<>(Expense.class, false);
         Div wrapper = new Div();
         wrapper.setClassName("grid-wrapper");
         splitLayout.addToPrimary(wrapper);
-        wrapper.add(grid);
+        wrapper.add(filters, grid);
+
+        // Configure Grid
+        grid.addColumn(Expense::getName).setHeader("Name").setSortable(true).setSortProperty("name");
+        grid.addColumn(Expense::getCost).setHeader("Amount").setSortable(true).setSortProperty("cost");
+        grid.addColumn(expenseCategory -> expenseCategory.getCategory().getName()).setHeader("Category").setSortable(true).setSortProperty("category");
+        grid.addColumn(Expense::getPeriodInterval).setHeader("Period Interval").setSortable(true);
+        grid.addColumn(Expense::getPeriodUnit).setHeader("Period Unit").setSortable(true);
+        grid.addColumn(Expense::getDate).setHeader("Date").setSortable(true).setSortProperty("date");
+
+        grid.addColumn(new ComponentRenderer<>(expense1 -> createBadge(expenseService.isExpenseResolved(expense1)))).setHeader("Status").setSortable(true);
+        grid.getColumns().forEach(col -> col.setAutoWidth(true));
+
+        grid.setItems(query -> expenseService.list(
+                        PageRequest.of(query.getPage(), query.getPageSize(), VaadinSpringDataHelpers.toSpringDataSort(query)))
+                .stream());
+        grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
+
+        // when a row is selected or deselected, populate form
+        grid.asSingleSelect().addValueChangeListener(event -> {
+            if (event.getValue() != null) {
+                UI.getCurrent().navigate(String.format(EXPENSE_EDIT_ROUTE_TEMPLATE, event.getValue().getId()));
+            } else {
+                clearForm();
+                UI.getCurrent().navigate(ExpensesView.class);
+            }
+        });
     }
 
     private void refreshGrid() {
