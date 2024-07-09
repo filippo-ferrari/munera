@@ -1,95 +1,220 @@
 package com.application.munera.views.expenses;
 
-import com.application.munera.data.*;
-import com.application.munera.services.CategoryService;
-import com.application.munera.services.EventService;
+import com.application.munera.data.Expense;
 import com.application.munera.services.ExpenseService;
-import com.application.munera.services.PersonService;
 import com.application.munera.views.MainLayout;
-import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.checkbox.Checkbox;
-import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dependency.Uses;
-import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.Notification.Position;
-import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.splitlayout.SplitLayout;
-import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.binder.BeanValidationBinder;
-import com.vaadin.flow.data.binder.ValidationException;
-import com.vaadin.flow.data.renderer.ComponentRenderer;
-import com.vaadin.flow.router.*;
+import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
+import com.vaadin.flow.theme.lumo.LumoUtility;
+import jakarta.persistence.criteria.*;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.data.jpa.domain.Specification;
 
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @PageTitle("Expenses")
 @Route(value = "/:expenseID?/:action?(edit)", layout = MainLayout.class)
 @RouteAlias(value = "", layout = MainLayout.class)
 @Uses(Icon.class)
-public class ExpensesView extends Div implements BeforeEnterObserver {
+public class ExpensesView extends Div {
 
-    private static final String EXPENSE_ID = "expenseID";
-    private static final String EXPENSE_EDIT_ROUTE_TEMPLATE = "/%s/edit";
+    private Grid<Expense> grid;
 
-    private final Grid<Expense> grid = new Grid<>(Expense.class, false);
-
-    private final Button cancel = new Button("Cancel");
-    private final Button save = new Button("Save");
-    private final Button delete = new Button("Delete");
-    private final BeanValidationBinder<Expense> binder;
-
-    private Expense expense;
-
+    private Filters filters;
     private final ExpenseService expenseService;
-    private final CategoryService categoryService;
-    private final PersonService personService;
-    private final EventService eventService;
-    private TextField name;
-    private TextField cost;
-    private ComboBox<Category> category;
-    private TextArea description;
-    private Checkbox isPeriodic;
-    private Checkbox isResolved;
-    private ComboBox<PeriodUnit> periodUnit;
-    private TextField periodInterval;
-    private DatePicker date;
-    private MultiSelectComboBox<Person> creditors;
-    private MultiSelectComboBox<Person> debtors;
-    private ComboBox<Event> event;
-    public ExpensesView(ExpenseService expenseService, CategoryService categoryService, PersonService personService, EventService eventService) {
+
+    public ExpensesView(ExpenseService expenseService) {
         this.expenseService = expenseService;
-        this.categoryService = categoryService;
-        this.personService = personService;
-        this.eventService = eventService;
-        addClassNames("expenses-view");
+        setSizeFull();
+        addClassNames("gridwith-filters-view");
 
-        // Create UI
-        SplitLayout splitLayout = new SplitLayout();
+        filters = new Filters(this::refreshGrid);
+        VerticalLayout layout = new VerticalLayout(createMobileFilters(), filters, createGrid());
+        layout.setSizeFull();
+        layout.setPadding(false);
+        layout.setSpacing(false);
+        add(layout);
+    }
 
-        createGridLayout(splitLayout);
-        createEditorLayout(splitLayout);
+    private HorizontalLayout createMobileFilters() {
+        // Mobile version
+        HorizontalLayout mobileFilters = new HorizontalLayout();
+        mobileFilters.setWidthFull();
+        mobileFilters.addClassNames(LumoUtility.Padding.MEDIUM, LumoUtility.BoxSizing.BORDER,
+                LumoUtility.AlignItems.CENTER);
+        mobileFilters.addClassName("mobile-filters");
 
-        add(splitLayout);
+        Icon mobileIcon = new Icon("lumo", "plus");
+        Span filtersHeading = new Span("Filters");
+        mobileFilters.add(mobileIcon, filtersHeading);
+        mobileFilters.setFlexGrow(1, filtersHeading);
+        mobileFilters.addClickListener(e -> {
+            if (filters.getClassNames().contains("visible")) {
+                filters.removeClassName("visible");
+                mobileIcon.getElement().setAttribute("icon", "lumo:plus");
+            } else {
+                filters.addClassName("visible");
+                mobileIcon.getElement().setAttribute("icon", "lumo:minus");
+            }
+        });
+        return mobileFilters;
+    }
 
-        // Configure Grid
+    public static class Filters extends Div implements Specification<Expense> {
+
+        private final TextField name = new TextField("Name");
+        private final TextField category = new TextField("Category");
+        private final DatePicker startDate = new DatePicker("Date of Birth");
+        private final DatePicker endDate = new DatePicker();
+        private final MultiSelectComboBox<String> creditors = new MultiSelectComboBox<>("Creditors");
+        private final CheckboxGroup<String> isResolved = new CheckboxGroup<>("Role");
+
+        public Filters(Runnable onSearch) {
+
+            setWidthFull();
+            addClassName("filter-layout");
+            addClassNames(LumoUtility.Padding.Horizontal.LARGE, LumoUtility.Padding.Vertical.MEDIUM,
+                    LumoUtility.BoxSizing.BORDER);
+            name.setPlaceholder("First or last name");
+
+            creditors.setItems("Insurance Clerk", "Mortarman", "Beer Coil Cleaner", "Scale Attendant");
+
+            isResolved.setItems("Worker", "Supervisor", "Manager", "External");
+            isResolved.addClassName("double-width");
+
+            // Action buttons
+            Button resetBtn = new Button("Reset");
+            resetBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+            resetBtn.addClickListener(e -> {
+                name.clear();
+                category.clear();
+                startDate.clear();
+                endDate.clear();
+                creditors.clear();
+                isResolved.clear();
+                onSearch.run();
+            });
+            Button searchBtn = new Button("Search");
+            searchBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+            searchBtn.addClickListener(e -> onSearch.run());
+
+            Div actions = new Div(resetBtn, searchBtn);
+            actions.addClassName(LumoUtility.Gap.SMALL);
+            actions.addClassName("actions");
+
+            add(name, category, createDateRangeFilter(), creditors, isResolved, actions);
+        }
+
+        private Component createDateRangeFilter() {
+            startDate.setPlaceholder("From");
+
+            endDate.setPlaceholder("To");
+
+            // For screen readers
+            startDate.setAriaLabel("From date");
+            endDate.setAriaLabel("To date");
+
+            FlexLayout dateRangeComponent = new FlexLayout(startDate, new Text(" – "), endDate);
+            dateRangeComponent.setAlignItems(FlexComponent.Alignment.BASELINE);
+            dateRangeComponent.addClassName(LumoUtility.Gap.XSMALL);
+
+            return dateRangeComponent;
+        }
+
+        @Override
+        public Predicate toPredicate(Root<Expense> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
+            List<Predicate> predicates = new ArrayList<>();
+
+            if (!name.isEmpty()) {
+                String lowerCaseFilter = name.getValue().toLowerCase();
+                Predicate firstNameMatch = criteriaBuilder.like(criteriaBuilder.lower(root.get("name")),
+                        lowerCaseFilter + "%");
+                predicates.add(firstNameMatch);
+            }
+            if (!category.isEmpty()) {
+                String databaseColumn = "phone";
+                String ignore = "- ()";
+
+                String lowerCaseFilter = ignoreCharacters(ignore, category.getValue().toLowerCase());
+                Predicate phoneMatch = criteriaBuilder.like(
+                        ignoreCharacters(ignore, criteriaBuilder, criteriaBuilder.lower(root.get(databaseColumn))),
+                        "%" + lowerCaseFilter + "%");
+                predicates.add(phoneMatch);
+
+            }
+            if (startDate.getValue() != null) {
+                String databaseColumn = "dateOfBirth";
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get(databaseColumn),
+                        criteriaBuilder.literal(startDate.getValue())));
+            }
+            if (endDate.getValue() != null) {
+                String databaseColumn = "dateOfBirth";
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(criteriaBuilder.literal(endDate.getValue()),
+                        root.get(databaseColumn)));
+            }
+            if (!creditors.isEmpty()) {
+                String databaseColumn = "occupation";
+                List<Predicate> occupationPredicates = new ArrayList<>();
+                for (String occupation : creditors.getValue()) {
+                    occupationPredicates
+                            .add(criteriaBuilder.equal(criteriaBuilder.literal(occupation), root.get(databaseColumn)));
+                }
+                predicates.add(criteriaBuilder.or(occupationPredicates.toArray(Predicate[]::new)));
+            }
+            if (!isResolved.isEmpty()) {
+                String databaseColumn = "role";
+                List<Predicate> rolePredicates = new ArrayList<>();
+                for (String role : isResolved.getValue()) {
+                    rolePredicates.add(criteriaBuilder.equal(criteriaBuilder.literal(role), root.get(databaseColumn)));
+                }
+                predicates.add(criteriaBuilder.or(rolePredicates.toArray(Predicate[]::new)));
+            }
+            return criteriaBuilder.and(predicates.toArray(Predicate[]::new));
+        }
+
+        private String ignoreCharacters(String characters, String in) {
+            String result = in;
+            for (int i = 0; i < characters.length(); i++) {
+                result = result.replace("" + characters.charAt(i), "");
+            }
+            return result;
+        }
+
+        private Expression<String> ignoreCharacters(String characters, CriteriaBuilder criteriaBuilder,
+                                                    Expression<String> inExpression) {
+            Expression<String> expression = inExpression;
+            for (int i = 0; i < characters.length(); i++) {
+                expression = criteriaBuilder.function("replace", String.class, expression,
+                        criteriaBuilder.literal(characters.charAt(i)), criteriaBuilder.literal(""));
+            }
+            return expression;
+        }
+
+    }
+
+    private Component createGrid() {
+        grid = new Grid<>(Expense.class, false);
         grid.addColumn(Expense::getName).setHeader("Name").setSortable(true).setSortProperty("name");
         grid.addColumn(Expense::getCost).setHeader("Amount").setSortable(true).setSortProperty("cost");
         grid.addColumn(expenseCategory -> expenseCategory.getCategory().getName()).setHeader("Category").setSortable(true).setSortProperty("category");
@@ -98,211 +223,18 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         grid.addColumn(Expense::getDate).setHeader("Date").setSortable(true).setSortProperty("date");
         // grid.addColumn(expenseEvent -> expenseEvent.getEvent().getName()).setHeader("Event").setSortable(true);
 
-        grid.addColumn(new ComponentRenderer<>(expense1 -> createBadge(expenseService.isExpenseResolved(expense1)))).setHeader("Status").setSortable(true);
         grid.getColumns().forEach(col -> col.setAutoWidth(true));
-
         grid.setItems(query -> expenseService.list(
-                        PageRequest.of(query.getPage(), query.getPageSize(), VaadinSpringDataHelpers.toSpringDataSort(query)))
-                .stream());
+                PageRequest.of(query.getPage(), query.getPageSize(), VaadinSpringDataHelpers.toSpringDataSort(query)),
+                filters).stream());
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
+        grid.addClassNames(LumoUtility.Border.TOP, LumoUtility.BorderColor.CONTRAST_10);
 
-        // when a row is selected or deselected, populate form
-        grid.asSingleSelect().addValueChangeListener(event -> {
-            if (event.getValue() != null) {
-                UI.getCurrent().navigate(String.format(EXPENSE_EDIT_ROUTE_TEMPLATE, event.getValue().getId()));
-            } else {
-                clearForm();
-                UI.getCurrent().navigate(ExpensesView.class);
-            }
-        });
-
-        // Configure Form
-        binder = new BeanValidationBinder<>(Expense.class);
-
-        // Bind fields. This is where you'd define e.g. validation rules
-        binder.bindInstanceFields(this);
-
-        // We set initial value of isPeriodic to true and show period fields
-        isPeriodic.setValue(false);
-        isResolved.setValue(false);
-        periodUnit.setVisible(false);
-        periodInterval.setVisible(false);
-
-        // We show the periodic fields only when the isPeriodic boolean is true
-        isPeriodic.addValueChangeListener(event -> {
-            boolean isPeriodicChecked = event.getValue();
-            periodUnit.setVisible(isPeriodicChecked);
-            periodInterval.setVisible(isPeriodicChecked);
-
-            // Clear periodUnit and periodInterval if isPeriodic is unchecked
-            if (!isPeriodicChecked) {
-                periodUnit.clear();
-                periodInterval.clear();
-            }
-        });
-
-        // Event listeners that will remove the selected creditors from the debtors list and vice versa
-        // Done so that the user cant create an expense with the same person as creditor and debtor
-        debtors.addValueChangeListener(event -> {
-            Set<Person> selectedDebtors = event.getValue();
-            final var creditorsSet = new HashSet<>(personService.findAll());
-            creditorsSet.removeIf(selectedDebtors::contains);
-            creditors.setItems(creditorsSet);
-        });
-
-        creditors.addValueChangeListener(event -> {
-            Set<Person> selectedCreditors = event.getValue();
-            final var debtorsSet = new HashSet<>(personService.findAll());
-            debtorsSet.removeIf(selectedCreditors::contains);
-            debtors.setItems(debtorsSet);
-        });
-
-        cancel.addClickListener(e -> {
-            clearForm();
-            refreshGrid();
-        });
-
-        save.addClickListener(e -> {
-            try {
-                if (this.expense == null) {
-                    this.expense = new Expense();
-                }
-                binder.writeBean(this.expense);
-                expenseService.update(this.expense);
-                clearForm();
-                refreshGrid();
-                Notification.show("Data updated");
-                UI.getCurrent().navigate(ExpensesView.class);
-            } catch (ObjectOptimisticLockingFailureException exception) {
-                Notification n = Notification.show(
-                        "Error updating the data. Somebody else has updated the record while you were making changes.");
-                n.setPosition(Position.MIDDLE);
-                n.addThemeVariants(NotificationVariant.LUMO_ERROR);
-            } catch (ValidationException validationException) {
-                Notification.show("Failed to update the data. Check again that all values are valid");
-            }
-        });
-
-        delete.addClickListener(e -> {
-            try {
-                if (Objects.isNull(this.expense)) throw new RuntimeException("Expense is null!"); //TODO: create proper exception
-                expenseService.delete(this.expense.getId());
-                clearForm();
-                refreshGrid();
-                Notification.show("Data deleted");
-                UI.getCurrent().navigate(ExpensesView.class);
-            } catch (ObjectOptimisticLockingFailureException exception) {
-                Notification n = Notification.show(
-                        "Error updating the data. Somebody else has updated the record while you were making changes.");
-                n.setPosition(Position.MIDDLE);
-                n.addThemeVariants(NotificationVariant.LUMO_ERROR);
-            }
-        });
-    }
-
-    @Override
-    public void beforeEnter(BeforeEnterEvent event) {
-        Optional<Long> expenseId = event.getRouteParameters().get(EXPENSE_ID).map(Long::parseLong);
-        if (expenseId.isPresent()) {
-            Optional<Expense> expenseFromBackend = expenseService.get(expenseId.get());
-            if (expenseFromBackend.isPresent()) populateForm(expenseFromBackend.get());
-             else {
-                Notification.show(
-                        String.format("The requested expense was not found, ID = %s", expenseId.get()), 3000,
-                        Notification.Position.BOTTOM_START);
-                // when a row is selected but the data is no longer available,
-                // refresh grid
-                refreshGrid();
-                event.forwardTo(ExpensesView.class);
-            }
-        }
-    }
-
-    private void createEditorLayout(SplitLayout splitLayout) {
-        Div editorLayoutDiv = new Div();
-        editorLayoutDiv.setClassName("editor-layout");
-
-        Div editorDiv = new Div();
-        editorDiv.setClassName("editor");
-        editorLayoutDiv.add(editorDiv);
-
-        FormLayout formLayout = new FormLayout();
-        name = new TextField("Name");
-        cost = new TextField("Cost");
-        category = new ComboBox<>("Category");
-        category.setItems(categoryService.findAll());
-        category.setItemLabelGenerator(Category::getName);
-        description = new TextArea("Description");
-        periodUnit = new ComboBox<>("Period Unit");
-        periodUnit.setItems(PeriodUnit.values());
-        periodInterval = new TextField("Period Interval");
-        creditors = new MultiSelectComboBox<>("Creditors");
-        creditors.setItems(personService.findAll());
-        creditors.setItemLabelGenerator(Person::getFirstName);
-        event = new ComboBox<>("Event");
-        event.setItems(eventService.findAll());
-        event.setItemLabelGenerator(Event::getName);
-        debtors = new MultiSelectComboBox<>("Debtors");
-        debtors.setItems(personService.findAll());
-        debtors.setItemLabelGenerator(Person::getFirstName);
-        date = new DatePicker("Date");
-
-        // Horizontal layout for checkboxes
-        HorizontalLayout checkboxLayout = new HorizontalLayout();
-        isPeriodic = new Checkbox("Is Periodic");
-        isResolved = new Checkbox("Paid");
-        checkboxLayout.add(isPeriodic, isResolved);
-
-        formLayout.add(name, cost, category, description, checkboxLayout, periodUnit, periodInterval, date, creditors, debtors, event);
-        editorDiv.add(formLayout);
-        createButtonLayout(editorLayoutDiv);
-
-        splitLayout.addToSecondary(editorLayoutDiv);
-    }
-
-    private void createButtonLayout(Div editorLayoutDiv) {
-        HorizontalLayout buttonLayout = new HorizontalLayout();
-        buttonLayout.setClassName("button-layout");
-        cancel.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        save.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        delete.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        buttonLayout.add(save, delete, cancel);
-        editorLayoutDiv.add(buttonLayout);
-    }
-
-    private void createGridLayout(SplitLayout splitLayout) {
-        Div wrapper = new Div();
-        wrapper.setClassName("grid-wrapper");
-        splitLayout.addToPrimary(wrapper);
-        wrapper.add(grid);
+        return grid;
     }
 
     private void refreshGrid() {
-        grid.select(null);
         grid.getDataProvider().refreshAll();
     }
 
-    private void clearForm() {
-        populateForm(null);
-    }
-
-    private void populateForm(Expense value) {
-        this.expense = value;
-        binder.readBean(this.expense);
-        boolean isPeriodicChecked = (value != null) && value.getIsPeriodic();
-        periodUnit.setVisible(isPeriodicChecked);
-        periodInterval.setVisible(isPeriodicChecked);
-    }
-
-    private Span createBadge(Boolean isExpenseResolved) {
-        Span badge = new Span();
-        if (Boolean.TRUE.equals(isExpenseResolved)) {
-            badge.setText("Resolved");
-            badge.getElement().getThemeList().add("badge success");
-        } else  {
-            badge.setText("To be Resolved");
-            badge.getElement().getThemeList().add("badge error");
-        }
-        return badge;
-    }
 }
