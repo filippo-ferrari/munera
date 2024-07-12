@@ -15,7 +15,6 @@ import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
@@ -31,9 +30,8 @@ import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.*;
-import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.vaadin.klaudeta.PaginatedGrid;
 
 import java.util.HashSet;
 import java.util.Objects;
@@ -49,7 +47,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
     private static final String EXPENSE_ID = "expenseID";
     private static final String EXPENSE_EDIT_ROUTE_TEMPLATE = "/%s/edit";
 
-    private final Grid<Expense> grid = new Grid<>(Expense.class, false);
+    private final PaginatedGrid<Expense, Objects> grid = new PaginatedGrid<>();
 
     private final Button cancel = new Button("Cancel");
     private final Button save = new Button("Save");
@@ -101,9 +99,9 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         grid.addColumn(new ComponentRenderer<>(expense1 -> createBadge(expenseService.isExpenseResolved(expense1)))).setHeader("Status").setSortable(true);
         grid.getColumns().forEach(col -> col.setAutoWidth(true));
 
-        grid.setItems(query -> expenseService.list(
-                        PageRequest.of(query.getPage(), query.getPageSize(), VaadinSpringDataHelpers.toSpringDataSort(query)))
-                .stream());
+        grid.setItems(this.expenseService.findAll());
+        grid.setPaginatorSize(5);
+        grid.setPageSize(25); //  setting page size
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
 
         // when a row is selected or deselected, populate form
