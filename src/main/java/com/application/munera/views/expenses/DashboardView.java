@@ -214,7 +214,7 @@ public class DashboardView extends Div {
         // Generate JavaScript initialization
         return "Highcharts.chart('bottomLeftChart', {" +
                 "chart: {" +
-                "type: 'column'" +
+                "type: 'column'," + // Specify the chart type as column
                 "}," +
                 "title: {" +
                 "text: 'Net Balances by Person'" +
@@ -232,12 +232,16 @@ public class DashboardView extends Div {
                 "color: '#808080'" +
                 "}]" +
                 "}," +
+                "plotOptions: {" + // Add plotOptions to configure the column width
+                "column: {" +
+                "pointWidth: 50" + // Adjust the width of the columns (in pixels)
+                "}" +
+                "}," +
                 "series: [{" +
                 "name: 'Balance'," +
                 "data: " + data + // Use the data fetched from DB
                 "}]" +
-                "});";
-    }
+                "});";    }
 
     private String generatePlaceholderChartScript(String divId, String title) {
         return "Highcharts.chart('" + divId + "', {" +
