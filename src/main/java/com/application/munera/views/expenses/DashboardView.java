@@ -1,7 +1,9 @@
 package com.application.munera.views.expenses;
 
 import com.application.munera.data.Expense;
+import com.application.munera.data.Person;
 import com.application.munera.services.ExpenseService;
+import com.application.munera.services.PersonService;
 import com.application.munera.views.MainLayout;
 import com.nimbusds.jose.shaded.gson.Gson;
 import com.vaadin.flow.component.html.Div;
@@ -10,6 +12,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
+import java.math.BigDecimal;
 import java.time.Year;
 import java.time.YearMonth;
 import java.time.format.TextStyle;
@@ -25,9 +28,11 @@ import java.util.stream.Collectors;
 public class DashboardView extends Div {
 
     private final ExpenseService expenseService;
+    private final PersonService personService;
 
-    public DashboardView(final ExpenseService expenseService) {
+    public DashboardView(final ExpenseService expenseService, final PersonService personService) {
         this.expenseService = expenseService;
+        this.personService = personService;
         addClassName("highcharts-view"); // Optional CSS class for styling
 
         VerticalLayout mainLayout = new VerticalLayout();
@@ -66,7 +71,7 @@ public class DashboardView extends Div {
         bottomRowLayout.setHeight("50%"); // Make sure the bottom row occupies the other half of the page height
         bottomRowLayout.getStyle().set("padding", "10px"); // Add padding to bottom row
 
-        // Create placeholder divs for the bottom charts
+        // Create the bottom left chart
         Div bottomLeftChartDiv = new Div();
         bottomLeftChartDiv.setId("bottomLeftChart");
         bottomLeftChartDiv.getStyle().set("min-height", "100%"); // Ensure it occupies the full height of the container
@@ -75,6 +80,7 @@ public class DashboardView extends Div {
         bottomLeftChartDiv.getStyle().set("padding", "10px"); // Add padding inside the border
         bottomRowLayout.add(bottomLeftChartDiv);
 
+        // Placeholder for the bottom right chart
         Div bottomRightChartDiv = new Div();
         bottomRightChartDiv.setId("bottomRightChart");
         bottomRightChartDiv.getStyle().set("min-height", "100%"); // Ensure it occupies the full height of the container
@@ -89,7 +95,7 @@ public class DashboardView extends Div {
 
         String barChartJs = generateBarChartScript();
         String pieChartJs = generatePieChartScript();
-        String bottomLeftChartJs = generatePlaceholderChartScript("bottomLeftChart", "Bottom Left Chart");
+        String bottomLeftChartJs = generateNegativeColumnChartScript();
         String bottomRightChartJs = generatePlaceholderChartScript("bottomRightChart", "Bottom Right Chart");
 
         // Execute the JavaScript to initialize the charts
@@ -183,20 +189,67 @@ public class DashboardView extends Div {
                 "});";
     }
 
-    private String generatePlaceholderChartScript(String chartId, String title) {
-        return "Highcharts.chart('" + chartId + "', {" +
+    private String generateNegativeColumnChartScript() {
+        List<Person> people = personService.findAll().stream().toList();
+        if (people.isEmpty()) {
+            return generatePlaceholderChartScript("bottomLeftChart", "No Data Available");
+        }
+
+        Map<String, Double> personData = new LinkedHashMap<>();
+
+        for (Person person : people) {
+            BigDecimal balance = personService.calculateNetBalance(person);
+            personData.put(person.getFirstName(), balance.doubleValue());
+        }
+
+        // Prepare series data for Highcharts with conditional coloring
+        StringBuilder data = new StringBuilder("[");
+        for (Map.Entry<String, Double> entry : personData.entrySet()) {
+            double value = entry.getValue();
+            String color = value >= 0 ? "#90EE90" : "#FF9999"; // Green for positive, red for negative
+            data.append("{ y: ").append(value).append(", color: '").append(color).append("' },");
+        }
+        data.setCharAt(data.length() - 1, ']'); // Replace last comma with closing bracket
+
+        // Generate JavaScript initialization
+        return "Highcharts.chart('bottomLeftChart', {" +
                 "chart: {" +
-                "type: 'line'" + // Placeholder type
+                "type: 'column'" +
+                "}," +
+                "title: {" +
+                "text: 'Net Balances by Person'" +
+                "}," +
+                "xAxis: {" +
+                "categories: " + new Gson().toJson(personData.keySet()) + // Categories are the person names
+                "}," +
+                "yAxis: {" +
+                "title: {" +
+                "text: 'Balance'" +
+                "}," +
+                "plotLines: [{" +
+                "value: 0," +
+                "width: 1," +
+                "color: '#808080'" +
+                "}]" +
+                "}," +
+                "series: [{" +
+                "name: 'Balance'," +
+                "data: " + data + // Use the data fetched from DB
+                "}]" +
+                "});";
+    }
+
+    private String generatePlaceholderChartScript(String divId, String title) {
+        return "Highcharts.chart('" + divId + "', {" +
+                "chart: {" +
+                "type: 'column'" +
                 "}," +
                 "title: {" +
                 "text: '" + title + "'" +
                 "}," +
-                "xAxis: {" +
-                "categories: []" + // Placeholder empty categories
-                "}," +
                 "series: [{" +
-                "name: 'Placeholder'," +
-                "data: []" + // Placeholder empty data
+                "name: 'Data'," +
+                "data: [0]" + // Placeholder data
                 "}]" +
                 "});";
     }
