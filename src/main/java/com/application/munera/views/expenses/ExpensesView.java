@@ -99,7 +99,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         grid.addColumn(new ComponentRenderer<>(expense1 -> createBadge(expenseService.isExpenseResolved(expense1)))).setHeader("Status").setSortable(true);
         grid.getColumns().forEach(col -> col.setAutoWidth(true));
 
-        grid.setItems(this.expenseService.findAll());
+        grid.setItems(this.expenseService.findAllOrderByDateDescending());
         grid.setPaginatorSize(5);
         grid.setPageSize(25); //  setting page size
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);

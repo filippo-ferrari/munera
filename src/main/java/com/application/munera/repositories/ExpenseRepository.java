@@ -28,4 +28,5 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long>, JpaSpec
     Set<Expense> findUnpaidDebtorsExpensesByPersonId(@Param("personId") Long personId);
 
     boolean existsByIdAndIsResolvedTrue(Long id);
-}
+
+    List<Expense> findAllByOrderByDateDesc();}

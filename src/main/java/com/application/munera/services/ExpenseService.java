@@ -70,4 +70,8 @@ public class ExpenseService {
         return this.repository.existsByIdAndIsResolvedTrue(expense.getId());
     }
 
+    public List<Expense> findAllOrderByDateDescending() {
+        return this.repository.findAllByOrderByDateDesc();
+    }
+
 }
