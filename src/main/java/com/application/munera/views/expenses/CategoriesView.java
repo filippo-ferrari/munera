@@ -22,12 +22,14 @@ import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.router.*;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
+import jakarta.annotation.security.PermitAll;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
 import java.util.Optional;
 
 @PageTitle("Categories")
+@PermitAll
 @Route(value = "categories/:categoryID?/:action?(edit)", layout = MainLayout.class)
 @Uses(Icon.class)
 public class CategoriesView extends Div implements BeforeEnterObserver {

@@ -28,12 +28,14 @@ import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
+import jakarta.annotation.security.PermitAll;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
 import java.util.Optional;
 
 @PageTitle("Events")
+@PermitAll
 @Route(value = "events/:eventID?/:action?(edit)", layout = MainLayout.class)
 @Uses(Icon.class)
 public class EventsView extends Div implements BeforeEnterObserver {

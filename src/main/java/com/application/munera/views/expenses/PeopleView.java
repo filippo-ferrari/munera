@@ -28,6 +28,7 @@ import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
+import jakarta.annotation.security.PermitAll;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
@@ -35,6 +36,7 @@ import java.math.BigDecimal;
 import java.util.Optional;
 
 @PageTitle("People")
+@PermitAll
 @Route(value = "people/:personID?/:action?(edit)", layout = MainLayout.class)
 @Uses(Icon.class)
 public class PeopleView extends Div implements BeforeEnterObserver {

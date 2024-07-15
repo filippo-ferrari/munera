@@ -30,6 +30,7 @@ import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.*;
+import jakarta.annotation.security.PermitAll;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.vaadin.klaudeta.PaginatedGrid;
 
@@ -38,6 +39,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+@PermitAll
 @PageTitle("Expenses")
 @Route(value = "/:expenseID?/:action?(edit)", layout = MainLayout.class)
 @RouteAlias(value = "", layout = MainLayout.class)

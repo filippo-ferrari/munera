@@ -11,6 +11,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import jakarta.annotation.security.PermitAll;
 
 import java.math.BigDecimal;
 import java.time.Year;
@@ -20,6 +21,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 //@HtmlImport("frontend://styles/shared-styles.html") // If you have custom styles
+@PermitAll
 @PageTitle("Dashboard")
 @Route(value = "dashboard", layout = MainLayout.class)
 public class DashboardView extends Div {
