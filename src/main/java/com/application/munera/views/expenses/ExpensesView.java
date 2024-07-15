@@ -276,7 +276,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
     }
 
     private void refreshGrid() {
-        grid.setItems(this.expenseService.findAll());
+        grid.setItems(this.expenseService.findAllOrderByDateDescending());
         grid.select(null);
         grid.getDataProvider().refreshAll();
     }
