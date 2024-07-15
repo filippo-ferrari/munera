@@ -16,15 +16,12 @@ import java.math.BigDecimal;
 import java.time.Year;
 import java.time.YearMonth;
 import java.time.format.TextStyle;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 //@HtmlImport("frontend://styles/shared-styles.html") // If you have custom styles
 @PageTitle("Dashboard")
-@Route(value = "highcharts-view", layout = MainLayout.class)
+@Route(value = "dashboard", layout = MainLayout.class)
 public class DashboardView extends Div {
 
     private final ExpenseService expenseService;
@@ -96,7 +93,7 @@ public class DashboardView extends Div {
         String barChartJs = generateBarChartScript();
         String pieChartJs = generatePieChartScript();
         String bottomLeftChartJs = generateNegativeColumnChartScript();
-        String bottomRightChartJs = generatePlaceholderChartScript("bottomRightChart", "Bottom Right Chart");
+        String bottomRightChartJs = generateExpensesOverTimeByCategoryScript();
 
         // Execute the JavaScript to initialize the charts
         getElement().executeJs(barChartJs);
@@ -190,10 +187,10 @@ public class DashboardView extends Div {
     }
 
     private String generateNegativeColumnChartScript() {
-        List<Person> people = personService.findAll().stream().toList();
-        if (people.isEmpty()) {
-            return generatePlaceholderChartScript("bottomLeftChart", "No Data Available");
-        }
+        final var people = personService.findAll().stream()
+                .filter(person -> personService.calculateNetBalance(person).compareTo(BigDecimal.ZERO) != 0)
+                .toList();
+        if (people.isEmpty()) return generatePlaceholderChartScript("bottomLeftChart", "No Data Available");
 
         Map<String, Double> personData = new LinkedHashMap<>();
 
@@ -255,6 +252,70 @@ public class DashboardView extends Div {
                 "name: 'Data'," +
                 "data: [0]" + // Placeholder data
                 "}]" +
+                "});";
+    }
+
+    private String generateExpensesOverTimeByCategoryScript() {
+        List<Expense> expenses = expenseService.findAllByYear(Year.now().getValue());
+
+        // Group expenses by category and by month
+        Map<String, Map<String, Double>> categoryMonthlyData = new LinkedHashMap<>();
+
+        YearMonth currentYearMonth = YearMonth.now().withMonth(1); // Start from January
+        List<String> monthNames = new ArrayList<>();
+
+        for (int i = 1; i <= 12; i++) {
+            String monthName = currentYearMonth.getMonth().getDisplayName(TextStyle.SHORT, Locale.ENGLISH);
+            monthNames.add(monthName);
+            currentYearMonth = currentYearMonth.plusMonths(1); // Move to the next month
+        }
+
+        for (Expense expense : expenses) {
+            String categoryName = expense.getCategory().getName();
+            String monthName = expense.getDate().getMonth().getDisplayName(TextStyle.SHORT, Locale.ENGLISH);
+            Double amount = expense.getCost().doubleValue();
+
+            categoryMonthlyData.putIfAbsent(categoryName, new LinkedHashMap<>());
+            Map<String, Double> monthlyData = categoryMonthlyData.get(categoryName);
+
+            // Initialize all months to 0 for each category
+            for (String month : monthNames) {
+                monthlyData.putIfAbsent(month, 0.0);
+            }
+
+            monthlyData.put(monthName, monthlyData.get(monthName) + amount);
+        }
+
+        // Prepare series data for Highcharts
+        StringBuilder seriesData = new StringBuilder("[");
+        for (Map.Entry<String, Map<String, Double>> entry : categoryMonthlyData.entrySet()) {
+            String categoryName = entry.getKey();
+            Map<String, Double> monthlyData = entry.getValue();
+
+            seriesData.append("{");
+            seriesData.append("name: '").append(categoryName).append("',");
+            seriesData.append("data: ").append(monthlyData.values());
+            seriesData.append("},");
+        }
+        seriesData.setCharAt(seriesData.length() - 1, ']'); // Replace last comma with closing bracket
+
+        // Generate JavaScript initialization
+        return "Highcharts.chart('bottomRightChart', {" +
+                "chart: {" +
+                "type: 'line'" +
+                "}," +
+                "title: {" +
+                "text: 'Expenses Over Time by Category for " + Year.now().getValue() + "'" +
+                "}," +
+                "xAxis: {" +
+                "categories: " + new Gson().toJson(monthNames) +
+                "}," +
+                "yAxis: {" +
+                "title: {" +
+                "text: 'Amount'" +
+                "}" +
+                "}," +
+                "series: " + seriesData +
                 "});";
     }
 }
