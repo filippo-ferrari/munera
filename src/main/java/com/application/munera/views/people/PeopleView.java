@@ -1,28 +1,28 @@
-package com.application.munera.views.expenses;
+package com.application.munera.views.people;
 
-import com.application.munera.data.Event;
 import com.application.munera.data.Person;
-import com.application.munera.services.EventService;
 import com.application.munera.services.PersonService;
 import com.application.munera.views.MainLayout;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
-import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.ValidationException;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
@@ -32,34 +32,33 @@ import jakarta.annotation.security.PermitAll;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
-@PageTitle("Events")
+@PageTitle("People")
 @PermitAll
-@Route(value = "events/:eventID?/:action?(edit)", layout = MainLayout.class)
+@Route(value = "people/:personID?/:action?(edit)", layout = MainLayout.class)
 @Uses(Icon.class)
-public class EventsView extends Div implements BeforeEnterObserver {
+public class PeopleView extends Div implements BeforeEnterObserver {
 
-    private static final String EVENT_ID = "eventID";
-    private static final String EVENT_EDIT_ROUTE_TEMPLATE = "events/%s/edit";
+    private static final String PERSON_ID = "personID";
+    private static final String PERSON_EDIT_ROUTE_TEMPLATE = "people/%s/edit";
 
-    private final Grid<Event> grid = new Grid<>(Event.class, false);
+    private final Grid<Person> grid = new Grid<>(Person.class, false);
 
     private final Button cancel = new Button("Cancel");
     private final Button save = new Button("Save");
     private final Button delete = new Button("Delete");
 
-    private final BeanValidationBinder<Event> binder;
+    private final BeanValidationBinder<Person> binder;
 
-    private Event event;
-    private final EventService eventService;
+    private Person person;
     private final PersonService personService;
-    private TextField name;
-    private TextArea description;
-    private MultiSelectComboBox<Person> participants;
+    private TextField firstName;
+    private TextField lastName;
+    private EmailField email;
 
-    public EventsView(EventService eventService, PersonService personService) {
-        this.eventService = eventService;
+    public PeopleView(PersonService personService) {
         this.personService = personService;
         addClassNames("expenses-view");
 
@@ -72,26 +71,36 @@ public class EventsView extends Div implements BeforeEnterObserver {
         add(splitLayout);
 
         // Configure Grid
-        grid.addColumn(Event::getName).setHeader("Name").setSortable(true);
-        grid.addColumn(Event::getDescription).setHeader("Description").setSortable(true);
-        grid.getColumns().forEach(col -> col.setAutoWidth(true));
+        grid.addColumn(Person::getFirstName).setHeader("First Name").setSortable(true);
+        grid.addColumn(Person::getLastName).setHeader("Last Name").setSortable(true);
+        grid.addColumn(Person::getEmail).setHeader("Email").setSortable(true);
+        grid.addColumn(personService::calculateDebt).setHeader("Debt").setSortable(true);
+        grid.addColumn(personService::calculateCredit).setHeader("Credit").setSortable(true);
+        grid.addColumn(personService::calculateNetBalance).setHeader("Total Expenses value").setSortable(true);
+        grid.addColumn(new ComponentRenderer<>(persona -> {
+            final var netBalance = personService.calculateNetBalance(persona);
+            return createBadge(netBalance);
+        })).setHeader("Balance Status").setSortable(true);
 
-        grid.setItems(query -> eventService.list(
+
+        grid.getColumns().forEach(col -> col.setAutoWidth(true));
+        grid.setItems(query -> personService.list(
                         PageRequest.of(query.getPage(), query.getPageSize(), VaadinSpringDataHelpers.toSpringDataSort(query)))
                 .stream());
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
 
         // when a row is selected or deselected, populate form
         grid.asSingleSelect().addValueChangeListener(event -> {
-            if (event.getValue() != null) UI.getCurrent().navigate(String.format(EVENT_EDIT_ROUTE_TEMPLATE, event.getValue().getId()));
-            else {
+            if (event.getValue() != null) {
+                UI.getCurrent().navigate(String.format(PERSON_EDIT_ROUTE_TEMPLATE, event.getValue().getId()));
+            } else {
                 clearForm();
-                UI.getCurrent().navigate(EventsView.class);
+                UI.getCurrent().navigate(PeopleView.class);
             }
         });
 
         // Configure Form
-        binder = new BeanValidationBinder<>(Event.class);
+        binder = new BeanValidationBinder<>(Person.class);
 
         // Bind fields. This is where you'd define e.g. validation rules
 
@@ -104,19 +113,19 @@ public class EventsView extends Div implements BeforeEnterObserver {
 
         save.addClickListener(e -> {
             try {
-                if (this.event == null) {
-                    this.event = new Event();
+                if (this.person == null) {
+                    this.person = new Person();
                 }
-                binder.writeBean(this.event);
-                eventService.update(this.event);
+                binder.writeBean(this.person);
+                personService.update(this.person);
                 clearForm();
                 refreshGrid();
                 Notification.show("Data updated");
-                UI.getCurrent().navigate(EventsView.class);
+                UI.getCurrent().navigate(PeopleView.class);
             } catch (ObjectOptimisticLockingFailureException exception) {
                 Notification n = Notification.show(
                         "Error updating the data. Somebody else has updated the record while you were making changes.");
-                n.setPosition(Notification.Position.MIDDLE);
+                n.setPosition(Position.MIDDLE);
                 n.addThemeVariants(NotificationVariant.LUMO_ERROR);
             } catch (ValidationException validationException) {
                 Notification.show("Failed to update the data. Check again that all values are valid");
@@ -125,16 +134,16 @@ public class EventsView extends Div implements BeforeEnterObserver {
 
         delete.addClickListener(e -> {
             try {
-                if (this.event == null) throw new RuntimeException("Event is null!"); //TODO: create proper exception
-                eventService.delete(this.event);
+                if (this.person == null) throw new RuntimeException("The person is null!"); //TODO: create proper exception
+                personService.delete(this.person.getId());
                 clearForm();
                 refreshGrid();
-                Notification.show("Data deleted");
-                UI.getCurrent().navigate(EventsView.class);
+                Notification.show("Data delete");
+                UI.getCurrent().navigate(PeopleView.class);
             } catch (ObjectOptimisticLockingFailureException exception) {
                 Notification n = Notification.show(
                         "Error updating the data. Somebody else has updated the record while you were making changes.");
-                n.setPosition(Notification.Position.MIDDLE);
+                n.setPosition(Position.MIDDLE);
                 n.addThemeVariants(NotificationVariant.LUMO_ERROR);
             }
         });
@@ -142,19 +151,19 @@ public class EventsView extends Div implements BeforeEnterObserver {
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
-        Optional<Long> eventId = event.getRouteParameters().get(EVENT_ID).map(Long::parseLong);
-        if (eventId.isPresent()) {
-            Optional<Event> eventFromBackend = eventService.findById(eventId.get());
-            if (eventFromBackend.isPresent()) {
-                populateForm(eventFromBackend.get());
+        Optional<Long> personId = event.getRouteParameters().get(PERSON_ID).map(Long::parseLong);
+        if (personId.isPresent()) {
+            Optional<Person> personFromBackend = personService.get(personId.get());
+            if (personFromBackend.isPresent()) {
+                populateForm(personFromBackend.get());
             } else {
                 Notification.show(
-                        String.format("The requested event was not found, ID = %s", eventId.get()), 3000,
-                        Notification.Position.BOTTOM_START);
+                        String.format("The requested person was not found, ID = %s", personId.get()), 3000,
+                        Position.BOTTOM_START);
                 // when a row is selected but the data is no longer available,
                 // refresh grid
                 refreshGrid();
-                event.forwardTo(EventsView.class);
+                event.forwardTo(PeopleView.class);
             }
         }
     }
@@ -168,12 +177,14 @@ public class EventsView extends Div implements BeforeEnterObserver {
         editorLayoutDiv.add(editorDiv);
 
         FormLayout formLayout = new FormLayout();
-        name = new TextField("Name");
-        description = new TextArea("Description");
-        participants = new MultiSelectComboBox<>("Participants");
-        participants.setItems(personService.findAll());
-        participants.setItemLabelGenerator(Person::getFirstName);
-        formLayout.add(name, description, participants);
+        firstName = new TextField("First Name");
+        lastName = new TextField("Last Name");
+        email = new EmailField("Email");
+
+        // We set the maximum parallel columns to 1
+        formLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
+
+        formLayout.add(firstName, lastName, email);
         editorDiv.add(formLayout);
         createButtonLayout(editorLayoutDiv);
 
@@ -206,8 +217,24 @@ public class EventsView extends Div implements BeforeEnterObserver {
         populateForm(null);
     }
 
-    private void populateForm(Event value) {
-        this.event = value;
-        binder.readBean(this.event);
+    private void populateForm(Person value) {
+        this.person = value;
+        binder.readBean(this.person);
+
+    }
+
+    private Span createBadge(BigDecimal netBalance) {
+        Span badge = new Span();
+        if (netBalance.compareTo(BigDecimal.ZERO) < 0) {
+            badge.setText("Credit");
+            badge.getElement().getThemeList().add("badge success");
+        } else if (netBalance.compareTo(BigDecimal.ZERO) > 0) {
+            badge.setText("Debit");
+            badge.getElement().getThemeList().add("badge error");
+        } else {
+            badge.setText("Clear");
+            badge.getElement().getThemeList().add("badge contrast");
+        }
+        return badge;
     }
 }

@@ -1,4 +1,4 @@
-package com.application.munera.views.expenses;
+package com.application.munera.views.dashboard;
 
 import com.application.munera.data.Expense;
 import com.application.munera.data.Person;

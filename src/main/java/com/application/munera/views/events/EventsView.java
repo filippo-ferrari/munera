@@ -1,11 +1,14 @@
-package com.application.munera.views.expenses;
+package com.application.munera.views.events;
 
-import com.application.munera.data.Category;
-import com.application.munera.services.CategoryService;
+import com.application.munera.data.Event;
+import com.application.munera.data.Person;
+import com.application.munera.services.EventService;
+import com.application.munera.services.PersonService;
 import com.application.munera.views.MainLayout;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
@@ -20,7 +23,10 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.ValidationException;
-import com.vaadin.flow.router.*;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
+import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.data.domain.PageRequest;
@@ -28,31 +34,33 @@ import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
 import java.util.Optional;
 
-@PageTitle("Categories")
+@PageTitle("Events")
 @PermitAll
-@Route(value = "categories/:categoryID?/:action?(edit)", layout = MainLayout.class)
+@Route(value = "events/:eventID?/:action?(edit)", layout = MainLayout.class)
 @Uses(Icon.class)
-public class CategoriesView extends Div implements BeforeEnterObserver {
+public class EventsView extends Div implements BeforeEnterObserver {
 
-    private static final String CATEGORY_ID = "categoryID";
-    private static final String CATEGORY_EDIT_ROUTE_TEMPLATE = "categories/%s/edit";
+    private static final String EVENT_ID = "eventID";
+    private static final String EVENT_EDIT_ROUTE_TEMPLATE = "events/%s/edit";
 
-    private final Grid<Category> grid = new Grid<>(Category.class, false);
+    private final Grid<Event> grid = new Grid<>(Event.class, false);
 
     private final Button cancel = new Button("Cancel");
     private final Button save = new Button("Save");
     private final Button delete = new Button("Delete");
 
-    private final BeanValidationBinder<Category> binder;
+    private final BeanValidationBinder<Event> binder;
 
-    private Category category;
-    private final CategoryService categoryService;
+    private Event event;
+    private final EventService eventService;
+    private final PersonService personService;
     private TextField name;
-
     private TextArea description;
+    private MultiSelectComboBox<Person> participants;
 
-    public CategoriesView(CategoryService categoryService) {
-        this.categoryService = categoryService;
+    public EventsView(EventService eventService, PersonService personService) {
+        this.eventService = eventService;
+        this.personService = personService;
         addClassNames("expenses-view");
 
         // Create UI
@@ -64,26 +72,26 @@ public class CategoriesView extends Div implements BeforeEnterObserver {
         add(splitLayout);
 
         // Configure Grid
-        grid.addColumn(Category::getName).setHeader("Name").setSortable(true);
-        grid.addColumn(Category::getDescription).setHeader("Description").setSortable(true);
+        grid.addColumn(Event::getName).setHeader("Name").setSortable(true);
+        grid.addColumn(Event::getDescription).setHeader("Description").setSortable(true);
         grid.getColumns().forEach(col -> col.setAutoWidth(true));
 
-        grid.setItems(query -> categoryService.list(
+        grid.setItems(query -> eventService.list(
                         PageRequest.of(query.getPage(), query.getPageSize(), VaadinSpringDataHelpers.toSpringDataSort(query)))
                 .stream());
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
 
         // when a row is selected or deselected, populate form
         grid.asSingleSelect().addValueChangeListener(event -> {
-            if (event.getValue() != null) UI.getCurrent().navigate(String.format(CATEGORY_EDIT_ROUTE_TEMPLATE, event.getValue().getId()));
+            if (event.getValue() != null) UI.getCurrent().navigate(String.format(EVENT_EDIT_ROUTE_TEMPLATE, event.getValue().getId()));
             else {
                 clearForm();
-                UI.getCurrent().navigate(CategoriesView.class);
+                UI.getCurrent().navigate(EventsView.class);
             }
         });
 
         // Configure Form
-        binder = new BeanValidationBinder<>(Category.class);
+        binder = new BeanValidationBinder<>(Event.class);
 
         // Bind fields. This is where you'd define e.g. validation rules
 
@@ -96,15 +104,15 @@ public class CategoriesView extends Div implements BeforeEnterObserver {
 
         save.addClickListener(e -> {
             try {
-                if (this.category == null) {
-                    this.category = new Category();
+                if (this.event == null) {
+                    this.event = new Event();
                 }
-                binder.writeBean(this.category);
-                categoryService.update(this.category);
+                binder.writeBean(this.event);
+                eventService.update(this.event);
                 clearForm();
                 refreshGrid();
                 Notification.show("Data updated");
-                UI.getCurrent().navigate(CategoriesView.class);
+                UI.getCurrent().navigate(EventsView.class);
             } catch (ObjectOptimisticLockingFailureException exception) {
                 Notification n = Notification.show(
                         "Error updating the data. Somebody else has updated the record while you were making changes.");
@@ -117,12 +125,12 @@ public class CategoriesView extends Div implements BeforeEnterObserver {
 
         delete.addClickListener(e -> {
             try {
-                if (this.category == null) throw new RuntimeException("Category is null!"); //TODO: create proper exception
-                categoryService.delete(this.category);
+                if (this.event == null) throw new RuntimeException("Event is null!"); //TODO: create proper exception
+                eventService.delete(this.event);
                 clearForm();
                 refreshGrid();
                 Notification.show("Data deleted");
-                UI.getCurrent().navigate(CategoriesView.class);
+                UI.getCurrent().navigate(EventsView.class);
             } catch (ObjectOptimisticLockingFailureException exception) {
                 Notification n = Notification.show(
                         "Error updating the data. Somebody else has updated the record while you were making changes.");
@@ -134,19 +142,19 @@ public class CategoriesView extends Div implements BeforeEnterObserver {
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
-        Optional<Long> categoryId = event.getRouteParameters().get(CATEGORY_ID).map(Long::parseLong);
-        if (categoryId.isPresent()) {
-            Optional<Category> categoryFromBackend = categoryService.findById(categoryId.get());
-            if (categoryFromBackend.isPresent()) {
-                populateForm(categoryFromBackend.get());
+        Optional<Long> eventId = event.getRouteParameters().get(EVENT_ID).map(Long::parseLong);
+        if (eventId.isPresent()) {
+            Optional<Event> eventFromBackend = eventService.findById(eventId.get());
+            if (eventFromBackend.isPresent()) {
+                populateForm(eventFromBackend.get());
             } else {
                 Notification.show(
-                        String.format("The requested category was not found, ID = %s", categoryId.get()), 3000,
+                        String.format("The requested event was not found, ID = %s", eventId.get()), 3000,
                         Notification.Position.BOTTOM_START);
                 // when a row is selected but the data is no longer available,
                 // refresh grid
                 refreshGrid();
-                event.forwardTo(CategoriesView.class);
+                event.forwardTo(EventsView.class);
             }
         }
     }
@@ -162,7 +170,10 @@ public class CategoriesView extends Div implements BeforeEnterObserver {
         FormLayout formLayout = new FormLayout();
         name = new TextField("Name");
         description = new TextArea("Description");
-        formLayout.add(name, description);
+        participants = new MultiSelectComboBox<>("Participants");
+        participants.setItems(personService.findAll());
+        participants.setItemLabelGenerator(Person::getFirstName);
+        formLayout.add(name, description, participants);
         editorDiv.add(formLayout);
         createButtonLayout(editorLayoutDiv);
 
@@ -195,8 +206,8 @@ public class CategoriesView extends Div implements BeforeEnterObserver {
         populateForm(null);
     }
 
-    private void populateForm(Category value) {
-        this.category = value;
-        binder.readBean(this.category);
+    private void populateForm(Event value) {
+        this.event = value;
+        binder.readBean(this.event);
     }
 }

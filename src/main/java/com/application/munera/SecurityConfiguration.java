@@ -1,6 +1,6 @@
 package com.application.munera;
 
-import com.application.munera.views.LoginView;
+import com.application.munera.views.login.LoginView;
 import com.vaadin.flow.spring.security.VaadinWebSecurity;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -1,6 +1,10 @@
 package com.application.munera.views;
 
+import com.application.munera.views.categories.CategoriesView;
+import com.application.munera.views.dashboard.DashboardView;
+import com.application.munera.views.events.EventsView;
 import com.application.munera.views.expenses.*;
+import com.application.munera.views.people.PeopleView;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.button.Button;

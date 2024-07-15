@@ -1,7 +1,7 @@
-package com.application.munera.views.expenses;
+package com.application.munera.views.categories;
 
-import com.application.munera.data.Person;
-import com.application.munera.services.PersonService;
+import com.application.munera.data.Category;
+import com.application.munera.services.CategoryService;
 import com.application.munera.views.MainLayout;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -11,55 +11,48 @@ import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
-import com.vaadin.flow.component.textfield.EmailField;
+import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.ValidationException;
-import com.vaadin.flow.data.renderer.ComponentRenderer;
-import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.router.BeforeEnterObserver;
-import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.*;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
-import java.math.BigDecimal;
 import java.util.Optional;
 
-@PageTitle("People")
+@PageTitle("Categories")
 @PermitAll
-@Route(value = "people/:personID?/:action?(edit)", layout = MainLayout.class)
+@Route(value = "categories/:categoryID?/:action?(edit)", layout = MainLayout.class)
 @Uses(Icon.class)
-public class PeopleView extends Div implements BeforeEnterObserver {
+public class CategoriesView extends Div implements BeforeEnterObserver {
 
-    private static final String PERSON_ID = "personID";
-    private static final String PERSON_EDIT_ROUTE_TEMPLATE = "people/%s/edit";
+    private static final String CATEGORY_ID = "categoryID";
+    private static final String CATEGORY_EDIT_ROUTE_TEMPLATE = "categories/%s/edit";
 
-    private final Grid<Person> grid = new Grid<>(Person.class, false);
+    private final Grid<Category> grid = new Grid<>(Category.class, false);
 
     private final Button cancel = new Button("Cancel");
     private final Button save = new Button("Save");
     private final Button delete = new Button("Delete");
 
-    private final BeanValidationBinder<Person> binder;
+    private final BeanValidationBinder<Category> binder;
 
-    private Person person;
-    private final PersonService personService;
-    private TextField firstName;
-    private TextField lastName;
-    private EmailField email;
+    private Category category;
+    private final CategoryService categoryService;
+    private TextField name;
 
-    public PeopleView(PersonService personService) {
-        this.personService = personService;
+    private TextArea description;
+
+    public CategoriesView(CategoryService categoryService) {
+        this.categoryService = categoryService;
         addClassNames("expenses-view");
 
         // Create UI
@@ -71,36 +64,26 @@ public class PeopleView extends Div implements BeforeEnterObserver {
         add(splitLayout);
 
         // Configure Grid
-        grid.addColumn(Person::getFirstName).setHeader("First Name").setSortable(true);
-        grid.addColumn(Person::getLastName).setHeader("Last Name").setSortable(true);
-        grid.addColumn(Person::getEmail).setHeader("Email").setSortable(true);
-        grid.addColumn(personService::calculateDebt).setHeader("Debt").setSortable(true);
-        grid.addColumn(personService::calculateCredit).setHeader("Credit").setSortable(true);
-        grid.addColumn(personService::calculateNetBalance).setHeader("Total Expenses value").setSortable(true);
-        grid.addColumn(new ComponentRenderer<>(persona -> {
-            final var netBalance = personService.calculateNetBalance(persona);
-            return createBadge(netBalance);
-        })).setHeader("Balance Status").setSortable(true);
-
-
+        grid.addColumn(Category::getName).setHeader("Name").setSortable(true);
+        grid.addColumn(Category::getDescription).setHeader("Description").setSortable(true);
         grid.getColumns().forEach(col -> col.setAutoWidth(true));
-        grid.setItems(query -> personService.list(
+
+        grid.setItems(query -> categoryService.list(
                         PageRequest.of(query.getPage(), query.getPageSize(), VaadinSpringDataHelpers.toSpringDataSort(query)))
                 .stream());
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
 
         // when a row is selected or deselected, populate form
         grid.asSingleSelect().addValueChangeListener(event -> {
-            if (event.getValue() != null) {
-                UI.getCurrent().navigate(String.format(PERSON_EDIT_ROUTE_TEMPLATE, event.getValue().getId()));
-            } else {
+            if (event.getValue() != null) UI.getCurrent().navigate(String.format(CATEGORY_EDIT_ROUTE_TEMPLATE, event.getValue().getId()));
+            else {
                 clearForm();
-                UI.getCurrent().navigate(PeopleView.class);
+                UI.getCurrent().navigate(CategoriesView.class);
             }
         });
 
         // Configure Form
-        binder = new BeanValidationBinder<>(Person.class);
+        binder = new BeanValidationBinder<>(Category.class);
 
         // Bind fields. This is where you'd define e.g. validation rules
 
@@ -113,19 +96,19 @@ public class PeopleView extends Div implements BeforeEnterObserver {
 
         save.addClickListener(e -> {
             try {
-                if (this.person == null) {
-                    this.person = new Person();
+                if (this.category == null) {
+                    this.category = new Category();
                 }
-                binder.writeBean(this.person);
-                personService.update(this.person);
+                binder.writeBean(this.category);
+                categoryService.update(this.category);
                 clearForm();
                 refreshGrid();
                 Notification.show("Data updated");
-                UI.getCurrent().navigate(PeopleView.class);
+                UI.getCurrent().navigate(CategoriesView.class);
             } catch (ObjectOptimisticLockingFailureException exception) {
                 Notification n = Notification.show(
                         "Error updating the data. Somebody else has updated the record while you were making changes.");
-                n.setPosition(Position.MIDDLE);
+                n.setPosition(Notification.Position.MIDDLE);
                 n.addThemeVariants(NotificationVariant.LUMO_ERROR);
             } catch (ValidationException validationException) {
                 Notification.show("Failed to update the data. Check again that all values are valid");
@@ -134,16 +117,16 @@ public class PeopleView extends Div implements BeforeEnterObserver {
 
         delete.addClickListener(e -> {
             try {
-                if (this.person == null) throw new RuntimeException("The person is null!"); //TODO: create proper exception
-                personService.delete(this.person.getId());
+                if (this.category == null) throw new RuntimeException("Category is null!"); //TODO: create proper exception
+                categoryService.delete(this.category);
                 clearForm();
                 refreshGrid();
-                Notification.show("Data delete");
-                UI.getCurrent().navigate(PeopleView.class);
+                Notification.show("Data deleted");
+                UI.getCurrent().navigate(CategoriesView.class);
             } catch (ObjectOptimisticLockingFailureException exception) {
                 Notification n = Notification.show(
                         "Error updating the data. Somebody else has updated the record while you were making changes.");
-                n.setPosition(Position.MIDDLE);
+                n.setPosition(Notification.Position.MIDDLE);
                 n.addThemeVariants(NotificationVariant.LUMO_ERROR);
             }
         });
@@ -151,19 +134,19 @@ public class PeopleView extends Div implements BeforeEnterObserver {
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
-        Optional<Long> personId = event.getRouteParameters().get(PERSON_ID).map(Long::parseLong);
-        if (personId.isPresent()) {
-            Optional<Person> personFromBackend = personService.get(personId.get());
-            if (personFromBackend.isPresent()) {
-                populateForm(personFromBackend.get());
+        Optional<Long> categoryId = event.getRouteParameters().get(CATEGORY_ID).map(Long::parseLong);
+        if (categoryId.isPresent()) {
+            Optional<Category> categoryFromBackend = categoryService.findById(categoryId.get());
+            if (categoryFromBackend.isPresent()) {
+                populateForm(categoryFromBackend.get());
             } else {
                 Notification.show(
-                        String.format("The requested person was not found, ID = %s", personId.get()), 3000,
-                        Position.BOTTOM_START);
+                        String.format("The requested category was not found, ID = %s", categoryId.get()), 3000,
+                        Notification.Position.BOTTOM_START);
                 // when a row is selected but the data is no longer available,
                 // refresh grid
                 refreshGrid();
-                event.forwardTo(PeopleView.class);
+                event.forwardTo(CategoriesView.class);
             }
         }
     }
@@ -177,14 +160,9 @@ public class PeopleView extends Div implements BeforeEnterObserver {
         editorLayoutDiv.add(editorDiv);
 
         FormLayout formLayout = new FormLayout();
-        firstName = new TextField("First Name");
-        lastName = new TextField("Last Name");
-        email = new EmailField("Email");
-
-        // We set the maximum parallel columns to 1
-        formLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
-
-        formLayout.add(firstName, lastName, email);
+        name = new TextField("Name");
+        description = new TextArea("Description");
+        formLayout.add(name, description);
         editorDiv.add(formLayout);
         createButtonLayout(editorLayoutDiv);
 
@@ -217,24 +195,8 @@ public class PeopleView extends Div implements BeforeEnterObserver {
         populateForm(null);
     }
 
-    private void populateForm(Person value) {
-        this.person = value;
-        binder.readBean(this.person);
-
-    }
-
-    private Span createBadge(BigDecimal netBalance) {
-        Span badge = new Span();
-        if (netBalance.compareTo(BigDecimal.ZERO) < 0) {
-            badge.setText("Credit");
-            badge.getElement().getThemeList().add("badge success");
-        } else if (netBalance.compareTo(BigDecimal.ZERO) > 0) {
-            badge.setText("Debit");
-            badge.getElement().getThemeList().add("badge error");
-        } else {
-            badge.setText("Clear");
-            badge.getElement().getThemeList().add("badge contrast");
-        }
-        return badge;
+    private void populateForm(Category value) {
+        this.category = value;
+        binder.readBean(this.category);
     }
 }
