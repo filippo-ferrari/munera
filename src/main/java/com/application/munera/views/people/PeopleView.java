@@ -24,6 +24,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.ValidationException;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
@@ -74,7 +75,17 @@ public class PeopleView extends Div implements BeforeEnterObserver {
 
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
         grid.addHierarchyColumn(this::getNodeName).setHeader("Name");
-        grid.addColumn(this::getNodeType).setHeader("Type");
+        grid.addColumn(this::getNodeCost).setHeader("Total Expenses Value").setSortable(true);
+        grid.addColumn(new ComponentRenderer<>(persona -> {
+            if (persona instanceof Person) {
+                final var netBalance = personService.calculateNetBalance((Person) persona);
+                return createPersonBadge(netBalance);
+            }
+            else {
+                final var isResolved = ((Expense) persona).getIsResolved();
+                return createExpenseBadge(isResolved);
+            }
+        })).setHeader("Balance Status");
 
         List<Person> people = (List<Person>) personService.findAll();
 
@@ -155,7 +166,16 @@ public class PeopleView extends Div implements BeforeEnterObserver {
         if (node instanceof Person) {
             return ((Person) node).getFirstName() + " " + ((Person) node).getLastName();
         } else if (node instanceof Expense) {
-            return ((Expense) node).getName() + " - $" + ((Expense) node).getCost();
+            return ((Expense) node).getName();
+        }
+        return "";
+    }
+
+    private String getNodeCost(Object node) {
+        if (node instanceof Person) {
+            return this.personService.calculateNetBalance((Person) node).toString() + " €";
+        } else if (node instanceof Expense) {
+            return ((Expense) node).getCost().toString() + " €";
         }
         return "";
     }
@@ -168,6 +188,7 @@ public class PeopleView extends Div implements BeforeEnterObserver {
         }
         return "";
     }
+
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
         Optional<Long> personId = event.getRouteParameters().get(PERSON_ID).map(Long::parseLong);
@@ -242,7 +263,7 @@ public class PeopleView extends Div implements BeforeEnterObserver {
 
     }
 
-    private Span createBadge(BigDecimal netBalance) {
+    private Span createPersonBadge(BigDecimal netBalance) {
         Span badge = new Span();
         if (netBalance.compareTo(BigDecimal.ZERO) < 0) {
             badge.setText("Credit");
@@ -253,6 +274,18 @@ public class PeopleView extends Div implements BeforeEnterObserver {
         } else {
             badge.setText("Clear");
             badge.getElement().getThemeList().add("badge contrast");
+        }
+        return badge;
+    }
+
+    private Span createExpenseBadge(Boolean isExpenseResolved) {
+        Span badge = new Span();
+        if (Boolean.TRUE.equals(isExpenseResolved)) {
+            badge.setText("Resolved");
+            badge.getElement().getThemeList().add("badge success");
+        } else  {
+            badge.setText("To be Resolved");
+            badge.getElement().getThemeList().add("badge error");
         }
         return badge;
     }
