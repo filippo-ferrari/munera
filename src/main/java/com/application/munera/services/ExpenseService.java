@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @Service
 public class ExpenseService {
@@ -40,6 +41,13 @@ public class ExpenseService {
     public Collection<Expense> findUnpaidCreditByUser(final Person person) {
         return repository.findUnpaidCreditorsExpensesByPersonId(person.getId());
     }
+
+    public List<Expense> findExpenseByUser(final Person person) {
+        final var credits = this.findCreditByUser(person);
+        final var debits = this.findDebtByUser(person);
+        return Stream.concat(credits.stream(), debits.stream()).toList();
+    }
+
     public List<Expense> findAll() {return repository.findAll();}
 
     public void update(Expense entity) {

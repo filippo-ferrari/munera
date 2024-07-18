@@ -1,6 +1,8 @@
 package com.application.munera.views.people;
 
+import com.application.munera.data.Expense;
 import com.application.munera.data.Person;
+import com.application.munera.services.ExpenseService;
 import com.application.munera.services.PersonService;
 import com.application.munera.views.MainLayout;
 import com.vaadin.flow.component.UI;
@@ -8,7 +10,6 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
@@ -20,19 +21,18 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.ValidationException;
-import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 import jakarta.annotation.security.PermitAll;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 @PageTitle("People")
@@ -44,7 +44,7 @@ public class PeopleView extends Div implements BeforeEnterObserver {
     private static final String PERSON_ID = "personID";
     private static final String PERSON_EDIT_ROUTE_TEMPLATE = "people/%s/edit";
 
-    private final Grid<Person> grid = new Grid<>(Person.class, false);
+    private final TreeGrid<Object> grid = new TreeGrid<>();
 
     private final Button cancel = new Button("Cancel");
     private final Button save = new Button("Save");
@@ -54,12 +54,14 @@ public class PeopleView extends Div implements BeforeEnterObserver {
 
     private Person person;
     private final PersonService personService;
+    private final ExpenseService expenseService;
     private TextField firstName;
     private TextField lastName;
     private EmailField email;
 
-    public PeopleView(PersonService personService) {
+    public PeopleView(PersonService personService, ExpenseService expenseService) {
         this.personService = personService;
+        this.expenseService = expenseService;
         addClassNames("expenses-view");
 
         // Create UI
@@ -70,32 +72,32 @@ public class PeopleView extends Div implements BeforeEnterObserver {
 
         add(splitLayout);
 
-        // Configure Grid
-        grid.addColumn(Person::getFirstName).setHeader("First Name").setSortable(true);
-        grid.addColumn(Person::getLastName).setHeader("Last Name").setSortable(true);
-        grid.addColumn(Person::getEmail).setHeader("Email").setSortable(true);
-        grid.addColumn(personService::calculateDebt).setHeader("Debt").setSortable(true);
-        grid.addColumn(personService::calculateCredit).setHeader("Credit").setSortable(true);
-        grid.addColumn(personService::calculateNetBalance).setHeader("Total Expenses value").setSortable(true);
-        grid.addColumn(new ComponentRenderer<>(persona -> {
-            final var netBalance = personService.calculateNetBalance(persona);
-            return createBadge(netBalance);
-        })).setHeader("Balance Status").setSortable(true);
-
-
-        grid.getColumns().forEach(col -> col.setAutoWidth(true));
-        grid.setItems(query -> personService.list(
-                        PageRequest.of(query.getPage(), query.getPageSize(), VaadinSpringDataHelpers.toSpringDataSort(query)))
-                .stream());
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
+        grid.addHierarchyColumn(this::getNodeName).setHeader("Name");
+        grid.addColumn(this::getNodeType).setHeader("Type");
+
+        List<Person> people = (List<Person>) personService.findAll();
+
+        for (Person person : people) {
+            // Add the person as a root item
+            grid.getTreeData().addItem(null, person);
+
+            // Fetch expenses for the current person
+            List<Expense> expenses =  expenseService.findExpenseByUser(person);
+
+            // Add each expense as a child item under the person
+            for (Expense expense : expenses) {
+                grid.getTreeData().addItem(person, expense);
+            }
+        }
+
 
         // when a row is selected or deselected, populate form
         grid.asSingleSelect().addValueChangeListener(event -> {
-            if (event.getValue() != null) {
-                UI.getCurrent().navigate(String.format(PERSON_EDIT_ROUTE_TEMPLATE, event.getValue().getId()));
-            } else {
-                clearForm();
-                UI.getCurrent().navigate(PeopleView.class);
+            Object selectedItem = event.getValue();
+            if (selectedItem instanceof Person) {
+                Person selectedPerson = (Person) selectedItem;
+                UI.getCurrent().navigate(String.format("people/%d/edit", selectedPerson.getId()));
             }
         });
 
@@ -149,6 +151,23 @@ public class PeopleView extends Div implements BeforeEnterObserver {
         });
     }
 
+    private String getNodeName(Object node) {
+        if (node instanceof Person) {
+            return ((Person) node).getFirstName() + " " + ((Person) node).getLastName();
+        } else if (node instanceof Expense) {
+            return ((Expense) node).getName() + " - $" + ((Expense) node).getCost();
+        }
+        return "";
+    }
+
+    private String getNodeType(Object node) {
+        if (node instanceof Person) {
+            return "Person";
+        } else if (node instanceof Expense) {
+            return "Expense";
+        }
+        return "";
+    }
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
         Optional<Long> personId = event.getRouteParameters().get(PERSON_ID).map(Long::parseLong);
