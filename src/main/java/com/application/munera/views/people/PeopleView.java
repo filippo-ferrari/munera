@@ -77,14 +77,8 @@ public class PeopleView extends Div implements BeforeEnterObserver {
         grid.addHierarchyColumn(this::getNodeName).setHeader("Name");
         grid.addColumn(this::getNodeCost).setHeader("Total Expenses Value").setSortable(true);
         grid.addColumn(new ComponentRenderer<>(persona -> {
-            if (persona instanceof Person) {
-                final var netBalance = personService.calculateNetBalance((Person) persona);
-                return createPersonBadge(netBalance);
-            }
-            else {
-                final var isResolved = ((Expense) persona).getIsResolved();
-                return createExpenseBadge(isResolved);
-            }
+            if (persona instanceof Person) return createPersonBadge(personService.calculateNetBalance((Person) persona));
+            else return createExpenseBadge(((Expense) persona).getIsResolved());
         })).setHeader("Balance Status");
 
         List<Person> people = (List<Person>) personService.findAll();
@@ -97,19 +91,13 @@ public class PeopleView extends Div implements BeforeEnterObserver {
             List<Expense> expenses =  expenseService.findExpenseByUser(person);
 
             // Add each expense as a child item under the person
-            for (Expense expense : expenses) {
-                grid.getTreeData().addItem(person, expense);
-            }
+            for (Expense expense : expenses) grid.getTreeData().addItem(person, expense);
         }
-
 
         // when a row is selected or deselected, populate form
         grid.asSingleSelect().addValueChangeListener(event -> {
             Object selectedItem = event.getValue();
-            if (selectedItem instanceof Person) {
-                Person selectedPerson = (Person) selectedItem;
-                UI.getCurrent().navigate(String.format("people/%d/edit", selectedPerson.getId()));
-            }
+            if (selectedItem instanceof Person selectedPerson) UI.getCurrent().navigate(String.format(PERSON_EDIT_ROUTE_TEMPLATE, selectedPerson.getId()));
         });
 
         // Configure Form
@@ -163,29 +151,14 @@ public class PeopleView extends Div implements BeforeEnterObserver {
     }
 
     private String getNodeName(Object node) {
-        if (node instanceof Person) {
-            return ((Person) node).getFirstName() + " " + ((Person) node).getLastName();
-        } else if (node instanceof Expense) {
-            return ((Expense) node).getName();
-        }
+        if (node instanceof Person) return ((Person) node).getFirstName() + " " + ((Person) node).getLastName();
+        else if (node instanceof Expense) return ((Expense) node).getName();
         return "";
     }
 
     private String getNodeCost(Object node) {
-        if (node instanceof Person) {
-            return this.personService.calculateNetBalance((Person) node).toString() + " €";
-        } else if (node instanceof Expense) {
-            return ((Expense) node).getCost().toString() + " €";
-        }
-        return "";
-    }
-
-    private String getNodeType(Object node) {
-        if (node instanceof Person) {
-            return "Person";
-        } else if (node instanceof Expense) {
-            return "Expense";
-        }
+        if (node instanceof Person) return this.personService.calculateNetBalance((Person) node).toString() + " €";
+        else if (node instanceof Expense) return ((Expense) node).getCost().toString() + " €";
         return "";
     }
 
@@ -194,9 +167,8 @@ public class PeopleView extends Div implements BeforeEnterObserver {
         Optional<Long> personId = event.getRouteParameters().get(PERSON_ID).map(Long::parseLong);
         if (personId.isPresent()) {
             Optional<Person> personFromBackend = personService.get(personId.get());
-            if (personFromBackend.isPresent()) {
-                populateForm(personFromBackend.get());
-            } else {
+            if (personFromBackend.isPresent()) populateForm(personFromBackend.get());
+            else {
                 Notification.show(
                         String.format("The requested person was not found, ID = %s", personId.get()), 3000,
                         Position.BOTTOM_START);
