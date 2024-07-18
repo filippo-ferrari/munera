@@ -83,16 +83,7 @@ public class PeopleView extends Div implements BeforeEnterObserver {
 
         List<Person> people = (List<Person>) personService.findAll();
 
-        for (Person person : people) {
-            // Add the person as a root item
-            grid.getTreeData().addItem(null, person);
-
-            // Fetch expenses for the current person
-            List<Expense> expenses =  expenseService.findExpenseByUser(person);
-
-            // Add each expense as a child item under the person
-            for (Expense expense : expenses) grid.getTreeData().addItem(person, expense);
-        }
+        this.setGridData(people);
 
         // when a row is selected or deselected, populate form
         grid.asSingleSelect().addValueChangeListener(event -> {
@@ -260,5 +251,18 @@ public class PeopleView extends Div implements BeforeEnterObserver {
             badge.getElement().getThemeList().add("badge error");
         }
         return badge;
+    }
+
+    public void setGridData(List<Person> people) {
+        for (Person person : people) {
+            // Add the person as a root item
+            grid.getTreeData().addItem(null, person);
+
+            // Fetch expenses for the current person
+            List<Expense> expenses =  expenseService.findExpenseByUser(person);
+
+            // Add each expense as a child item under the person
+            for (Expense expense : expenses) grid.getTreeData().addItem(person, expense);
+        }
     }
 }
