@@ -61,15 +61,16 @@ Munera is a companion for managing expenses efficiently and effortlessly, whethe
 
 6. **Misc**
     - PeriodUnit and Interval need to be implemented with a scheduler
-    - Graphs could use more work
+    - Graphs could use more work, maybe some filtering?
     - More validation in form
-    - Login page
+    - ~~Login page~~
+    - email setup
     - Migration tool for DB changes in prod
 
 ## Known Issues
 
+- PeopleVIew dosent refresh after an edit operation anymore
 - Form still needs more validation when empty, some entities can be created with all null values, even the ones that have constraints throw SQL errors, they need to be gracefully handled.
 - Errors need to be caught and handled
 - Graphs still need ~~a lot of~~ **some** improvements
-- PeriodUnit and Interval need to be implemented with a scheduler 
 - ~~ExpenseView dosent refresh after an edit operation anymore~~
