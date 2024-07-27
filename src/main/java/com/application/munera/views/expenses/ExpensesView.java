@@ -108,9 +108,8 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
 
         // when a row is selected or deselected, populate form
         grid.asSingleSelect().addValueChangeListener(event -> {
-            if (event.getValue() != null) {
-                UI.getCurrent().navigate(String.format(EXPENSE_EDIT_ROUTE_TEMPLATE, event.getValue().getId()));
-            } else {
+            if (event.getValue() != null) UI.getCurrent().navigate(String.format(EXPENSE_EDIT_ROUTE_TEMPLATE, event.getValue().getId()));
+            else {
                 clearForm();
                 UI.getCurrent().navigate(ExpensesView.class);
             }
@@ -164,9 +163,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
 
         save.addClickListener(e -> {
             try {
-                if (this.expense == null) {
-                    this.expense = new Expense();
-                }
+                if (this.expense == null) this.expense = new Expense();
                 binder.writeBean(this.expense);
                 expenseService.update(this.expense);
                 clearForm();

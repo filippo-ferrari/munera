@@ -105,9 +105,7 @@ public class PeopleView extends Div implements BeforeEnterObserver {
 
         save.addClickListener(e -> {
             try {
-                if (this.person == null) {
-                    this.person = new Person();
-                }
+                if (this.person == null) this.person = new Person();
                 binder.writeBean(this.person);
                 personService.update(this.person);
                 clearForm();
