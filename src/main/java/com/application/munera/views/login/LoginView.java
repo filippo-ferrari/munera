@@ -36,9 +36,7 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
         login.setI18n(i18n);
 
         // Add a listener for the Forgot password button
-        login.addForgotPasswordListener(event -> {
-            Notification.show("Tough shit, feature aint ready yet!", 3000, Notification.Position.BOTTOM_CENTER);
-        });
+        login.addForgotPasswordListener(event -> Notification.show("Tough shit, feature aint ready yet!", 3000, Notification.Position.BOTTOM_CENTER));
 
         add(new H1("Munera"), new H2("An expense tracking application"), login);
     }

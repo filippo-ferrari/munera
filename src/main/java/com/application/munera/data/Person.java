@@ -54,10 +54,9 @@ public class Person extends AbstractEntity {
         if (obj == this) {
             return true;
         }
-        if (!(obj instanceof Person)) {
+        if (!(obj instanceof Person other)) {
             return false;
         }
-        Person other = (Person) obj;
         return Objects.equals(firstName, other.firstName) &&
                 Objects.equals(lastName, other.lastName) &&
                 Objects.equals(email, other.email);

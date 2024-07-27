@@ -146,7 +146,7 @@ public class PeopleView extends Div implements BeforeEnterObserver {
     }
 
     private String getNodeCost(Object node) {
-        if (node instanceof Person) return this.personService.calculateNetBalance((Person) node).toString() + " €";
+        if (node instanceof Person) return this.personService.calculateNetBalance((Person) node) + " €";
         else if (node instanceof Expense) return ((Expense) node).getCost().toString() + " €";
         return "";
     }

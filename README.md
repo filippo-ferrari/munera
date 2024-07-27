@@ -55,7 +55,7 @@ Munera is a companion for managing expenses efficiently and effortlessly, whethe
     - If possible, the calculations should take into account the different currencies
 
 5. **Events**
-    - ~~Options to create events in which to put expenses (vacations, congress, etc)~~
+    - ~~Options to create events in which to put expenses (vacations, congress, etc.)~~
     - ~~Each event has a number of people connected to it, expenses can be added to these people~~
     - A reports tells which people need to give/take money to which people in order to be even
 
@@ -69,8 +69,8 @@ Munera is a companion for managing expenses efficiently and effortlessly, whethe
 
 ## Known Issues
 
-- PeopleVIew dosent refresh after an edit operation anymore
+- PeopleVIew doesn't refresh after an edit operation anymore
 - Form still needs more validation when empty, some entities can be created with all null values, even the ones that have constraints throw SQL errors, they need to be gracefully handled.
 - Errors need to be caught and handled
 - Graphs still need ~~a lot of~~ **some** improvements
-- ~~ExpenseView dosent refresh after an edit operation anymore~~
+- ~~ExpenseView doesn't refresh after an edit operation anymore~~
