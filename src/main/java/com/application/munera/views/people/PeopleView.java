@@ -78,7 +78,7 @@ public class PeopleView extends Div implements BeforeEnterObserver {
         grid.addColumn(this::getNodeCost).setHeader("Total Expenses Value").setSortable(true);
         grid.addColumn(new ComponentRenderer<>(persona -> {
             if (persona instanceof Person) return createPersonBadge(personService.calculateNetBalance((Person) persona));
-            else return createExpenseBadge(((Expense) persona).getIsResolved());
+            else return createExpenseBadge(((Expense) persona).getIsPaid());
         })).setHeader("Balance Status");
 
         List<Person> people = (List<Person>) personService.findAll();

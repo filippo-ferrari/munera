@@ -21,12 +21,12 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long>, JpaSpec
     @Query("SELECT e FROM Expense e WHERE YEAR(e.date) = :year")
     List<Expense> findAllByYear(@Param("year") int year);
 
-    @Query("SELECT e FROM Expense e JOIN e.creditors c WHERE c.id = :personId AND e.isResolved = false")
+    @Query("SELECT e FROM Expense e JOIN e.creditors c WHERE c.id = :personId AND e.isPaid = false")
     Set<Expense> findUnpaidCreditorsExpensesByPersonId(@Param("personId") Long personId);
 
-    @Query("SELECT e FROM Expense e JOIN e.debtors d WHERE d.id = :personId AND e.isResolved = false")
+    @Query("SELECT e FROM Expense e JOIN e.debtors d WHERE d.id = :personId AND e.isPaid = false")
     Set<Expense> findUnpaidDebtorsExpensesByPersonId(@Param("personId") Long personId);
 
-    boolean existsByIdAndIsResolvedTrue(Long id);
+    boolean existsByIdAndIsPaidTrue(Long id);
 
     List<Expense> findAllByOrderByDateDesc();}

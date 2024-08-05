@@ -69,8 +69,8 @@ public class Expense extends AbstractEntity {
     private LocalDateTime paymentDate;
 
     /**
-     * the isResolved field starts as always false
+     * the isPaid field starts as always false
      */
-    @Column(name = "isResolved", nullable = false)
-    private Boolean isResolved = false;
+    @Column(name = "isPaid", nullable = false)
+    private Boolean isPaid = false;
 }

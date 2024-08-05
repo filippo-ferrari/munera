@@ -67,7 +67,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
     private ComboBox<Category> category;
     private TextArea description;
     private Checkbox isPeriodic;
-    private Checkbox isResolved;
+    private Checkbox isPaid;
     private ComboBox<PeriodUnit> periodUnit;
     private TextField periodInterval;
     private DatePicker date;
@@ -123,7 +123,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
 
         // We set initial value of isPeriodic to true and show period fields
         isPeriodic.setValue(false);
-        isResolved.setValue(false);
+        isPaid.setValue(false);
         periodUnit.setVisible(false);
         periodInterval.setVisible(false);
 
@@ -247,8 +247,8 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         // Horizontal layout for checkboxes
         HorizontalLayout checkboxLayout = new HorizontalLayout();
         isPeriodic = new Checkbox("Is Periodic");
-        isResolved = new Checkbox("Paid");
-        checkboxLayout.add(isPeriodic, isResolved);
+        isPaid = new Checkbox("Paid");
+        checkboxLayout.add(isPeriodic, isPaid);
 
         formLayout.add(name, cost, category, description, checkboxLayout, periodUnit, periodInterval, date, creditors, debtors, event);
         editorDiv.add(formLayout);

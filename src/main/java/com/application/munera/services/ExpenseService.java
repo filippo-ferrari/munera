@@ -52,7 +52,7 @@ public class ExpenseService {
     public List<Expense> findAll() {return repository.findAll();}
 
     public void update(Expense entity) {
-        if (Boolean.TRUE.equals(entity.getIsResolved())) entity.setPaymentDate(LocalDateTime.now());
+        if (Boolean.TRUE.equals(entity.getIsPaid())) entity.setPaymentDate(LocalDateTime.now());
         repository.save(entity);
     }
 
@@ -77,7 +77,7 @@ public class ExpenseService {
     }
 
     public boolean isExpenseResolved(final Expense expense) {
-        return this.repository.existsByIdAndIsResolvedTrue(expense.getId());
+        return this.repository.existsByIdAndIsPaidTrue(expense.getId());
     }
 
     public List<Expense> findAllOrderByDateDescending() {
