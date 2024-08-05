@@ -27,22 +27,47 @@ public class ExpenseService {
         return repository.findById(id);
     }
 
+    /**
+     * finds all expenses tagged as debit given a user
+     * @param person the user of the expenses
+     * @return the collections of expenses found
+     */
     public Collection<Expense> findDebtByUser(final Person person) {
         return repository.findDebtorsExpensesByPersonId(person.getId());
     }
 
+    /**
+     * finds all expenses tagged as credit given a user
+     * @param person the user of the expenses
+     * @return the collections of expenses found
+     */
     public Collection<Expense> findCreditByUser(final Person person) {
         return repository.findCreditorsExpensesByPersonId(person.getId());
     }
 
+    /**
+     * finds all expenses tagged as debit and unpaid given a user
+     * @param person the user of the expenses
+     * @return the collections of expenses found
+     */
     public Collection<Expense> findUnpaidDebtByUser(final Person person) {
         return repository.findUnpaidDebtorsExpensesByPersonId(person.getId());
     }
 
+    /**
+     * finds all expenses tagged as credit and unpaid given a user
+     * @param person the user of the expenses
+     * @return the collections of expenses found
+     */
     public Collection<Expense> findUnpaidCreditByUser(final Person person) {
         return repository.findUnpaidCreditorsExpensesByPersonId(person.getId());
     }
 
+    /**
+     * finds all expenses related to a user
+     * @param person the user of the expenses
+     * @return the collections of expenses found
+     */
     public List<Expense> findExpenseByUser(final Person person) {
         final var credits = this.findCreditByUser(person);
         final var debits = this.findDebtByUser(person);
@@ -51,11 +76,19 @@ public class ExpenseService {
 
     public List<Expense> findAll() {return repository.findAll();}
 
+    /**
+     * updates an expense
+     * @param entity the expense to update
+     */
     public void update(Expense entity) {
         if (Boolean.TRUE.equals(entity.getIsPaid())) entity.setPaymentDate(LocalDateTime.now());
         repository.save(entity);
     }
 
+    /**
+     * deletes an expense given the ID
+     * @param id the id of the expense to delete
+     */
     public void delete(Long id) {
         repository.deleteById(id);
     }
@@ -76,12 +109,20 @@ public class ExpenseService {
         return this.repository.findAllByYear(year);
     }
 
-    public boolean isExpenseResolved(final Expense expense) {
+    /**
+     * checks if an expense has been paid
+     * @param expense the expense to check
+     * @return true if the expense has been paid, false otherwise
+     */
+    public boolean isExpensePaid(final Expense expense) {
         return this.repository.existsByIdAndIsPaidTrue(expense.getId());
     }
 
+    /**
+     * fetches all expenses ordered by date descending
+     * @return the list of expenses found
+     */
     public List<Expense> findAllOrderByDateDescending() {
         return this.repository.findAllByOrderByDateDesc();
     }
-
 }

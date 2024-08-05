@@ -51,14 +51,29 @@ public class PersonService {
         return (int) this.personRepository.count();
     }
 
+    /**
+     * calculates the debt a certain person has
+     * @param person the person of which you want to know the debt
+     * @return the debt that a certain person has
+     */
     public BigDecimal calculateDebt(final Person person){
         return this.expenseService.findDebtByUser(person).stream().map(Expense::getCost).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
+    /**
+     * calculates the credit a certain person has
+     * @param person the person of which you want to know the credit
+     * @return the credit that a certain person has
+     */
     public BigDecimal calculateCredit(final Person person) {
         return this.expenseService.findCreditByUser(person).stream().map(Expense::getCost).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
+    /**
+     * calculates the balance of a person using the money owed or paid off to that person
+     * @param person the person of which you want to know the balance
+     * @return the amount of money owed or paid off to a certain person
+     */
     public BigDecimal calculateNetBalance(final Person person) {
         final var credit = this.expenseService.findUnpaidCreditByUser(person).stream().map(Expense::getCost).reduce(BigDecimal.ZERO, BigDecimal::add);
         final var debit = this.expenseService.findUnpaidDebtByUser(person).stream().map(Expense::getCost).reduce(BigDecimal.ZERO, BigDecimal::add);
