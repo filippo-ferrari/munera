@@ -98,7 +98,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         grid.addColumn(Expense::getDate).setHeader("Date").setSortable(true).setSortProperty("date");
         // grid.addColumn(expenseEvent -> expenseEvent.getEvent().getName()).setHeader("Event").setSortable(true);
 
-        grid.addColumn(new ComponentRenderer<>(expense1 -> createBadge(expenseService.isExpenseResolved(expense1)))).setHeader("Status").setSortable(true);
+        grid.addColumn(new ComponentRenderer<>(expense1 -> createBadge(expenseService.isExpensePaid(expense1)))).setHeader("Status").setSortable(true);
         grid.getColumns().forEach(col -> col.setAutoWidth(true));
 
         grid.setItems(this.expenseService.findAllOrderByDateDescending());
@@ -292,13 +292,13 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         periodInterval.setVisible(isPeriodicChecked);
     }
 
-    private Span createBadge(Boolean isExpenseResolved) {
+    private Span createBadge(Boolean isExpensePaid) {
         Span badge = new Span();
-        if (Boolean.TRUE.equals(isExpenseResolved)) {
-            badge.setText("Resolved");
+        if (Boolean.TRUE.equals(isExpensePaid)) {
+            badge.setText("Paid");
             badge.getElement().getThemeList().add("badge success");
         } else  {
-            badge.setText("To be Resolved");
+            badge.setText("Owed");
             badge.getElement().getThemeList().add("badge error");
         }
         return badge;
