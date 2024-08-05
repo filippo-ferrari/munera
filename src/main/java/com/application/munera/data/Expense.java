@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @Entity
@@ -64,8 +65,11 @@ public class Expense extends AbstractEntity {
     @Column(name = "Date", nullable = false, columnDefinition = "DATE DEFAULT CURRENT_DATE")
     private LocalDate date;
 
+    @Column(name = "PaymentDate")
+    private LocalDateTime paymentDate;
+
     /**
-     * the isResolved field starts as always false, cause at creation an expense cant be already be resolved
+     * the isResolved field starts as always false
      */
     @Column(name = "isResolved", nullable = false)
     private Boolean isResolved = false;

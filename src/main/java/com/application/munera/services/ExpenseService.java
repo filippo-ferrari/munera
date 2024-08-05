@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -51,6 +52,7 @@ public class ExpenseService {
     public List<Expense> findAll() {return repository.findAll();}
 
     public void update(Expense entity) {
+        if (Boolean.TRUE.equals(entity.getIsResolved())) entity.setPaymentDate(LocalDateTime.now());
         repository.save(entity);
     }
 
