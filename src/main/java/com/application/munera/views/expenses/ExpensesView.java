@@ -103,7 +103,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
 
         grid.setItems(this.expenseService.findAllOrderByDateDescending());
         grid.setPaginatorSize(5);
-        grid.setPageSize(25); //  setting page size
+        grid.setPageSize(22); //  setting page size
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
 
         // when a row is selected or deselected, populate form
