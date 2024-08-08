@@ -239,28 +239,28 @@ public class PeopleView extends Div implements BeforeEnterObserver {
         return badge;
     }
 
-    private Span createExpenseBadge(Boolean isExpenseResolved) {
+    private Span createExpenseBadge(Boolean isExpensePaid) {
         Span badge = new Span();
-        if (Boolean.TRUE.equals(isExpenseResolved)) {
-            badge.setText("Resolved");
+        if (Boolean.TRUE.equals(isExpensePaid)) {
+            badge.setText("Paid");
             badge.getElement().getThemeList().add("badge success");
         } else  {
-            badge.setText("To be Resolved");
+            badge.setText("Owed");
             badge.getElement().getThemeList().add("badge error");
         }
         return badge;
     }
 
     public void setGridData(List<Person> people) {
-        for (Person person : people) {
+        for (Person user : people) {
             // Add the person as a root item
-            grid.getTreeData().addItem(null, person);
+            grid.getTreeData().addItem(null, user);
 
             // Fetch expenses for the current person
-            List<Expense> expenses =  expenseService.findExpenseByUser(person);
+            List<Expense> expenses =  expenseService.findExpenseByUser(user);
 
             // Add each expense as a child item under the person
-            for (Expense expense : expenses) grid.getTreeData().addItem(person, expense);
+            for (Expense expense : expenses) grid.getTreeData().addItem(user, expense);
         }
     }
 }
