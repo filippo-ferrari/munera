@@ -1,5 +1,5 @@
-# Use a Maven or Gradle image to build the JAR
-FROM maven:3.8.5-openjdk-21-slim AS build
+# Use a Maven image with OpenJDK 22 to build the JAR
+FROM maven:3.9.4-openjdk-22 AS build
 
 # Set the working directory
 WORKDIR /app
@@ -10,8 +10,8 @@ COPY . .
 # Build the JAR file
 RUN mvn clean package -DskipTests
 
-# Use a lightweight image to run the JAR
-FROM openjdk:21-jdk-slim
+# Use a lightweight image with OpenJDK 22 to run the JAR
+FROM openjdk:22-jdk-slim
 
 # Set the working directory
 WORKDIR /app
@@ -24,4 +24,3 @@ EXPOSE 8080
 
 # Run the JAR file
 CMD ["java", "-jar", "/app/munera-1.0-SNAPSHOT.jar"]
-
