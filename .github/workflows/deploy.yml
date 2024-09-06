@@ -25,22 +25,16 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_KEY }}
 
-      - name: Copy Docker files to server
+      - name: Deploy Docker Compose and Dockerfile
         run: |
-          scp -o StrictHostKeyChecking=no docker-compose.yml Dockerfile ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/effe/munera/
+          scp -o StrictHostKeyChecking=no docker-compose.yml Dockerfile ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/${{ secrets.SSH_USER }}/munera/
 
-      - name: Deploy Docker containers
+      - name: Deploy Docker image and run containers
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-            cd /home/effe/munera
-
-            # Stop and remove existing containers for vaadin-app only
-            docker-compose stop vaadin-app || true
-            docker-compose rm -f vaadin-app || true
-
-            # Rebuild and restart containers using docker-compose
+            cd /home/${{ secrets.SSH_USER }}/munera
+            docker-compose down --remove-orphans || true
             docker-compose up -d --build
-
           EOF
         env:
           DB_ADDRESS: ${{ secrets.DB_ADDRESS }}

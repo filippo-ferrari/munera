@@ -1,19 +1,17 @@
-# Use a Maven image with OpenJDK 22 to build the JAR
+# Use a Maven image to build the JAR
 FROM maven:3.9.4-eclipse-temurin-21-alpine AS build
-
-# Install Node.js (needed for Vaadin frontend tooling)
-RUN apk add --no-cache nodejs npm
 
 # Set the working directory
 WORKDIR /app
 
-# Copy the source code into the container
-COPY . .
+# Copy the pom.xml and the source code
+COPY pom.xml ./
+COPY src ./src
 
-# Build the JAR file
+# Package the application
 RUN mvn clean package -DskipTests
 
-# Use a lightweight image with OpenJDK 22 to run the JAR
+# Use an OpenJDK image to run the JAR
 FROM openjdk:22-jdk-slim
 
 # Set the working directory
