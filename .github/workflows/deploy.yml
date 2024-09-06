@@ -25,18 +25,22 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_KEY }}
 
-      - name: Deploy Docker image
+      - name: Copy files to server
+        run: |
+          scp -o StrictHostKeyChecking=no docker-compose.yml Dockerfile ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/${{ secrets.SSH_USER }}/munera/
+          scp -o StrictHostKeyChecking=no target/munera-1.0-SNAPSHOT.jar ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/${{ secrets.SSH_USER }}/munera/
+
+      - name: Deploy using Docker Compose
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-            docker pull vaadin-app || true
+            cd /home/${{ secrets.SSH_USER }}/munera
+          
+            # Stop and remove only the specific application container
             docker stop vaadin-app || true
             docker rm vaadin-app || true
-            docker run -d --name vaadin-app -p 8080:8080 \
-              -e DB_ADDRESS=${DB_ADDRESS} \
-              -e DB_USER=${DB_USER} \
-              -e DB_PASSWORD=${DB_PASSWORD} \
-              -e DB_NAME=${DB_NAME} \
-              vaadin-app
+
+            # Build and start the containers (including the database container)
+            docker-compose up -d --build
           EOF
         env:
           DB_ADDRESS: ${{ secrets.DB_ADDRESS }}
