@@ -5,7 +5,6 @@
 .project
 .classpath
 .env
-application.properties
 
 *.iml
 .DS_Store
