@@ -1,43 +1,34 @@
-name: Deploy to Debian Server
+name: Deploy Vaadin App
 
 on:
   push:
     branches:
-      - main
+      - main  # Adjust this to your deployment branch
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout the code
-        uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+      - name: Build JAR
+        run: ./mvnw clean package -DskipTests
 
-      - name: Build Docker image
+      - name: Upload JAR to server
+        run: scp -i ${{ secrets.SSH_KEY }} target/munera-1.0-SNAPSHOT.jar ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/${{ secrets.SSH_USER }}/munera
+
+      - name: Upload Dockerfile to server
+        run: scp -i ${{ secrets.SSH_KEY }} Dockerfile ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/${{ secrets.SSH_USER }}/munera
+
+      - name: Upload docker-compose.yml to server
+        run: scp -i ${{ secrets.SSH_KEY }} docker-compose.yml ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/${{ secrets.SSH_USER }}/munera
+
+      - name: Deploy on server
         run: |
-          docker build -t vaadin-app .
-
-      - name: Set up SSH
-        uses: webfactory/ssh-agent@v0.5.3
-        with:
-          ssh-private-key: ${{ secrets.SSH_KEY }}
-
-      - name: Deploy Docker Compose and Dockerfile
-        run: |
-          scp -o StrictHostKeyChecking=no docker-compose.yml Dockerfile ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/${{ secrets.SSH_USER }}/munera/
-
-      - name: Deploy Docker image and run containers
-        run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+          ssh -i ${{ secrets.SSH_KEY }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
             cd /home/${{ secrets.SSH_USER }}/munera
-            docker-compose down --remove-orphans || true
-            docker-compose up -d --build
+            docker-compose down
+            docker-compose up --build -d
           EOF
-        env:
-          DB_ADDRESS: ${{ secrets.DB_ADDRESS }}
-          DB_USER: ${{ secrets.DB_USER }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          DB_NAME: ${{ secrets.DB_NAME }}
