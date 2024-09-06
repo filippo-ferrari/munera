@@ -67,6 +67,11 @@ Munera is a companion for managing expenses efficiently and effortlessly, whethe
     - email setup
     - Migration tool for DB changes in prod
 
+7. **Deployment**
+    - Improve the Dockerfile and docker-compose.yml
+    - Improve the deploy.yml
+    - Fix known bugs in the pipeline
+
 ## Known Issues
 
 - PeopleVIew doesn't refresh after an edit operation anymore
@@ -74,3 +79,4 @@ Munera is a companion for managing expenses efficiently and effortlessly, whethe
 - Errors need to be caught and handled
 - Graphs still need ~~a lot of~~ **some** improvements
 - ~~ExpenseView doesn't refresh after an edit operation anymore~~
+- Deployment must be improved
