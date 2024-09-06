@@ -3,7 +3,7 @@ name: Deploy Vaadin App
 on:
   push:
     branches:
-      - main  # Adjust this to your deployment branch
+      - main
 
 jobs:
   deploy:
@@ -20,12 +20,15 @@ jobs:
           distribution: 'temurin'
 
       - name: Build JAR
-        run: ./mvnw clean package -DskipTests  # Adjust this based on your build tool
+        run: ./mvnw clean package -DskipTests
 
       - name: Set up SSH key
         uses: webfactory/ssh-agent@v0.5.3
         with:
           ssh-private-key: ${{ secrets.SSH_KEY }}
+
+      - name: Clean deployment directory on server
+        run: ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} 'rm -rf /home/${{ secrets.SSH_USER }}/munera/*'
 
       - name: Upload JAR to server
         run: scp -o StrictHostKeyChecking=no target/munera-1.0-SNAPSHOT.jar ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/${{ secrets.SSH_USER }}/munera
@@ -36,11 +39,17 @@ jobs:
       - name: Upload docker-compose.yml to server
         run: scp -o StrictHostKeyChecking=no docker-compose.yml ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/${{ secrets.SSH_USER }}/munera
 
-      - name: Deploy on server - Change directory
-        run: ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} 'cd /home/${{ secrets.SSH_USER }}/munera'
-
-      - name: Deploy on server - Stop Docker containers
+      - name: Stop Docker containers on server
         run: ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} 'cd /home/${{ secrets.SSH_USER }}/munera && docker-compose down'
 
-      - name: Deploy on server - Start Docker containers
-        run: ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} 'cd /home/${{ secrets.SSH_USER }}/munera && docker-compose up --build -d'
+      - name: Start Docker containers on server
+        env:
+          DB_ADDRESS: ${{ secrets.DB_ADDRESS }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'ENDSSH'
+            cd /home/${{ secrets.SSH_USER }}/munera
+            docker-compose up --build -d
+          ENDSSH
