@@ -3,7 +3,7 @@ name: Deploy Vaadin App
 on:
   push:
     branches:
-      - main  # Adjust this to your deployment branch
+      - main
 
 jobs:
   deploy:
@@ -17,9 +17,10 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: '22'
+          distribution: 'adopt-openjdk'
 
       - name: Build JAR
-        run: ./mvnw clean package -DskipTests  # Adjust this based on your build tool
+        run: ./mvnw clean package -DskipTests
 
       - name: Upload JAR to server
         run: scp -i ${{ secrets.SSH_KEY }} target/munera-1.0-SNAPSHOT.jar ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/${{ secrets.SSH_USER }}/munera
