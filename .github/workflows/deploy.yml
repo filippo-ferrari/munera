@@ -3,7 +3,7 @@ name: Deploy Vaadin App
 on:
   push:
     branches:
-      - main
+      - main  # Adjust this to your deployment branch
 
 jobs:
   deploy:
@@ -20,20 +20,24 @@ jobs:
           distribution: 'temurin'
 
       - name: Build JAR
-        run: ./mvnw clean package -DskipTests
+        run: ./mvnw clean package -DskipTests  # Adjust this based on your build tool
+
+      - name: Set up SSH key
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_KEY }}
 
       - name: Upload JAR to server
-        run: scp -i ${{ secrets.SSH_KEY }} target/munera-1.0-SNAPSHOT.jar ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/${{ secrets.SSH_USER }}/munera
+        run: scp -o StrictHostKeyChecking=no target/munera-1.0-SNAPSHOT.jar ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/${{ secrets.SSH_USER }}/munera
 
       - name: Upload Dockerfile to server
-        run: scp -i ${{ secrets.SSH_KEY }} Dockerfile ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/${{ secrets.SSH_USER }}/munera
+        run: scp -o StrictHostKeyChecking=no Dockerfile ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/${{ secrets.SSH_USER }}/munera
 
       - name: Upload docker-compose.yml to server
-        run: scp -i ${{ secrets.SSH_KEY }} docker-compose.yml ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/${{ secrets.SSH_USER }}/munera
+        run: scp -o StrictHostKeyChecking=no docker-compose.yml ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/${{ secrets.SSH_USER }}/munera
 
       - name: Deploy on server
-        run: |
-          ssh -i ${{ secrets.SSH_KEY }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+        run: ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
           cd /home/${{ secrets.SSH_USER }}/munera
           docker-compose down
           docker-compose up --build -d
