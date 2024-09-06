@@ -31,8 +31,9 @@ jobs:
         run: scp -i ${{ secrets.SSH_KEY }} docker-compose.yml ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/${{ secrets.SSH_USER }}/munera
 
       - name: Deploy on server
-        run: ssh -i ${{ secrets.SSH_KEY }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+        run: |
+          ssh -i ${{ secrets.SSH_KEY }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
           cd /home/${{ secrets.SSH_USER }}/munera
           docker-compose down
           docker-compose up --build -d
-        EOF
+          EOF
