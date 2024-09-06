@@ -20,7 +20,7 @@ jobs:
           distribution: 'temurin'
 
       - name: Build JAR
-        run: ./mvnw clean package -DskipTests
+        run: ./mvnw clean package -Pproduction -DskipTests
 
       - name: Set up SSH key
         uses: webfactory/ssh-agent@v0.5.3
