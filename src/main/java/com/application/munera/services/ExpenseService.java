@@ -1,6 +1,7 @@
 package com.application.munera.services;
 
 import com.application.munera.data.Expense;
+import com.application.munera.data.ExpenseType;
 import com.application.munera.data.Person;
 import com.application.munera.repositories.ExpenseRepository;
 import org.springframework.data.domain.Page;
@@ -8,23 +9,25 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nonnull;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 @Service
 public class ExpenseService {
 
-    private final ExpenseRepository repository;
+    private final ExpenseRepository expenseRepository;
 
-    public ExpenseService(ExpenseRepository repository) {
-        this.repository = repository;
+    public ExpenseService(ExpenseRepository expenseRepository) {
+        this.expenseRepository = expenseRepository;
     }
 
     public Optional<Expense> get(Long id) {
-        return repository.findById(id);
+        return expenseRepository.findById(id);
     }
 
     /**
@@ -33,7 +36,7 @@ public class ExpenseService {
      * @return the collections of expenses found
      */
     public Collection<Expense> findDebtByUser(final Person person) {
-        return repository.findDebtorsExpensesByPersonId(person.getId());
+        return expenseRepository.findDebtorsExpensesByPersonId(person.getId());
     }
 
     /**
@@ -42,7 +45,7 @@ public class ExpenseService {
      * @return the collections of expenses found
      */
     public Collection<Expense> findCreditByUser(final Person person) {
-        return repository.findCreditorsExpensesByPersonId(person.getId());
+        return expenseRepository.findCreditorsExpensesByPersonId(person.getId());
     }
 
     /**
@@ -51,7 +54,7 @@ public class ExpenseService {
      * @return the collections of expenses found
      */
     public Collection<Expense> findUnpaidDebtByUser(final Person person) {
-        return repository.findUnpaidDebtorsExpensesByPersonId(person.getId());
+        return expenseRepository.findUnpaidDebtorsExpensesByPersonId(person.getId());
     }
 
     /**
@@ -60,7 +63,7 @@ public class ExpenseService {
      * @return the collections of expenses found
      */
     public Collection<Expense> findUnpaidCreditByUser(final Person person) {
-        return repository.findUnpaidCreditorsExpensesByPersonId(person.getId());
+        return expenseRepository.findUnpaidCreditorsExpensesByPersonId(person.getId());
     }
 
     /**
@@ -74,7 +77,7 @@ public class ExpenseService {
         return Stream.concat(credits.stream(), debits.stream()).toList();
     }
 
-    public List<Expense> findAll() {return repository.findAll();}
+    public List<Expense> findAll() {return expenseRepository.findAll();}
 
     /**
      * updates an expense
@@ -82,7 +85,8 @@ public class ExpenseService {
      */
     public void update(Expense entity) {
         if (Boolean.TRUE.equals(entity.getIsPaid())) entity.setPaymentDate(LocalDateTime.now());
-        repository.save(entity);
+        this.setExpenseType(entity);
+        expenseRepository.save(entity);
     }
 
     /**
@@ -90,23 +94,27 @@ public class ExpenseService {
      * @param id the id of the expense to delete
      */
     public void delete(Long id) {
-        repository.deleteById(id);
+        expenseRepository.deleteById(id);
     }
 
     public Page<Expense> list(Pageable pageable) {
-        return repository.findAll(pageable);
+        return expenseRepository.findAll(pageable);
     }
 
     public Page<Expense> list(Pageable pageable, Specification<Expense> filter) {
-        return repository.findAll(filter, pageable);
+        return expenseRepository.findAll(filter, pageable);
     }
 
     public int count() {
-        return (int) repository.count();
+        return (int) expenseRepository.count();
     }
 
     public List<Expense> findAllByYear(final int year ) {
-        return this.repository.findAllByYear(year);
+        return this.expenseRepository.findAllByYear(year);
+    }
+
+    public List<Expense> findExpensesByYearExcludingCreditPaid(int year) {
+        return expenseRepository.findByYearAndFilterCreditPaid(year, ExpenseType.CREDIT);
     }
 
     /**
@@ -115,7 +123,7 @@ public class ExpenseService {
      * @return true if the expense has been paid, false otherwise
      */
     public boolean isExpensePaid(final Expense expense) {
-        return this.repository.existsByIdAndIsPaidTrue(expense.getId());
+        return this.expenseRepository.existsByIdAndIsPaidTrue(expense.getId());
     }
 
     /**
@@ -123,6 +131,24 @@ public class ExpenseService {
      * @return the list of expenses found
      */
     public List<Expense> findAllOrderByDateDescending() {
-        return this.repository.findAllByOrderByDateDesc();
+        return this.expenseRepository.findAllByOrderByDateDesc();
     }
+
+    /**
+     *  sets the Expense type depending on the presence or absence of creditors and debtors
+     *  this is used to filter expenses with a creditor that are paid, since they are not part of
+     *  the actual money the user has spent, it's just a load technically
+     * @param expense the expense to set the type of
+     */
+    private void setExpenseType(final @Nonnull Expense expense) {
+        if (Objects.nonNull(expense.getCreditors()) && !expense.getCreditors().isEmpty())
+            // If creditors are present, set type to CREDIT
+            expense.setExpenseType(ExpenseType.CREDIT);
+         else if (Objects.nonNull(expense.getDebtors()) && !expense.getDebtors().isEmpty())
+            // If debtors are present and no creditors, set type to DEBIT
+            expense.setExpenseType(ExpenseType.DEBIT);
+         else
+             // If neither creditors nor debtors are present, set type to NONE
+            expense.setExpenseType(ExpenseType.NONE);
+        }
 }

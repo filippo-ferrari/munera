@@ -73,4 +73,8 @@ public class Expense extends AbstractEntity {
      */
     @Column(name = "isPaid", nullable = false)
     private Boolean isPaid = false;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "expenseType", nullable = false)
+    private ExpenseType expenseType;
 }

@@ -2,6 +2,7 @@ package com.application.munera.repositories;
 
 
 import com.application.munera.data.Expense;
+import com.application.munera.data.ExpenseType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -26,6 +27,9 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long>, JpaSpec
 
     @Query("SELECT e FROM Expense e JOIN e.debtors d WHERE d.id = :personId AND e.isPaid = false")
     Set<Expense> findUnpaidDebtorsExpensesByPersonId(@Param("personId") Long personId);
+
+    @Query("SELECT e FROM Expense e WHERE YEAR(e.date) = :year AND NOT (e.expenseType = :expenseType AND e.isPaid = true)")
+    List<Expense> findByYearAndFilterCreditPaid(@Param("year") int year, @Param("expenseType") ExpenseType expenseType);
 
     boolean existsByIdAndIsPaidTrue(Long id);
 

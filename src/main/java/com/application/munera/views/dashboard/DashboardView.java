@@ -105,7 +105,7 @@ public class DashboardView extends Div {
     }
 
     private String generateBarChartScript() {
-        List<Expense> expenses = expenseService.findAllByYear(Year.now().getValue());
+        List<Expense> expenses = expenseService.findExpensesByYearExcludingCreditPaid(Year.now().getValue());
 
         // Prepare data for Highcharts
         Map<String, Double> monthlyData = new LinkedHashMap<>();
@@ -150,7 +150,7 @@ public class DashboardView extends Div {
     }
 
     private String generatePieChartScript() {
-        List<Expense> expenses = expenseService.findAllByYear(Year.now().getValue());
+        List<Expense> expenses = expenseService.findExpensesByYearExcludingCreditPaid(Year.now().getValue());
 
         // Group expenses by category name and sum their costs
         Map<String, Double> categoryData = expenses.stream()
@@ -258,7 +258,7 @@ public class DashboardView extends Div {
     }
 
     private String generateExpensesOverTimeByCategoryScript() {
-        List<Expense> expenses = expenseService.findAllByYear(Year.now().getValue());
+        List<Expense> expenses = expenseService.findExpensesByYearExcludingCreditPaid(Year.now().getValue());
 
         // Group expenses by category and by month
         Map<String, Map<String, Double>> categoryMonthlyData = new LinkedHashMap<>();
