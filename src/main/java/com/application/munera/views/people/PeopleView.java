@@ -4,7 +4,7 @@ import com.application.munera.data.*;
 import com.application.munera.services.ExpenseService;
 import com.application.munera.services.PersonService;
 import com.application.munera.views.MainLayout;
-import com.application.munera.views.expenses.BadgeMessage;
+import com.application.munera.data.BadgeMessage;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;

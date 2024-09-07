@@ -1,5 +1,8 @@
-package com.application.munera.views.expenses;
+package com.application.munera.data;
 
+import lombok.Getter;
+
+@Getter
 public enum BadgeMessage {
     PAID_TO_SOMEONE("Paid to someone", "badge success"),
     PAID_TO_YOU("Paid to you", "badge success"),
@@ -17,11 +20,4 @@ public enum BadgeMessage {
         this.theme = theme;
     }
 
-    public String getText() {
-        return text;
-    }
-
-    public String getTheme() {
-        return theme;
-    }
 }
