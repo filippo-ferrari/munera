@@ -20,7 +20,10 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.ValidationException;
-import com.vaadin.flow.router.*;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
+import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.data.domain.PageRequest;
@@ -86,8 +89,11 @@ public class CategoriesView extends Div implements BeforeEnterObserver {
         binder = new BeanValidationBinder<>(Category.class);
 
         // Bind fields. This is where you'd define e.g. validation rules
-
         binder.bindInstanceFields(this);
+        binder.forField(name)
+                .asRequired("Name is required")
+                .bind(Category::getName, Category::setName);
+
 
         cancel.addClickListener(e -> {
             clearForm();
