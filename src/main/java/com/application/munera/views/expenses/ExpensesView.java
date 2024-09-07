@@ -96,7 +96,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         grid.addColumn(Expense::getDate).setHeader("Date").setSortable(true).setSortProperty("date");
         // grid.addColumn(expenseEvent -> expenseEvent.getEvent().getName()).setHeader("Event").setSortable(true);
 
-        grid.addColumn(new ComponentRenderer<>(this.viewService::createBadge)).setHeader("Status").setSortable(true);
+        grid.addColumn(new ComponentRenderer<>(this.viewService::createExpenseBadge)).setHeader("Status").setSortable(true);
         grid.getColumns().forEach(col -> col.setAutoWidth(true));
 
         grid.setItems(this.expenseService.findAllOrderByDateDescending());

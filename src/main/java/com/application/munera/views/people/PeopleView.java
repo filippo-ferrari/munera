@@ -13,7 +13,6 @@ import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
@@ -33,7 +32,6 @@ import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -80,8 +78,8 @@ public class PeopleView extends Div implements BeforeEnterObserver {
         grid.addHierarchyColumn(this::getNodeName).setHeader("Name");
         grid.addColumn(this::getNodeCost).setHeader("Total Expenses Value").setSortable(true);
         grid.addColumn(new ComponentRenderer<>(persona -> {
-            if (persona instanceof Person) return createPersonBadge(personService.calculateNetBalance((Person) persona));
-            else return this.viewService.createBadge(((Expense) persona));
+            if (persona instanceof Person) return this.viewService.createPersonBadge(personService.calculateNetBalance((Person) persona));
+            else return this.viewService.createExpenseBadge(((Expense) persona));
         })).setHeader("Balance Status");
 
         List<Person> people = (List<Person>) personService.findAll();
@@ -225,21 +223,6 @@ public class PeopleView extends Div implements BeforeEnterObserver {
         this.person = value;
         binder.readBean(this.person);
 
-    }
-
-    private Span createPersonBadge(BigDecimal netBalance) {
-        Span badge = new Span();
-        if (netBalance.compareTo(BigDecimal.ZERO) < 0) {
-            badge.setText("Credit");
-            badge.getElement().getThemeList().add("badge success");
-        } else if (netBalance.compareTo(BigDecimal.ZERO) > 0) {
-            badge.setText("Debit");
-            badge.getElement().getThemeList().add("badge error");
-        } else {
-            badge.setText("Clear");
-            badge.getElement().getThemeList().add("badge contrast");
-        }
-        return badge;
     }
 
     public void setGridData(List<Person> people) {

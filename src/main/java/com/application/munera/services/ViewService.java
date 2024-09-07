@@ -6,6 +6,8 @@ import com.application.munera.data.ExpenseType;
 import com.vaadin.flow.component.html.Span;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+
 @Service
 public class ViewService {
 
@@ -15,7 +17,7 @@ public class ViewService {
         this.expenseService = expenseService;
     }
 
-    public Span createBadge(final Expense expense) {
+    public Span createExpenseBadge(final Expense expense) {
         final var isExpensePaid = Boolean.TRUE.equals(this.expenseService.isExpensePaid(expense));
         final var badgeMessage = determineBadgeMessage(expense.getExpenseType(), isExpensePaid);
 
@@ -23,6 +25,21 @@ public class ViewService {
         badge.setText(badgeMessage.getText());
         badge.getElement().getThemeList().add(badgeMessage.getTheme());
 
+        return badge;
+    }
+
+    public Span createPersonBadge(BigDecimal netBalance) {
+        Span badge = new Span();
+        if (netBalance.compareTo(BigDecimal.ZERO) < 0) {
+            badge.setText("Credit");
+            badge.getElement().getThemeList().add("badge success");
+        } else if (netBalance.compareTo(BigDecimal.ZERO) > 0) {
+            badge.setText("Debit");
+            badge.getElement().getThemeList().add("badge error");
+        } else {
+            badge.setText("Clear");
+            badge.getElement().getThemeList().add("badge contrast");
+        }
         return badge;
     }
 
