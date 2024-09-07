@@ -13,7 +13,6 @@ import javax.annotation.Nonnull;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -141,10 +140,10 @@ public class ExpenseService {
      * @param expense the expense to set the type of
      */
     private void setExpenseType(final @Nonnull Expense expense) {
-        if (Objects.nonNull(expense.getCreditors()) && !expense.getCreditors().isEmpty())
+        if (!expense.getCreditors().isEmpty())
             // If creditors are present, set type to CREDIT
             expense.setExpenseType(ExpenseType.CREDIT);
-         else if (Objects.nonNull(expense.getDebtors()) && !expense.getDebtors().isEmpty())
+         else if (!expense.getDebtors().isEmpty())
             // If debtors are present and no creditors, set type to DEBIT
             expense.setExpenseType(ExpenseType.DEBIT);
          else
