@@ -1,10 +1,7 @@
 package com.application.munera.views.expenses;
 
 import com.application.munera.data.*;
-import com.application.munera.services.CategoryService;
-import com.application.munera.services.EventService;
-import com.application.munera.services.ExpenseService;
-import com.application.munera.services.PersonService;
+import com.application.munera.services.*;
 import com.application.munera.views.MainLayout;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -17,7 +14,6 @@ import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
@@ -62,6 +58,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
     private final CategoryService categoryService;
     private final PersonService personService;
     private final EventService eventService;
+    private final ViewService viewService;
     private TextField name;
     private TextField cost;
     private ComboBox<Category> category;
@@ -74,11 +71,12 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
     private MultiSelectComboBox<Person> creditors;
     private MultiSelectComboBox<Person> debtors;
     private ComboBox<Event> event;
-    public ExpensesView(ExpenseService expenseService, CategoryService categoryService, PersonService personService, EventService eventService) {
+    public ExpensesView(ExpenseService expenseService, CategoryService categoryService, PersonService personService, EventService eventService, ViewService viewService) {
         this.expenseService = expenseService;
         this.categoryService = categoryService;
         this.personService = personService;
         this.eventService = eventService;
+        this.viewService = viewService;
         addClassNames("expenses-view");
 
         // Create UI
@@ -98,7 +96,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         grid.addColumn(Expense::getDate).setHeader("Date").setSortable(true).setSortProperty("date");
         // grid.addColumn(expenseEvent -> expenseEvent.getEvent().getName()).setHeader("Event").setSortable(true);
 
-        grid.addColumn(new ComponentRenderer<>(this::createBadge)).setHeader("Status").setSortable(true);
+        grid.addColumn(new ComponentRenderer<>(this.viewService::createBadge)).setHeader("Status").setSortable(true);
         grid.getColumns().forEach(col -> col.setAutoWidth(true));
 
         grid.setItems(this.expenseService.findAllOrderByDateDescending());
@@ -290,25 +288,5 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         boolean isPeriodicChecked = (value != null) && value.getIsPeriodic();
         periodUnit.setVisible(isPeriodicChecked);
         periodInterval.setVisible(isPeriodicChecked);
-    }
-
-    private Span createBadge(final Expense expense) {
-        final var isExpensePaid = Boolean.TRUE.equals(this.expenseService.isExpensePaid(expense));
-        final var badgeMessage = determineBadgeMessage(expense.getExpenseType(), isExpensePaid);
-
-        final var badge = new Span();
-        badge.setText(badgeMessage.getText());
-        badge.getElement().getThemeList().add(badgeMessage.getTheme());
-
-        return badge;
-    }
-
-    private BadgeMessage determineBadgeMessage(ExpenseType type, boolean isPaid) {
-        return switch (type) {
-            case CREDIT -> isPaid ? BadgeMessage.PAID_TO_SOMEONE : BadgeMessage.OWED_BY_SOMEONE;
-            case DEBIT -> isPaid ? BadgeMessage.PAID_TO_YOU : BadgeMessage.OWED_TO_YOU;
-            case NONE -> isPaid ? BadgeMessage.PAID : BadgeMessage.NOT_PAID;
-            default -> BadgeMessage.UNKNOWN;
-        };
     }
 }
