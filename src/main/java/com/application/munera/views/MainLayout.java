@@ -22,6 +22,8 @@ import com.vaadin.flow.spring.security.AuthenticationContext;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
+import javax.swing.*;
+
 /**
  * The main view is a top-level placeholder for other views.
  */
@@ -47,23 +49,26 @@ public class MainLayout extends AppLayout {
         // Retrieve the authenticated user's name
         String username = authContext.getPrincipalName().orElse("Guest");
 
+        // Create the user icon
+        final var userIcon = LineAwesomeIcon.USER.create();
+        userIcon.addClassNames(LumoUtility.FontSize.LARGE);
+
         // Create a Span to display "Hi, username"
         Span greeting = new Span("Hi, " + username);
         greeting.addClassNames(LumoUtility.FontSize.LARGE, LumoUtility.FontWeight.BOLD);
-        greeting.getStyle().set("margin-right", "20px");
 
-        // Creating the logout button
+        // Combine the user icon and greeting in a horizontal layout
+        HorizontalLayout userInfoLayout = new HorizontalLayout(userIcon, greeting);
+        userInfoLayout.setAlignItems(FlexComponent.Alignment.CENTER); // Center vertically
+
+        // Create the logout button
         Button logout = new Button("Logout", click -> this.authContext.logout());
 
-        // Adding some padding to the logout button
-        logout.getStyle().set("padding", "10px");
-
         // Creating the header and adding the greeting and logout button
-        HorizontalLayout header = new HorizontalLayout(greeting, logout);
+        HorizontalLayout header = new HorizontalLayout(userInfoLayout, logout);
         header.setWidthFull(); // Make the header take the full width
         header.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.CENTER);
-        header.setJustifyContentMode(FlexComponent.JustifyContentMode.END); // Align items to the end (right)
-        header.getStyle().set("padding", "0 10px"); // Add padding around the header if needed
+        header.setJustifyContentMode(FlexComponent.JustifyContentMode.END); // Align items to the right
 
         addToNavbar(true, toggle, viewTitle);
         addToNavbar(header);
