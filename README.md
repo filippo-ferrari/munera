@@ -24,6 +24,8 @@ Munera is a companion for managing expenses efficiently and effortlessly, whethe
 - Create, read, update and delete people
 - Create, read, update and delete events
 
+- Graphs are now available!
+
 ## Completed Features
 - [x] Create categories with CRUD operations
 - [x] Create concept of creditors and debtors for each expense
