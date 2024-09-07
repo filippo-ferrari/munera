@@ -96,8 +96,14 @@ public class PeopleView extends Div implements BeforeEnterObserver {
         binder = new BeanValidationBinder<>(Person.class);
 
         // Bind fields. This is where you'd define e.g. validation rules
-
         binder.bindInstanceFields(this);
+        binder.forField(firstName)
+                .asRequired("First Name is required")
+                .bind(Person::getFirstName, Person::setFirstName);
+
+        binder.forField(lastName)
+                .asRequired("Last Name is required")
+                .bind(Person::getLastName, Person::setLastName);
 
         cancel.addClickListener(e -> {
             clearForm();

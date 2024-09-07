@@ -24,6 +24,7 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.ValidationException;
+import com.vaadin.flow.data.converter.StringToBigDecimalConverter;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.*;
 import jakarta.annotation.security.PermitAll;
@@ -118,6 +119,22 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
 
         // Bind fields. This is where you'd define e.g. validation rules
         binder.bindInstanceFields(this);
+        binder.forField(name)
+                .asRequired("Name is required")
+                .bind(Expense::getName, Expense::setName);
+
+        binder.forField(cost)
+                .asRequired("Cost is required")
+                .withConverter( new StringToBigDecimalConverter("Invalid cost"))
+                .bind(Expense::getCost, Expense::setCost);
+
+        binder.forField(category)
+                .asRequired("Category is required")
+                .bind(Expense::getCategory, Expense::setCategory);
+
+        binder.forField(date)
+                .asRequired("Date is required")
+                .bind(Expense::getDate, Expense::setDate);
 
         // We set initial value of isPeriodic to true and show period fields
         isPeriodic.setValue(false);
