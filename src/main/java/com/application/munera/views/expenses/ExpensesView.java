@@ -8,7 +8,6 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.formlayout.FormLayout;
@@ -31,10 +30,8 @@ import jakarta.annotation.security.PermitAll;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.vaadin.klaudeta.PaginatedGrid;
 
-import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 
 @PermitAll
 @PageTitle("Expenses")
@@ -69,9 +66,10 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
     private ComboBox<PeriodUnit> periodUnit;
     private TextField periodInterval;
     private DatePicker date;
-    private MultiSelectComboBox<Person> creditors;
-    private MultiSelectComboBox<Person> debtors;
+    private ComboBox<Person> creditor;
+    private ComboBox<Person> debtor;
     private ComboBox<Event> event;
+
     public ExpensesView(ExpenseService expenseService, CategoryService categoryService, PersonService personService, EventService eventService, ViewService viewService) {
         this.expenseService = expenseService;
         this.categoryService = categoryService;
@@ -102,7 +100,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
 
         grid.setItems(this.expenseService.findAllOrderByDateDescending());
         grid.setPaginatorSize(5);
-        grid.setPageSize(22); //  setting page size
+        grid.setPageSize(22); // setting page size
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
 
         // when a row is selected or deselected, populate form
@@ -125,7 +123,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
 
         binder.forField(cost)
                 .asRequired("Cost is required")
-                .withConverter( new StringToBigDecimalConverter("Invalid cost"))
+                .withConverter(new StringToBigDecimalConverter("Invalid cost"))
                 .bind(Expense::getCost, Expense::setCost);
 
         binder.forField(category)
@@ -155,21 +153,22 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
             }
         });
 
-        // Event listeners that will remove the selected creditors from the debtors list and vice versa
-        // Done so that the user cant create an expense with the same person as creditor and debtor
-        debtors.addValueChangeListener(event -> {
-            Set<Person> selectedDebtors = event.getValue();
-            final var creditorsSet = new HashSet<>(personService.findAll());
-            creditorsSet.removeIf(selectedDebtors::contains);
-            creditors.setItems(creditorsSet);
-        });
-
-        creditors.addValueChangeListener(event -> {
-            Set<Person> selectedCreditors = event.getValue();
-            final var debtorsSet = new HashSet<>(personService.findAll());
-            debtorsSet.removeIf(selectedCreditors::contains);
-            debtors.setItems(debtorsSet);
-        });
+        //TODO: THIS NEEDS TO BE IMPLEMENTED BUT FOR THE SINGLE PERSON NOW, STILL NEEDED
+//        // Event listeners that will remove the selected creditors from the debtors list and vice versa
+//        // Done so that the user cant create an expense with the same person as creditor and debtor
+//        debtors.addValueChangeListener(event -> {
+//            Set<Person> selectedDebtors = event.getValue();
+//            final var creditorsSet = new HashSet<>(personService.findAll());
+//            creditorsSet.removeIf(selectedDebtors::contains);
+//            creditors.setItems(creditorsSet);
+//        });
+//
+//        creditors.addValueChangeListener(event -> {
+//            Set<Person> selectedCreditors = event.getValue();
+//            final var debtorsSet = new HashSet<>(personService.findAll());
+//            debtorsSet.removeIf(selectedCreditors::contains);
+//            debtors.setItems(debtorsSet);
+//        });
 
         cancel.addClickListener(e -> {
             clearForm();
@@ -205,7 +204,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
                 UI.getCurrent().navigate(ExpensesView.class);
             } catch (ObjectOptimisticLockingFailureException exception) {
                 Notification n = Notification.show(
-                        "Error updating the data. Somebody else has updated the record while you were making changes.");
+                        "Error deleting the data. Somebody else has updated the record while you were making changes.");
                 n.setPosition(Position.MIDDLE);
                 n.addThemeVariants(NotificationVariant.LUMO_ERROR);
             }
@@ -218,7 +217,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         if (expenseId.isPresent()) {
             Optional<Expense> expenseFromBackend = expenseService.get(expenseId.get());
             if (expenseFromBackend.isPresent()) populateForm(expenseFromBackend.get());
-             else {
+            else {
                 Notification.show(
                         String.format("The requested expense was not found, ID = %s", expenseId.get()), 3000,
                         Notification.Position.BOTTOM_START);
@@ -248,15 +247,15 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         periodUnit = new ComboBox<>("Period Unit");
         periodUnit.setItems(PeriodUnit.values());
         periodInterval = new TextField("Period Interval");
-        creditors = new MultiSelectComboBox<>("Creditors");
-        creditors.setItems(personService.findAll());
-        creditors.setItemLabelGenerator(Person::getFirstName);
+        creditor = new ComboBox<>("Creditor");
+        creditor.setItems(personService.findAll());
+        creditor.setItemLabelGenerator(Person::getFirstName);
         event = new ComboBox<>("Event");
         event.setItems(eventService.findAll());
         event.setItemLabelGenerator(Event::getName);
-        debtors = new MultiSelectComboBox<>("Debtors");
-        debtors.setItems(personService.findAll());
-        debtors.setItemLabelGenerator(Person::getFirstName);
+        debtor = new ComboBox<>("Debtor");
+        debtor.setItems(personService.findAll());
+        debtor.setItemLabelGenerator(Person::getFirstName);
         date = new DatePicker("Date");
 
         // Horizontal layout for checkboxes
@@ -265,7 +264,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         isPaid = new Checkbox("Paid");
         checkboxLayout.add(isPeriodic, isPaid);
 
-        formLayout.add(name, cost, category, description, checkboxLayout, periodUnit, periodInterval, date, creditors, debtors, event);
+        formLayout.add(name, cost, category, description, checkboxLayout, periodUnit, periodInterval, date, creditor, debtor, event);
         editorDiv.add(formLayout);
         createButtonLayout(editorLayoutDiv);
 
@@ -305,5 +304,9 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         boolean isPeriodicChecked = (value != null) && value.getIsPeriodic();
         periodUnit.setVisible(isPeriodicChecked);
         periodInterval.setVisible(isPeriodicChecked);
+
+        // Set selected items for creditor and debtor
+        creditor.setValue(value != null ? value.getCreditor() : null);
+        debtor.setValue(value != null ? value.getDebtor() : null);
     }
 }

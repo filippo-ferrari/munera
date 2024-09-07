@@ -8,7 +8,6 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Set;
 
 @Entity
 @Getter
@@ -45,19 +44,13 @@ public class Expense extends AbstractEntity {
     @Column(name = "PeriodInterval")
     private Integer periodInterval;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "Creditor_expenses",
-            joinColumns = @JoinColumn(name = "expense_id"),
-            inverseJoinColumns = @JoinColumn(name = "people_id"))
-    private Set<Person> creditors;
+    @ManyToOne
+    @JoinColumn(name = "CreditorId")
+    private Person creditor;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "Debtors_expenses",
-            joinColumns = @JoinColumn(name = "expense_id"),
-            inverseJoinColumns = @JoinColumn(name = "people_id"))
-    private Set<Person> debtors;
+    @ManyToOne
+    @JoinColumn(name = "DebtorId")
+    private Person debtor;
 
     @ManyToOne
     @JoinColumn(name = "EventId")
@@ -69,9 +62,6 @@ public class Expense extends AbstractEntity {
     @Column(name = "PaymentDate")
     private LocalDateTime paymentDate;
 
-    /**
-     * the isPaid field starts as always false
-     */
     @Column(name = "isPaid", nullable = false)
     private Boolean isPaid = false;
 
