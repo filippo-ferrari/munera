@@ -6,6 +6,9 @@
 .classpath
 .env
 
+# Ignore profile-specific properties files
+application-*.properties
+
 *.iml
 .DS_Store
 
