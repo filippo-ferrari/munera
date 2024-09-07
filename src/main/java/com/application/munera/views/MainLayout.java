@@ -44,19 +44,26 @@ public class MainLayout extends AppLayout {
         viewTitle = new H1();
         viewTitle.addClassNames(LumoUtility.FontSize.LARGE, LumoUtility.Margin.NONE);
 
+        // Retrieve the authenticated user's name
+        String username = authContext.getPrincipalName().orElse("Guest");
+
+        // Create a Span to display "Hi, username"
+        Span greeting = new Span("Hi, " + username);
+        greeting.addClassNames(LumoUtility.FontSize.LARGE, LumoUtility.FontWeight.BOLD);
+        greeting.getStyle().set("margin-right", "20px");
+
         // Creating the logout button
         Button logout = new Button("Logout", click -> this.authContext.logout());
 
         // Adding some padding to the logout button
         logout.getStyle().set("padding", "10px");
 
-        // Creating the header and adding the logout button to the far left
-        HorizontalLayout header = new HorizontalLayout(logout);
+        // Creating the header and adding the greeting and logout button
+        HorizontalLayout header = new HorizontalLayout(greeting, logout);
         header.setWidthFull(); // Make the header take the full width
         header.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.CENTER);
-        header.setJustifyContentMode(FlexComponent.JustifyContentMode.END); // Align items to the start (left)
+        header.setJustifyContentMode(FlexComponent.JustifyContentMode.END); // Align items to the end (right)
         header.getStyle().set("padding", "0 10px"); // Add padding around the header if needed
-
 
         addToNavbar(true, toggle, viewTitle);
         addToNavbar(header);
@@ -85,7 +92,6 @@ public class MainLayout extends AppLayout {
     }
 
     private Footer createFooter() {
-
         return new Footer();
     }
 
