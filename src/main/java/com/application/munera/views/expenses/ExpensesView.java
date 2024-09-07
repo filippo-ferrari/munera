@@ -311,5 +311,4 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
             default -> BadgeMessage.UNKNOWN;
         };
     }
-
 }

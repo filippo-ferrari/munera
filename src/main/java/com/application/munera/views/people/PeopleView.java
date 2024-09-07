@@ -1,10 +1,10 @@
 package com.application.munera.views.people;
 
-import com.application.munera.data.Expense;
-import com.application.munera.data.Person;
+import com.application.munera.data.*;
 import com.application.munera.services.ExpenseService;
 import com.application.munera.services.PersonService;
 import com.application.munera.views.MainLayout;
+import com.application.munera.views.expenses.BadgeMessage;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -78,7 +78,7 @@ public class PeopleView extends Div implements BeforeEnterObserver {
         grid.addColumn(this::getNodeCost).setHeader("Total Expenses Value").setSortable(true);
         grid.addColumn(new ComponentRenderer<>(persona -> {
             if (persona instanceof Person) return createPersonBadge(personService.calculateNetBalance((Person) persona));
-            else return createExpenseBadge(((Expense) persona).getIsPaid());
+            else return createExpenseBadge(((Expense) persona));
         })).setHeader("Balance Status");
 
         List<Person> people = (List<Person>) personService.findAll();
@@ -239,16 +239,24 @@ public class PeopleView extends Div implements BeforeEnterObserver {
         return badge;
     }
 
-    private Span createExpenseBadge(Boolean isExpensePaid) {
-        Span badge = new Span();
-        if (Boolean.TRUE.equals(isExpensePaid)) {
-            badge.setText("Paid");
-            badge.getElement().getThemeList().add("badge success");
-        } else  {
-            badge.setText("Owed");
-            badge.getElement().getThemeList().add("badge error");
-        }
+    private Span createExpenseBadge(final Expense expense) {
+        final var isExpensePaid = Boolean.TRUE.equals(this.expenseService.isExpensePaid(expense));
+        final var badgeMessage = determineBadgeMessage(expense.getExpenseType(), isExpensePaid);
+
+        final var badge = new Span();
+        badge.setText(badgeMessage.getText());
+        badge.getElement().getThemeList().add(badgeMessage.getTheme());
+
         return badge;
+    }
+
+    private BadgeMessage determineBadgeMessage(ExpenseType type, boolean isPaid) {
+        return switch (type) {
+            case CREDIT -> isPaid ? BadgeMessage.PAID_TO_SOMEONE : BadgeMessage.OWED_BY_SOMEONE;
+            case DEBIT -> isPaid ? BadgeMessage.PAID_TO_YOU : BadgeMessage.OWED_TO_YOU;
+            case NONE -> isPaid ? BadgeMessage.PAID : BadgeMessage.NOT_PAID;
+            default -> BadgeMessage.UNKNOWN;
+        };
     }
 
     public void setGridData(List<Person> people) {
