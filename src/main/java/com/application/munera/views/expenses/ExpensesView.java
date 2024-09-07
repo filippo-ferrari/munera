@@ -98,7 +98,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         grid.addColumn(Expense::getDate).setHeader("Date").setSortable(true).setSortProperty("date");
         // grid.addColumn(expenseEvent -> expenseEvent.getEvent().getName()).setHeader("Event").setSortable(true);
 
-        grid.addColumn(new ComponentRenderer<>(expense1 -> createBadge(expenseService.isExpensePaid(expense1)))).setHeader("Status").setSortable(true);
+        grid.addColumn(new ComponentRenderer<>(this::createBadge)).setHeader("Status").setSortable(true);
         grid.getColumns().forEach(col -> col.setAutoWidth(true));
 
         grid.setItems(this.expenseService.findAllOrderByDateDescending());
@@ -292,15 +292,24 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         periodInterval.setVisible(isPeriodicChecked);
     }
 
-    private Span createBadge(Boolean isExpensePaid) {
-        Span badge = new Span();
-        if (Boolean.TRUE.equals(isExpensePaid)) {
-            badge.setText("Paid");
-            badge.getElement().getThemeList().add("badge success");
-        } else  {
-            badge.setText("Owed");
-            badge.getElement().getThemeList().add("badge error");
-        }
+    private Span createBadge(final Expense expense) {
+        final var isExpensePaid = Boolean.TRUE.equals(this.expenseService.isExpensePaid(expense));
+        final var badgeMessage = determineBadgeMessage(expense.getExpenseType(), isExpensePaid);
+
+        final var badge = new Span();
+        badge.setText(badgeMessage.getText());
+        badge.getElement().getThemeList().add(badgeMessage.getTheme());
+
         return badge;
     }
+
+    private BadgeMessage determineBadgeMessage(ExpenseType type, boolean isPaid) {
+        return switch (type) {
+            case CREDIT -> isPaid ? BadgeMessage.PAID_TO_SOMEONE : BadgeMessage.OWED_BY_SOMEONE;
+            case DEBIT -> isPaid ? BadgeMessage.PAID_TO_YOU : BadgeMessage.OWED_TO_YOU;
+            case NONE -> isPaid ? BadgeMessage.PAID : BadgeMessage.NOT_PAID;
+            default -> BadgeMessage.UNKNOWN;
+        };
+    }
+
 }

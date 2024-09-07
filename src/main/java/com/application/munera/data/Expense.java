@@ -38,6 +38,7 @@ public class Expense extends AbstractEntity {
     @Column(name = "PeriodicExpense", nullable = false)
     private Boolean isPeriodic;
 
+    @Enumerated(EnumType.ORDINAL)
     @Column(name = "PeriodUnit")
     private PeriodUnit periodUnit;
 
