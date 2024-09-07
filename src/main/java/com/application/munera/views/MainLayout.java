@@ -51,11 +51,11 @@ public class MainLayout extends AppLayout {
 
         // Create the user icon
         final var userIcon = LineAwesomeIcon.USER.create();
-        userIcon.addClassNames(LumoUtility.FontSize.LARGE);
+        userIcon.addClassNames(LumoUtility.FontSize.LARGE); // Make the icon size larger
 
         // Create a Span to display "Hi, username"
         Span greeting = new Span("Hi, " + username);
-        greeting.addClassNames(LumoUtility.FontSize.LARGE, LumoUtility.FontWeight.BOLD);
+        greeting.addClassNames(LumoUtility.FontSize.LARGE, LumoUtility.FontWeight.BOLD); // Make text larger and bold
 
         // Combine the user icon and greeting in a horizontal layout
         HorizontalLayout userInfoLayout = new HorizontalLayout(userIcon, greeting);
@@ -63,12 +63,14 @@ public class MainLayout extends AppLayout {
 
         // Create the logout button
         Button logout = new Button("Logout", click -> this.authContext.logout());
+        logout.getStyle().set("padding", "10px"); // add padding to the logout button
 
-        // Creating the header and adding the greeting and logout button
+        // Create the header layout and add all elements
         HorizontalLayout header = new HorizontalLayout(userInfoLayout, logout);
         header.setWidthFull(); // Make the header take the full width
         header.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.CENTER);
         header.setJustifyContentMode(FlexComponent.JustifyContentMode.END); // Align items to the right
+        header.getStyle().set("padding", "0 10px"); // Add padding around the header
 
         addToNavbar(true, toggle, viewTitle);
         addToNavbar(header);
