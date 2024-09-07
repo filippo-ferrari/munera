@@ -13,6 +13,7 @@ import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
@@ -81,6 +82,16 @@ public class PeopleView extends Div implements BeforeEnterObserver {
             if (persona instanceof Person) return this.viewService.createPersonBadge(personService.calculateNetBalance((Person) persona));
             else return this.viewService.createExpenseBadge(((Expense) persona));
         })).setHeader("Balance Status");
+
+        grid.addColumn(new ComponentRenderer<>(person -> {
+            if (person instanceof Person) {
+                Button markPaidButton = new Button("Mark All Expenses Paid", event -> markExpensesPaid((Person) person));
+                markPaidButton.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_PRIMARY);
+                return markPaidButton;
+            } else {
+                return new Span();
+            }
+        })).setHeader("Actions");
 
         List<Person> people = (List<Person>) personService.findAll();
 
@@ -241,6 +252,22 @@ public class PeopleView extends Div implements BeforeEnterObserver {
 
             // Add each expense as a child item under the person
             for (Expense expense : expenses) grid.getTreeData().addItem(user, expense);
+        }
+    }
+
+    private void markExpensesPaid(Person person) {
+        try {
+            List<Expense> expenses = expenseService.findCreditByUser(person).stream().toList();
+            for (Expense expense : expenses) {
+                expense.setIsPaid(true);
+                expenseService.update(expense);
+            }
+            Notification.show("All expenses marked as paid for " + person.getFirstName() + " " + person.getLastName());
+            refreshGrid();
+        } catch (Exception e) {
+            Notification n = Notification.show("Error marking expenses as paid: " + e.getMessage());
+            n.setPosition(Position.MIDDLE);
+            n.addThemeVariants(NotificationVariant.LUMO_ERROR);
         }
     }
 }
