@@ -158,7 +158,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
             }
         });
 
-//        // Event listeners that will remove the selected creditors from the debtors list and vice versa
+//        TODO:// Event listeners that will remove the selected creditors from the debtors list and vice versa
 //        // Done so that the user cant create an expense with the same person as creditor and debtor
 //        payer.addValueChangeListener(event -> {
 //            Person selectedDebtors = event.getValue();
@@ -257,13 +257,13 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         periodInterval = new TextField("Period Interval");
         payer = new ComboBox<>("Payer");
         payer.setItems(people);
-        payer.setItemLabelGenerator(Person::getFirstName);
+        payer.setItemLabelGenerator(person -> person.getFirstName() + " " + person.getLastName());
         event = new ComboBox<>("Event");
         event.setItems(eventService.findAll());
         event.setItemLabelGenerator(Event::getName);
         beneficiary = new ComboBox<>("Beneficiary");
         beneficiary.setItems(people);
-        beneficiary.setItemLabelGenerator(Person::getFirstName);
+        beneficiary.setItemLabelGenerator(person -> person.getFirstName() + " " + person.getLastName());
         date = new DatePicker("Date");
 
         // Horizontal layout for checkboxes
