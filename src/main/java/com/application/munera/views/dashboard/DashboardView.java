@@ -105,7 +105,8 @@ public class DashboardView extends Div {
     }
 
     private String generateBarChartScript() {
-        List<Expense> expenses = expenseService.findExpensesByYearExcludingCreditPaid(Year.now().getValue());
+        final var loggedInPerson = this.personService.getLoggedInPerson();
+        List<Expense> expenses = expenseService.fetchExpensesForDashboard(loggedInPerson, Year.now());
 
         // Prepare data for Highcharts
         Map<String, Double> monthlyData = new LinkedHashMap<>();

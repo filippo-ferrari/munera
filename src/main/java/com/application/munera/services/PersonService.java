@@ -10,17 +10,20 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
 public class PersonService {
 
+    private final UserService userService;
     private final PersonRepository personRepository;
     private final ExpenseService expenseService;
 
-    public PersonService(PersonRepository personRepository, ExpenseService expenseService) {
+    public PersonService(PersonRepository personRepository, ExpenseService expenseService, UserService userService) {
         this.personRepository = personRepository;
         this.expenseService = expenseService;
+        this.userService = userService;
     }
 
     /**
@@ -77,6 +80,16 @@ public class PersonService {
      */
     public int count() {
         return (int) this.personRepository.count();
+    }
+
+    /**
+     * Fetches the Person entity connected to the currently logged-in user.
+     *
+     * @return Person entity of the logged-in user, or null if not found.
+     */
+    public Person getLoggedInPerson() {
+        final var user = userService.getLoggedInUser();
+        return Objects.requireNonNull(personRepository.findByUserId(user.getId()).orElse(null));
     }
 
     /**
