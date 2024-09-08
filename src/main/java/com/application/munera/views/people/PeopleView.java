@@ -85,13 +85,19 @@ public class PeopleView extends Div implements BeforeEnterObserver {
 
         grid.addColumn(new ComponentRenderer<>(persona -> {
             if (persona instanceof Person) {
-                Button markPaidButton = new Button("Mark All Expenses Paid", event -> markExpensesPaid((Person) persona));
-                markPaidButton.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_PRIMARY);
-                return markPaidButton;
-            } else {
-                return new Span();
-            }
-        })).setHeader("Actions");
+                Button setDebtPaidButton = new Button("Set all debt as paid", event -> setDebtPaid((Person) persona));
+                setDebtPaidButton.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_PRIMARY);
+                return setDebtPaidButton;
+            } else return new Span();
+        }));
+
+        grid.addColumn(new ComponentRenderer<>(persona -> {
+            if (persona instanceof Person) {
+                Button setCreditPaidButton = new Button("Set all credit as paid", event -> setCreditPaid((Person) persona));
+                setCreditPaidButton.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_PRIMARY);
+                return setCreditPaidButton;
+            } else return new Span();
+        }));
 
         List<Person> people =  personService.findAllExcludeUsers();
 
@@ -255,9 +261,25 @@ public class PeopleView extends Div implements BeforeEnterObserver {
         }
     }
 
-    private void markExpensesPaid(Person person) {
+    private void setDebtPaid(Person person) {
         try {
             List<Expense> expenses = expenseService.findExpensesWherePayer(person).stream().toList();
+            for (Expense expense : expenses) {
+                expense.setIsPaid(true);
+                expenseService.update(expense);
+            }
+            Notification.show("All expenses marked as paid for " + person.getFirstName() + " " + person.getLastName());
+            refreshGrid();
+        } catch (Exception e) {
+            Notification n = Notification.show("Error marking expenses as paid: " + e.getMessage());
+            n.setPosition(Position.MIDDLE);
+            n.addThemeVariants(NotificationVariant.LUMO_ERROR);
+        }
+    }
+
+    private void setCreditPaid(Person person) {
+        try {
+            List<Expense> expenses = expenseService.findExpensesWhereBeneficiary(person).stream().toList();
             for (Expense expense : expenses) {
                 expense.setIsPaid(true);
                 expenseService.update(expense);
