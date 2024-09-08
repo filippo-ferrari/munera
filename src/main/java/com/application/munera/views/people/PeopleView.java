@@ -83,9 +83,9 @@ public class PeopleView extends Div implements BeforeEnterObserver {
             else return this.viewService.createExpenseBadge(((Expense) persona));
         })).setHeader("Balance Status");
 
-        grid.addColumn(new ComponentRenderer<>(person -> {
-            if (person instanceof Person) {
-                Button markPaidButton = new Button("Mark All Expenses Paid", event -> markExpensesPaid((Person) person));
+        grid.addColumn(new ComponentRenderer<>(persona -> {
+            if (persona instanceof Person) {
+                Button markPaidButton = new Button("Mark All Expenses Paid", event -> markExpensesPaid((Person) persona));
                 markPaidButton.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_PRIMARY);
                 return markPaidButton;
             } else {
@@ -93,7 +93,7 @@ public class PeopleView extends Div implements BeforeEnterObserver {
             }
         })).setHeader("Actions");
 
-        List<Person> people = (List<Person>) personService.findAll();
+        List<Person> people =  personService.findAll();
 
         this.setGridData(people);
 
@@ -248,7 +248,7 @@ public class PeopleView extends Div implements BeforeEnterObserver {
             grid.getTreeData().addItem(null, user);
 
             // Fetch expenses for the current person
-            List<Expense> expenses =  expenseService.findExpenseByUser(user);
+            List<Expense> expenses =  expenseService.findExpensesByUser(user);
 
             // Add each expense as a child item under the person
             for (Expense expense : expenses) grid.getTreeData().addItem(user, expense);
@@ -257,7 +257,7 @@ public class PeopleView extends Div implements BeforeEnterObserver {
 
     private void markExpensesPaid(Person person) {
         try {
-            List<Expense> expenses = expenseService.findCreditByUser(person).stream().toList();
+            List<Expense> expenses = expenseService.findExpensesWherePayer(person).stream().toList();
             for (Expense expense : expenses) {
                 expense.setIsPaid(true);
                 expenseService.update(expense);

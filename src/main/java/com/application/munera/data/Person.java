@@ -40,11 +40,12 @@ public class Person extends AbstractEntity {
     @Column(name = "credit")
     private BigDecimal credit;
 
-    @OneToMany(mappedBy = "creditor")
-    private Set<Expense> creditExpenses;
+    // Updated to match the new field names in Expense
+    @OneToMany(mappedBy = "payer")
+    private Set<Expense> expensesAsPayer;
 
-    @OneToMany(mappedBy = "debtor")
-    private Set<Expense> debtExpenses;
+    @OneToMany(mappedBy = "beneficiary")
+    private Set<Expense> expensesAsBeneficiary;
 
     @ManyToMany(mappedBy = "participants")
     private Set<Event> events;

@@ -66,8 +66,8 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
     private ComboBox<PeriodUnit> periodUnit;
     private TextField periodInterval;
     private DatePicker date;
-    private ComboBox<Person> creditor;
-    private ComboBox<Person> debtor;
+    private ComboBox<Person> payer;
+    private ComboBox<Person> beneficiary;
     private ComboBox<Event> event;
 
     public ExpensesView(ExpenseService expenseService, CategoryService categoryService, PersonService personService, EventService eventService, ViewService viewService) {
@@ -94,7 +94,6 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         grid.addColumn(Expense::getPeriodUnit).setHeader("Period Unit").setSortable(true);
         grid.addColumn(Expense::getDate).setHeader("Date").setSortable(true).setSortProperty("date");
         // grid.addColumn(expenseEvent -> expenseEvent.getEvent().getName()).setHeader("Event").setSortable(true);
-
         grid.addColumn(new ComponentRenderer<>(this.viewService::createExpenseBadge)).setHeader("Status").setSortable(true);
         grid.getColumns().forEach(col -> col.setAutoWidth(true));
 
@@ -156,11 +155,11 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         //TODO: THIS NEEDS TO BE IMPLEMENTED BUT FOR THE SINGLE PERSON NOW, STILL NEEDED
 //        // Event listeners that will remove the selected creditors from the debtors list and vice versa
 //        // Done so that the user cant create an expense with the same person as creditor and debtor
-//        debtors.addValueChangeListener(event -> {
-//            Set<Person> selectedDebtors = event.getValue();
+//        payer.addValueChangeListener(event -> {
+//            Person selectedDebtors = event.getValue();
 //            final var creditorsSet = new HashSet<>(personService.findAll());
-//            creditorsSet.removeIf(selectedDebtors::contains);
-//            creditors.setItems(creditorsSet);
+//            creditorsSet.removeIf(creditorsSet.contains(selectedDebtors));
+//            payer.setItems(creditorsSet);
 //        });
 //
 //        creditors.addValueChangeListener(event -> {
@@ -232,10 +231,10 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
     private void createEditorLayout(SplitLayout splitLayout) {
         Div editorLayoutDiv = new Div();
         editorLayoutDiv.setClassName("editor-layout");
-
         Div editorDiv = new Div();
         editorDiv.setClassName("editor");
         editorLayoutDiv.add(editorDiv);
+        final var people = this.personService.findAll();
 
         FormLayout formLayout = new FormLayout();
         name = new TextField("Name");
@@ -247,15 +246,15 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         periodUnit = new ComboBox<>("Period Unit");
         periodUnit.setItems(PeriodUnit.values());
         periodInterval = new TextField("Period Interval");
-        creditor = new ComboBox<>("Creditor");
-        creditor.setItems(personService.findAll());
-        creditor.setItemLabelGenerator(Person::getFirstName);
+        payer = new ComboBox<>("Payer");
+        payer.setItems(people);
+        payer.setItemLabelGenerator(Person::getFirstName);
         event = new ComboBox<>("Event");
         event.setItems(eventService.findAll());
         event.setItemLabelGenerator(Event::getName);
-        debtor = new ComboBox<>("Debtor");
-        debtor.setItems(personService.findAll());
-        debtor.setItemLabelGenerator(Person::getFirstName);
+        beneficiary = new ComboBox<>("Beneficiary");
+        beneficiary.setItems(people);
+        beneficiary.setItemLabelGenerator(Person::getFirstName);
         date = new DatePicker("Date");
 
         // Horizontal layout for checkboxes
@@ -264,7 +263,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         isPaid = new Checkbox("Paid");
         checkboxLayout.add(isPeriodic, isPaid);
 
-        formLayout.add(name, cost, category, description, checkboxLayout, periodUnit, periodInterval, date, creditor, debtor, event);
+        formLayout.add(name, cost, category, description, checkboxLayout, periodUnit, periodInterval, date, payer, beneficiary, event);
         editorDiv.add(formLayout);
         createButtonLayout(editorLayoutDiv);
 
@@ -304,9 +303,5 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         boolean isPeriodicChecked = (value != null) && value.getIsPeriodic();
         periodUnit.setVisible(isPeriodicChecked);
         periodInterval.setVisible(isPeriodicChecked);
-
-        // Set selected items for creditor and debtor
-        creditor.setValue(value != null ? value.getCreditor() : null);
-        debtor.setValue(value != null ? value.getDebtor() : null);
     }
 }

@@ -26,99 +26,102 @@ public class ExpenseService {
         this.expenseRepository = expenseRepository;
     }
 
+    /**
+     * Retrieves an expense by its ID.
+     * @param id the ID of the expense
+     * @return an Optional containing the expense if found, otherwise empty
+     */
     public Optional<Expense> get(Long id) {
         return expenseRepository.findById(id);
     }
 
     /**
-     * finds all expenses tagged as debit given a user
+     * Finds all expenses where the specified person is the beneficiary.
      * @param person the user of the expenses
-     * @return the collections of expenses found
+     * @return the collection of expenses found
      */
-    public Collection<Expense> findDebtByUser(final Person person) {
-        return expenseRepository.findDebtorsExpensesByPersonId(person.getId());
+    public Collection<Expense> findExpensesWhereBeneficiary(final Person person) {
+        return expenseRepository.findExpensesByBeneficiary(person.getId());
     }
 
     /**
-     * finds all expenses tagged as credit given a user
+     * Finds all expenses where the specified person is the payer.
      * @param person the user of the expenses
-     * @return the collections of expenses found
+     * @return the collection of expenses found
      */
-    public Collection<Expense> findCreditByUser(final Person person) {
-        return expenseRepository.findCreditorsExpensesByPersonId(person.getId());
+    public Collection<Expense> findExpensesWherePayer(final Person person) {
+        return expenseRepository.findExpensesByPayer(person.getId());
     }
 
     /**
-     * finds all expenses tagged as debit and unpaid given a user
+     * Finds all expenses where the specified person is the beneficiary and the expense is unpaid.
      * @param person the user of the expenses
-     * @return the collections of expenses found
+     * @return the collection of unpaid expenses found
      */
-    public Collection<Expense> findUnpaidDebtByUser(final Person person) {
-        return expenseRepository.findUnpaidDebtorsExpensesByPersonId(person.getId());
+    public Collection<Expense> findUnpaidExpensesWhereBeneficiary(final Person person) {
+        return expenseRepository.findUnapidExpensesByBeneficiary(person.getId());
     }
 
     /**
-     * finds all expenses tagged as credit and unpaid given a user
+     * Finds all expenses where the specified person is the payer and the expense is unpaid.
      * @param person the user of the expenses
-     * @return the collections of expenses found
+     * @return the collection of unpaid expenses found
      */
-    public Collection<Expense> findUnpaidCreditByUser(final Person person) {
-        return expenseRepository.findUnpaidCreditorsExpensesByPersonId(person.getId());
+    public Collection<Expense> findUnpaidExpensesWherePayer(final Person person) {
+        return expenseRepository.findUnpaidExpensesByPayer(person.getId());
     }
 
     /**
-     * finds all expenses related to a user
+     * Finds all expenses related to a user, both where the user is a payer and a beneficiary.
      * @param person the user of the expenses
-     * @return the collections of expenses found
+     * @return the list of expenses found
      */
-    public List<Expense> findExpenseByUser(final Person person) {
-        final var credits = this.findCreditByUser(person);
-        final var debits = this.findDebtByUser(person);
-        return Stream.concat(credits.stream(), debits.stream()).toList();
+    public List<Expense> findExpensesByUser(final Person person) {
+        // Retrieve expenses where the person is the payer
+        final var payerExpenses = this.findExpensesWherePayer(person);
+        // Retrieve expenses where the person is the beneficiary
+        final var beneficiaryExpenses = this.findExpensesWhereBeneficiary(person);
+        // Combine both sets of expenses into a single list without duplicates
+        return Stream.concat(payerExpenses.stream(), beneficiaryExpenses.stream())
+                .distinct()
+                .toList();
     }
-
-    public List<Expense> findAll() {return expenseRepository.findAll();}
+    /**
+     * Retrieves all expenses.
+     * @return the list of all expenses
+     */
+    public List<Expense> findAll() {
+        return expenseRepository.findAll();
+    }
 
     /**
-     * updates an expense
-     * @param entity the expense to update
+     * Finds all expenses for a given year.
+     * @param year the year for which to find expenses
+     * @return the list of expenses found
      */
-    public void update(Expense entity) {
-        if (Boolean.TRUE.equals(entity.getIsPaid())) entity.setPaymentDate(LocalDateTime.now());
-        this.setExpenseType(entity);
-        expenseRepository.save(entity);
-    }
-
-    /**
-     * deletes an expense given the ID
-     * @param id the id of the expense to delete
-     */
-    public void delete(Long id) {
-        expenseRepository.deleteById(id);
-    }
-
-    public Page<Expense> list(Pageable pageable) {
-        return expenseRepository.findAll(pageable);
-    }
-
-    public Page<Expense> list(Pageable pageable, Specification<Expense> filter) {
-        return expenseRepository.findAll(filter, pageable);
-    }
-
-    public int count() {
-        return (int) expenseRepository.count();
-    }
-
-    public List<Expense> findAllByYear(final int year ) {
+    public List<Expense> findAllByYear(final int year) {
         return this.expenseRepository.findAllByYear(year);
     }
 
+    /**
+     * Fetches all expenses ordered by date in descending order.
+     * @return the list of expenses found
+     */
+    public List<Expense> findAllOrderByDateDescending() {
+        return this.expenseRepository.findAllByOrderByDateDesc();
+    }
+
+    /**
+     * Finds expenses by year excluding those marked as credit and paid.
+     * @param year the year for which to find expenses
+     * @return the list of expenses found
+     */
     public List<Expense> findExpensesByYearExcludingCreditPaid(int year) {
         return expenseRepository.findByYearAndFilterCreditPaid(year, ExpenseType.CREDIT);
     }
 
     /**
-     * checks if an expense has been paid
+     * Checks if an expense has been paid.
      * @param expense the expense to check
      * @return true if the expense has been paid, false otherwise
      */
@@ -127,35 +130,76 @@ public class ExpenseService {
     }
 
     /**
-     * fetches all expenses ordered by date descending
-     * @return the list of expenses found
+     * Updates an existing expense.
+     * @param entity the expense to update
      */
-    public List<Expense> findAllOrderByDateDescending() {
-        return this.expenseRepository.findAllByOrderByDateDesc();
+    public void update(Expense entity) {
+        if (Boolean.TRUE.equals(entity.getIsPaid())) {
+            entity.setPaymentDate(LocalDateTime.now());
+        }
+        this.setExpenseType(entity);
+        expenseRepository.save(entity);
     }
 
     /**
-     *  sets the Expense type depending on the presence or absence of creditors and debtors
-     *  this is used to filter expenses with a creditor that are paid, since they are not part of
-     *  the actual money the user has spent, it's just a load technically
+     * Deletes an expense given its ID.
+     * @param id the ID of the expense to delete
+     */
+    public void delete(Long id) {
+        expenseRepository.deleteById(id);
+    }
+
+    /**
+     * Lists expenses in a paginated format.
+     * @param pageable the pagination information
+     * @return a page of expenses
+     */
+    public Page<Expense> list(Pageable pageable) {
+        return expenseRepository.findAll(pageable);
+    }
+
+    /**
+     * Lists expenses in a paginated format with filtering options.
+     * @param pageable the pagination information
+     * @param filter the filter specification
+     * @return a page of expenses matching the filter
+     */
+    public Page<Expense> list(Pageable pageable, Specification<Expense> filter) {
+        return expenseRepository.findAll(filter, pageable);
+    }
+
+    /**
+     * Counts the total number of expenses.
+     * @return the count of expenses
+     */
+    public int count() {
+        return (int) expenseRepository.count();
+    }
+
+    // ================================
+    // Private methods
+    // ================================
+
+    /**
+     * Sets the expense type depending on the presence or absence of a payer and beneficiary.
+     * This is used to filter expenses where the payer has been reimbursed.
      * @param expense the expense to set the type of
      */
     private void setExpenseType(final @Nonnull Expense expense) {
-        // Check if the creditor is present
-        if (Objects.nonNull(expense.getCreditor())) {
-            // If creditor is present, set type to CREDIT
+        // Check if the payer is present
+        if (Objects.nonNull(expense.getPayer())) {
+            // If payer is present, set type to CREDIT
             expense.setExpenseType(ExpenseType.CREDIT);
         }
-        // Check if the debtor is present and no creditor
-        else if (Objects.nonNull(expense.getDebtor())) {
-            // If debtor is present and no creditor, set type to DEBIT
+        // Check if the beneficiary is present and no payer
+        else if (Objects.nonNull(expense.getBeneficiary())) {
+            // If beneficiary is present and no payer, set type to DEBIT
             expense.setExpenseType(ExpenseType.DEBIT);
         }
-        // If neither creditor nor debtor is present
+        // If neither payer nor beneficiary is present
         else {
-            // If neither creditor nor debtor is present, set type to NONE
+            // Set type to NONE
             expense.setExpenseType(ExpenseType.NONE);
         }
     }
-
 }

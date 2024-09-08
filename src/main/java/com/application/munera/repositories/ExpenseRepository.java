@@ -14,24 +14,24 @@ import java.util.Set;
 public interface ExpenseRepository extends JpaRepository<Expense, Long>, JpaSpecificationExecutor<Expense> {
 
     // Find expenses where the creditor is a specific person
-    @Query("SELECT e FROM Expense e WHERE e.creditor.id = :personId")
-    Set<Expense> findCreditorsExpensesByPersonId(@Param("personId") Long personId);
+    @Query("SELECT e FROM Expense e WHERE e.payer.id = :personId")
+    Set<Expense> findExpensesByPayer(@Param("personId") Long personId);
 
     // Find expenses where the debtor is a specific person
-    @Query("SELECT e FROM Expense e WHERE e.debtor.id = :personId")
-    Set<Expense> findDebtorsExpensesByPersonId(@Param("personId") Long personId);
+    @Query("SELECT e FROM Expense e WHERE e.beneficiary.id = :personId")
+    Set<Expense> findExpensesByBeneficiary(@Param("personId") Long personId);
 
     // Find all expenses for a given year
     @Query("SELECT e FROM Expense e WHERE YEAR(e.date) = :year")
     List<Expense> findAllByYear(@Param("year") int year);
 
     // Find unpaid expenses where the creditor is a specific person
-    @Query("SELECT e FROM Expense e WHERE e.creditor.id = :personId AND e.isPaid = false")
-    Set<Expense> findUnpaidCreditorsExpensesByPersonId(@Param("personId") Long personId);
+    @Query("SELECT e FROM Expense e WHERE e.payer.id = :personId AND e.isPaid = false")
+    Set<Expense> findUnpaidExpensesByPayer(@Param("personId") Long personId);
 
     // Find unpaid expenses where the debtor is a specific person
-    @Query("SELECT e FROM Expense e WHERE e.debtor.id = :personId AND e.isPaid = false")
-    Set<Expense> findUnpaidDebtorsExpensesByPersonId(@Param("personId") Long personId);
+    @Query("SELECT e FROM Expense e WHERE e.beneficiary.id = :personId AND e.isPaid = false")
+    Set<Expense> findUnapidExpensesByBeneficiary(@Param("personId") Long personId);
 
     // Find expenses for a given year and filter by expense type and paid status
     @Query("SELECT e FROM Expense e WHERE YEAR(e.date) = :year AND NOT (e.expenseType = :expenseType AND e.isPaid = true)")

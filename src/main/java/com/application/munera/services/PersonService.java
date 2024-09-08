@@ -9,7 +9,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -23,60 +23,108 @@ public class PersonService {
         this.expenseService = expenseService;
     }
 
+    /**
+     * Finds a person by ID.
+     * @param id the ID of the person
+     * @return an optional containing the person if found, otherwise empty
+     */
     public Optional<Person> get(Long id) {
         return personRepository.findById(id);
     }
 
-    public Collection<Person> findAll() {
+    /**
+     * Finds all persons.
+     * @return a collection of all persons
+     */
+    public List<Person> findAll() {
         return this.personRepository.findAll();
     }
 
-    public void update(Person person) {
-        this.personRepository.save(person);
-    }
-
-    public void delete(Long id) {
-        this.personRepository.deleteById(id);
-    }
-
-    public Page<Person> list(Pageable pageable){
+    /**
+     * Lists all persons with pagination.
+     * @param pageable the pagination information
+     * @return a page of persons
+     */
+    public Page<Person> list(Pageable pageable) {
         return personRepository.findAll(pageable);
     }
 
+    /**
+     * Lists all persons with pagination and filtering.
+     * @param pageable the pagination information
+     * @param filter the specification filter
+     * @return a page of persons matching the filter
+     */
     public Page<Person> list(Pageable pageable, Specification<Person> filter) {
-        return  this.personRepository.findAll(filter, pageable);
+        return this.personRepository.findAll(filter, pageable);
     }
 
+    /**
+     * Counts the total number of persons.
+     * @return the total count of persons
+     */
     public int count() {
         return (int) this.personRepository.count();
     }
 
     /**
-     * calculates the debt a certain person has
-     * @param person the person of which you want to know the debt
-     * @return the debt that a certain person has
+     * Updates a person in the repository.
+     * @param person the person to update
      */
-    public BigDecimal calculateDebt(final Person person){
-        return this.expenseService.findDebtByUser(person).stream().map(Expense::getCost).reduce(BigDecimal.ZERO, BigDecimal::add);
+    public void update(Person person) {
+        this.personRepository.save(person);
     }
 
     /**
-     * calculates the credit a certain person has
-     * @param person the person of which you want to know the credit
-     * @return the credit that a certain person has
+     * Deletes a person by ID.
+     * @param id the ID of the person to delete
+     */
+    public void delete(Long id) {
+        this.personRepository.deleteById(id);
+    }
+
+    /**
+     * Calculates the total debt of a person.
+     * @param person the person whose debt is to be calculated
+     * @return the total debt amount
+     */
+    public BigDecimal calculateDebt(final Person person) {
+        return this.expenseService.findExpensesWherePayer(person).stream()
+                .filter(expense -> !expense.getBeneficiary().equals(person) && Boolean.FALSE.equals(expense.getIsPaid()))
+                .map(Expense::getCost)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    /**
+     * Calculates the total credit of a person.
+     * @param person the person whose credit is to be calculated
+     * @return the total credit amount
      */
     public BigDecimal calculateCredit(final Person person) {
-        return this.expenseService.findCreditByUser(person).stream().map(Expense::getCost).reduce(BigDecimal.ZERO, BigDecimal::add);
+        return this.expenseService.findExpensesWhereBeneficiary(person).stream()
+                .filter(expense -> !expense.getPayer().equals(person) && Boolean.FALSE.equals(expense.getIsPaid()))
+                .map(Expense::getCost)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     /**
-     * calculates the balance of a person using the money owed or paid off to that person
-     * @param person the person of which you want to know the balance
-     * @return the amount of money owed or paid off to a certain person
+     * Calculates the net balance of a person.
+     * The net balance is the difference between the total amount the person is owed
+     * (expenses where they are the payer) and the total amount the person owes
+     * (expenses where they are the beneficiary).
+     *
+     * A positive net balance means the person is owed money.
+     * A negative net balance means the person owes money.
+     *
+     * @param person the person whose net balance is to be calculated
+     * @return the net balance amount
      */
     public BigDecimal calculateNetBalance(final Person person) {
-        final var credit = this.expenseService.findUnpaidCreditByUser(person).stream().map(Expense::getCost).reduce(BigDecimal.ZERO, BigDecimal::add);
-        final var debit = this.expenseService.findUnpaidDebtByUser(person).stream().map(Expense::getCost).reduce(BigDecimal.ZERO, BigDecimal::add);
-        return credit.subtract(debit);
+            // Calculate total debt (what others owe to the person)
+            final BigDecimal debt = this.calculateDebt(person);
+            // Calculate total credit (what the person owes to others)
+            final BigDecimal credit = this.calculateCredit(person);
+            // Net balance calculation: debt (owed to the person) - credit (person owes)
+            return debt.subtract(credit);
     }
 }

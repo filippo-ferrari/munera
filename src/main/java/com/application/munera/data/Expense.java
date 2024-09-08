@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Table(name = "expenses")
-public class Expense extends AbstractEntity {
+public class Expense {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,11 +46,11 @@ public class Expense extends AbstractEntity {
 
     @ManyToOne
     @JoinColumn(name = "CreditorId")
-    private Person creditor;
+    private Person payer;
 
     @ManyToOne
     @JoinColumn(name = "DebtorId")
-    private Person debtor;
+    private Person beneficiary;
 
     @ManyToOne
     @JoinColumn(name = "EventId")
