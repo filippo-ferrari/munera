@@ -40,6 +40,15 @@ public class PersonService {
         return this.personRepository.findAll();
     }
 
+
+    /**
+     * Finds all people excluding the users'ones.
+     * @return a collection of all persons
+     */
+    public List<Person> findAllExcludeUsers() {
+        return this.personRepository.findAllExcludeUser();
+    }
+
     /**
      * Lists all persons with pagination.
      * @param pageable the pagination information

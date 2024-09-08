@@ -152,22 +152,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
             }
         });
 
-        //TODO: THIS NEEDS TO BE IMPLEMENTED BUT FOR THE SINGLE PERSON NOW, STILL NEEDED
-//        // Event listeners that will remove the selected creditors from the debtors list and vice versa
-//        // Done so that the user cant create an expense with the same person as creditor and debtor
-//        payer.addValueChangeListener(event -> {
-//            Person selectedDebtors = event.getValue();
-//            final var creditorsSet = new HashSet<>(personService.findAll());
-//            creditorsSet.removeIf(creditorsSet.contains(selectedDebtors));
-//            payer.setItems(creditorsSet);
-//        });
-//
-//        creditors.addValueChangeListener(event -> {
-//            Set<Person> selectedCreditors = event.getValue();
-//            final var debtorsSet = new HashSet<>(personService.findAll());
-//            debtorsSet.removeIf(selectedCreditors::contains);
-//            debtors.setItems(debtorsSet);
-//        });
+
 
         cancel.addClickListener(e -> {
             clearForm();

@@ -93,7 +93,7 @@ public class PeopleView extends Div implements BeforeEnterObserver {
             }
         })).setHeader("Actions");
 
-        List<Person> people =  personService.findAll();
+        List<Person> people =  personService.findAllExcludeUsers();
 
         this.setGridData(people);
 
