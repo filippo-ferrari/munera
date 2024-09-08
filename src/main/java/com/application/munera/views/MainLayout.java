@@ -3,8 +3,9 @@ package com.application.munera.views;
 import com.application.munera.views.categories.CategoriesView;
 import com.application.munera.views.dashboard.DashboardView;
 import com.application.munera.views.events.EventsView;
-import com.application.munera.views.expenses.*;
+import com.application.munera.views.expenses.ExpensesView;
 import com.application.munera.views.people.PeopleView;
+import com.application.munera.views.settings.SettingsView;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.button.Button;
@@ -21,8 +22,6 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import org.vaadin.lineawesome.LineAwesomeIcon;
-
-import javax.swing.*;
 
 /**
  * The main view is a top-level placeholder for other views.
@@ -94,6 +93,7 @@ public class MainLayout extends AppLayout {
         nav.addItem(new SideNavItem("People", PeopleView.class, LineAwesomeIcon.USER.create()));
         nav.addItem(new SideNavItem("Events", EventsView.class, LineAwesomeIcon.BANDCAMP.create()));
         nav.addItem(new SideNavItem("Dashboard", DashboardView.class, LineAwesomeIcon.CHART_LINE_SOLID.create()));
+        nav.addItem(new SideNavItem("Settings", SettingsView.class, LineAwesomeIcon.COG_SOLID.create()));
 
         return nav;
     }
