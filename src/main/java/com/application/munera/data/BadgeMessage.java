@@ -4,11 +4,11 @@ import lombok.Getter;
 
 @Getter
 public enum BadgeMessage {
-    PAID_TO_SOMEONE("Paid to someone", "badge success"),
-    PAID_TO_YOU("Paid to you", "badge success"),
+    PAID_TO_ME("Paid to me", "badge success"),
+    PAID_BY_ME("Paid by me", "badge success"),
     PAID("Paid", "badge success"),
-    OWED_BY_SOMEONE("Owed by someone", "badge warning"),
-    OWED_TO_YOU("Owed to you", "badge warning"),
+    OWED_TO_ME("Owed to me", "badge warning"),
+    OWED_BY_ME("Owed by me", "badge warning"),
     NOT_PAID("Not paid", "badge warning"),
     UNKNOWN("Unknown status", "badge error");
 

@@ -9,11 +9,11 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 
 @Service
-public class ViewService {
+public class ServiceView {
 
     private final ExpenseService expenseService;
 
-    public ViewService(ExpenseService expenseService) {
+    public ServiceView(ExpenseService expenseService) {
         this.expenseService = expenseService;
     }
 
@@ -45,8 +45,8 @@ public class ViewService {
 
     private BadgeMessage determineBadgeMessage(ExpenseType type, boolean isPaid) {
         return switch (type) {
-            case CREDIT -> isPaid ? BadgeMessage.PAID_TO_SOMEONE : BadgeMessage.OWED_BY_SOMEONE;
-            case DEBIT -> isPaid ? BadgeMessage.PAID_TO_YOU : BadgeMessage.OWED_TO_YOU;
+            case CREDIT -> isPaid ? BadgeMessage.PAID_TO_ME : BadgeMessage.OWED_TO_ME;
+            case DEBIT -> isPaid ? BadgeMessage.PAID_BY_ME : BadgeMessage.OWED_BY_ME;
             case NONE -> isPaid ? BadgeMessage.PAID : BadgeMessage.NOT_PAID;
             default -> BadgeMessage.UNKNOWN;
         };

@@ -1,19 +1,22 @@
 package com.application.munera.services;
 
+import com.application.munera.SecurityUtils;
 import com.application.munera.data.Expense;
 import com.application.munera.data.ExpenseType;
 import com.application.munera.data.Person;
 import com.application.munera.repositories.ExpenseRepository;
+import com.application.munera.repositories.PersonRepository;
+import com.application.munera.repositories.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -21,9 +24,13 @@ import java.util.stream.Stream;
 public class ExpenseService {
 
     private final ExpenseRepository expenseRepository;
+    private final UserRepository userRepository;
+    private final PersonRepository personRepository;
 
-    public ExpenseService(ExpenseRepository expenseRepository) {
+    public ExpenseService(ExpenseRepository expenseRepository, UserRepository userRepository, PersonRepository personRepository) {
         this.expenseRepository = expenseRepository;
+        this.userRepository =  userRepository;
+        this.personRepository = personRepository;
     }
 
     /**
@@ -134,9 +141,7 @@ public class ExpenseService {
      * @param entity the expense to update
      */
     public void update(Expense entity) {
-        if (Boolean.TRUE.equals(entity.getIsPaid())) {
-            entity.setPaymentDate(LocalDateTime.now());
-        }
+        if (Boolean.TRUE.equals(entity.getIsPaid())) entity.setPaymentDate(LocalDateTime.now());
         this.setExpenseType(entity);
         expenseRepository.save(entity);
     }
@@ -182,23 +187,34 @@ public class ExpenseService {
 
     /**
      * Sets the expense type depending on the presence or absence of a payer and beneficiary.
-     * This is used to filter expenses where the payer has been reimbursed.
      * @param expense the expense to set the type of
      */
     private void setExpenseType(final @Nonnull Expense expense) {
-        // Check if the payer is present
-        if (Objects.nonNull(expense.getPayer())) {
-            // If payer is present, set type to CREDIT
+        // Get the currently logged-in user
+        UserDetails userDetails = SecurityUtils.getLoggedInUserDetails();
+        if (userDetails == null) {
+            throw new IllegalStateException("No logged-in user found");
+        }
+
+        // Fetch the logged-in user
+        final var loggedInUserId = userRepository.findByUsername(userDetails.getUsername()).getId();
+        Person loggedInPerson = this.personRepository.findByUserId(loggedInUserId).orElse(null);
+
+        if (loggedInPerson == null) throw new IllegalStateException("No associated Person entity found for logged-in user");
+
+        // Check if the payer and beneficiary are present
+        Person payer = expense.getPayer();
+        Person beneficiary = expense.getBeneficiary();
+
+        // Determine the expense type
+        if (payer.equals(loggedInPerson) && !beneficiary.equals(loggedInPerson)) {
+            // Logged-in user is the payer, and the beneficiary is someone else
             expense.setExpenseType(ExpenseType.CREDIT);
-        }
-        // Check if the beneficiary is present and no payer
-        else if (Objects.nonNull(expense.getBeneficiary())) {
-            // If beneficiary is present and no payer, set type to DEBIT
+        } else if (!payer.equals(loggedInPerson) && beneficiary.equals(loggedInPerson)) {
+            // Logged-in user is the beneficiary, and the payer is someone else
             expense.setExpenseType(ExpenseType.DEBIT);
-        }
-        // If neither payer nor beneficiary is present
-        else {
-            // Set type to NONE
+        } else if (payer.equals(loggedInPerson) &&  beneficiary.equals(loggedInPerson)) {
+            // Both payer and beneficiary are the logged-in user
             expense.setExpenseType(ExpenseType.NONE);
         }
     }
