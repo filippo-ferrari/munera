@@ -1,5 +1,6 @@
 package com.application.munera.views.expenses;
 
+import com.application.munera.SecurityUtils;
 import com.application.munera.data.*;
 import com.application.munera.services.*;
 import com.application.munera.views.MainLayout;
@@ -27,7 +28,9 @@ import com.vaadin.flow.data.converter.StringToBigDecimalConverter;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.*;
 import jakarta.annotation.security.PermitAll;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.vaadin.klaudeta.PaginatedGrid;
 
 import java.util.Objects;
@@ -57,6 +60,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
     private final PersonService personService;
     private final EventService eventService;
     private final ViewService viewService;
+    private final UserService userService;
     private TextField name;
     private TextField cost;
     private ComboBox<Category> category;
@@ -70,12 +74,14 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
     private ComboBox<Person> beneficiary;
     private ComboBox<Event> event;
 
-    public ExpensesView(ExpenseService expenseService, CategoryService categoryService, PersonService personService, EventService eventService, ViewService viewService) {
+    @Autowired
+    public ExpensesView(ExpenseService expenseService, CategoryService categoryService, PersonService personService, EventService eventService, ViewService viewService, UserService userService) {
         this.expenseService = expenseService;
         this.categoryService = categoryService;
         this.personService = personService;
         this.eventService = eventService;
         this.viewService = viewService;
+        this.userService =  userService;
         addClassNames("expenses-view");
 
         // Create UI
@@ -152,7 +158,21 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
             }
         });
 
-
+//        // Event listeners that will remove the selected creditors from the debtors list and vice versa
+//        // Done so that the user cant create an expense with the same person as creditor and debtor
+//        payer.addValueChangeListener(event -> {
+//            Person selectedDebtors = event.getValue();
+//            final var creditorsSet = new HashSet<>(personService.findAllWithoutUser());
+//            creditorsSet.removeIf(creditorsSet::contains);
+//            payer.setItems(creditorsSet);
+//        });
+//
+//        beneficiary.addValueChangeListener(event -> {
+//            Person selectedCreditors = event.getValue();
+//            final var debtorsSet = new HashSet<>(personService.findAllWithoutUser());
+//            debtorsSet.removeIf(debtorsSet::contains);
+//            beneficiary.setItems(debtorsSet);
+//        });
 
         cancel.addClickListener(e -> {
             clearForm();
@@ -193,10 +213,14 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
                 n.addThemeVariants(NotificationVariant.LUMO_ERROR);
             }
         });
+
+        // Initialize ComboBox with the logged-in user's Person entity as default
+        initializeComboBoxes();
     }
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
+        initializeComboBoxes();
         Optional<Long> expenseId = event.getRouteParameters().get(EXPENSE_ID).map(Long::parseLong);
         if (expenseId.isPresent()) {
             Optional<Expense> expenseFromBackend = expenseService.get(expenseId.get());
@@ -288,5 +312,23 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         boolean isPeriodicChecked = (value != null) && value.getIsPeriodic();
         periodUnit.setVisible(isPeriodicChecked);
         periodInterval.setVisible(isPeriodicChecked);
+    }
+
+    private void initializeComboBoxes() {
+        // Fetch the logged-in user's Person entity
+        UserDetails userDetails = SecurityUtils.getLoggedInUserDetails();
+        if (userDetails != null) {
+            String username = userDetails.getUsername();
+            final var user = this.userService.findByUsername(username);
+            if (user != null) {
+                Optional<Person> loggedInPerson = personService.findByUserId(user.getId());
+                if (loggedInPerson.isPresent()) {
+                    Person person = loggedInPerson.get();
+                    // Set default values for payer and beneficiary ComboBoxes
+                    payer.setValue(person);
+                    beneficiary.setValue(person);
+                }
+            }
+        }
     }
 }

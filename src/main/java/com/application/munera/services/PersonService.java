@@ -40,6 +40,9 @@ public class PersonService {
         return this.personRepository.findAll();
     }
 
+    public Optional<Person> findByUserId(Long id) {
+        return this.personRepository.findByUserId(id);
+    }
 
     /**
      * Finds all people excluding the users'ones.

@@ -50,7 +50,7 @@ public class Person extends AbstractEntity {
     @ManyToMany(mappedBy = "participants")
     private Set<Event> events;
 
-    @Column(name = "Username", unique = true, nullable = false)
+    @Column(name = "Username", unique = true)
     private String username; // This field will link to the User entity
 
     @Column(name = "UserId", unique = true)
