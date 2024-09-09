@@ -1,4 +1,4 @@
-package com.application.munera;
+package com.application.munera.security;
 
 import com.application.munera.repositories.UserRepository;
 import com.application.munera.views.login.LoginView;

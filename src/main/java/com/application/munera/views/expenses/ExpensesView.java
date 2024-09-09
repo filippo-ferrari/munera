@@ -1,6 +1,6 @@
 package com.application.munera.views.expenses;
 
-import com.application.munera.SecurityUtils;
+import com.application.munera.security.SecurityUtils;
 import com.application.munera.data.*;
 import com.application.munera.services.*;
 import com.application.munera.views.MainLayout;

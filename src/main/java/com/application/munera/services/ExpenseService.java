@@ -1,6 +1,6 @@
 package com.application.munera.services;
 
-import com.application.munera.SecurityUtils;
+import com.application.munera.security.SecurityUtils;
 import com.application.munera.data.Expense;
 import com.application.munera.data.ExpenseType;
 import com.application.munera.data.Person;

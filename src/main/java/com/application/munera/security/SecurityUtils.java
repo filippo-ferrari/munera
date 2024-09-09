@@ -1,4 +1,4 @@
-package com.application.munera;
+package com.application.munera.security;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;

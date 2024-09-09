@@ -40,7 +40,6 @@ public class Person extends AbstractEntity {
     @Column(name = "credit")
     private BigDecimal credit;
 
-    // Updated to match the new field names in Expense
     @OneToMany(mappedBy = "payer")
     private Set<Expense> expensesAsPayer;
 
