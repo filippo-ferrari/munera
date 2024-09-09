@@ -1,6 +1,7 @@
-package com.application.munera.security;
+package com.application.munera.initializers;
 
 import com.application.munera.data.User;
+import com.application.munera.security.AdminProperties;
 import com.application.munera.services.UserService;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -37,4 +37,12 @@ public class CategoryService {
     public Page<Category> list(Pageable pageable){
         return categoryRepository.findAll(pageable);
     }
+
+    public Long count() {
+        return this.categoryRepository.count();
+    }
+
+    public Category save(Category category) {
+        return this.categoryRepository.save(category);
+    }
 }
