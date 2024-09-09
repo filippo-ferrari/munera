@@ -6,6 +6,8 @@
 .classpath
 .env
 
+src/main/resources/*.sql
+
 # Ignore profile-specific properties files
 application-*.properties
 
