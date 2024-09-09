@@ -4,7 +4,7 @@ import com.application.munera.data.Expense;
 import com.application.munera.data.Person;
 import com.application.munera.services.ExpenseService;
 import com.application.munera.services.PersonService;
-import com.application.munera.services.ServiceView;
+import com.application.munera.services.ViewsService;
 import com.application.munera.views.MainLayout;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -56,15 +56,15 @@ public class PeopleView extends Div implements BeforeEnterObserver {
     private Person person;
     private final PersonService personService;
     private final ExpenseService expenseService;
-    private final ServiceView serviceView;
+    private final ViewsService viewsService;
     private TextField firstName;
     private TextField lastName;
     private EmailField email;
 
-    public PeopleView(PersonService personService, ExpenseService expenseService, ServiceView serviceView) {
+    public PeopleView(PersonService personService, ExpenseService expenseService, ViewsService viewsService) {
         this.personService = personService;
         this.expenseService = expenseService;
-        this.serviceView = serviceView;
+        this.viewsService = viewsService;
         addClassNames("expenses-view");
 
         // Create UI
@@ -79,8 +79,8 @@ public class PeopleView extends Div implements BeforeEnterObserver {
         grid.addHierarchyColumn(this::getNodeName).setHeader("Name");
         grid.addColumn(this::getNodeCost).setHeader("Total Expenses Value").setSortable(true);
         grid.addColumn(new ComponentRenderer<>(persona -> {
-            if (persona instanceof Person) return this.serviceView.createPersonBadge(personService.calculateNetBalance((Person) persona));
-            else return this.serviceView.createExpenseBadge(((Expense) persona));
+            if (persona instanceof Person) return this.viewsService.createPersonBadge(personService.calculateNetBalance((Person) persona));
+            else return this.viewsService.createExpenseBadge(((Expense) persona));
         })).setHeader("Balance Status");
 
         grid.addColumn(new ComponentRenderer<>(persona -> {

@@ -59,7 +59,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
     private final CategoryService categoryService;
     private final PersonService personService;
     private final EventService eventService;
-    private final ServiceView serviceView;
+    private final ViewsService viewsService;
     private final UserService userService;
     private TextField name;
     private TextField cost;
@@ -75,12 +75,12 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
     private ComboBox<Event> event;
 
     @Autowired
-    public ExpensesView(ExpenseService expenseService, CategoryService categoryService, PersonService personService, EventService eventService, ServiceView serviceView, UserService userService) {
+    public ExpensesView(ExpenseService expenseService, CategoryService categoryService, PersonService personService, EventService eventService, ViewsService viewsService, UserService userService) {
         this.expenseService = expenseService;
         this.categoryService = categoryService;
         this.personService = personService;
         this.eventService = eventService;
-        this.serviceView = serviceView;
+        this.viewsService = viewsService;
         this.userService =  userService;
         addClassNames("expenses-view");
 
@@ -100,7 +100,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         grid.addColumn(Expense::getPeriodUnit).setHeader("Period Unit").setSortable(true);
         grid.addColumn(Expense::getDate).setHeader("Date").setSortable(true).setSortProperty("date");
         // grid.addColumn(expenseEvent -> expenseEvent.getEvent().getName()).setHeader("Event").setSortable(true);
-        grid.addColumn(new ComponentRenderer<>(this.serviceView::createExpenseBadge)).setHeader("Status").setSortable(true);
+        grid.addColumn(new ComponentRenderer<>(this.viewsService::createExpenseBadge)).setHeader("Status").setSortable(true);
         grid.getColumns().forEach(col -> col.setAutoWidth(true));
 
         grid.setItems(this.expenseService.findAllOrderByDateDescending());

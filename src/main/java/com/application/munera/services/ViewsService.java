@@ -9,11 +9,11 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 
 @Service
-public class ServiceView {
+public class ViewsService {
 
     private final ExpenseService expenseService;
 
-    public ServiceView(ExpenseService expenseService) {
+    public ViewsService(ExpenseService expenseService) {
         this.expenseService = expenseService;
     }
 
