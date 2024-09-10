@@ -88,6 +88,10 @@ public class PeopleView extends Div implements BeforeEnterObserver {
                 Button setDebtPaidButton = new Button("Set all debt as paid", event -> setDebtPaid((Person) persona));
                 setDebtPaidButton.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_PRIMARY);
                 return setDebtPaidButton;
+            } else if (persona instanceof Expense) {
+                Button setExpensePaidButton = new Button("Set as paid", event -> setExpensePaid((Expense) persona));
+                setExpensePaidButton.addThemeVariants(ButtonVariant.LUMO_SMALL);
+                return setExpensePaidButton;
             } else return new Span();
         }));
 
@@ -261,6 +265,7 @@ public class PeopleView extends Div implements BeforeEnterObserver {
         }
     }
 
+    //TODO: this needs to be in the person service?
     private void setDebtPaid(Person person) {
         try {
             List<Expense> expenses = expenseService.findExpensesWherePayer(person).stream().toList();
@@ -277,6 +282,15 @@ public class PeopleView extends Div implements BeforeEnterObserver {
         }
     }
 
+    //TODO: this needs to be in the expense service?
+    private void setExpensePaid(Expense expense) {
+        expense.setIsPaid(true);
+        this.expenseService.update(expense);
+        Notification.show("Expense " + expense.getName() + " set as paid" );
+        refreshGrid();
+    }
+
+    //TODO: this needs to be in the person service?
     private void setCreditPaid(Person person) {
         try {
             List<Expense> expenses = expenseService.findExpensesWhereBeneficiary(person).stream().toList();
