@@ -2,6 +2,8 @@ package com.application.munera.views.people;
 
 import com.application.munera.data.Expense;
 import com.application.munera.data.Person;
+import com.application.munera.facades.ExpenseFacade;
+import com.application.munera.facades.PersonFacade;
 import com.application.munera.services.ExpenseService;
 import com.application.munera.services.PersonService;
 import com.application.munera.services.ViewsService;
@@ -55,16 +57,20 @@ public class PeopleView extends Div implements BeforeEnterObserver {
 
     private Person person;
     private final PersonService personService;
+    private final PersonFacade personFacade;
+    private final ExpenseFacade expenseFacade;
     private final ExpenseService expenseService;
     private final ViewsService viewsService;
     private TextField firstName;
     private TextField lastName;
     private EmailField email;
 
-    public PeopleView(PersonService personService, ExpenseService expenseService, ViewsService viewsService) {
+    public PeopleView(PersonService personService, ExpenseService expenseService, ViewsService viewsService, PersonFacade personFacade, ExpenseFacade expenseFacade) {
         this.personService = personService;
         this.expenseService = expenseService;
         this.viewsService = viewsService;
+        this.personFacade = personFacade;
+        this.expenseFacade = expenseFacade;
         addClassNames("expenses-view");
 
         // Create UI
@@ -85,11 +91,11 @@ public class PeopleView extends Div implements BeforeEnterObserver {
 
         grid.addColumn(new ComponentRenderer<>(persona -> {
             if (persona instanceof Person) {
-                Button setDebtPaidButton = new Button("Set all debt as paid", event -> setDebtPaid((Person) persona));
+                Button setDebtPaidButton = new Button("Set all debt as paid", event -> this.personFacade.setDebtPaid((Person) persona, grid));
                 setDebtPaidButton.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_PRIMARY);
                 return setDebtPaidButton;
             } else if (persona instanceof Expense) {
-                Button setExpensePaidButton = new Button("Set as paid", event -> setExpensePaid((Expense) persona));
+                Button setExpensePaidButton = new Button("Set as paid", event -> this.expenseFacade.setExpensePaid((Expense) persona, grid));
                 setExpensePaidButton.addThemeVariants(ButtonVariant.LUMO_SMALL);
                 return setExpensePaidButton;
             } else return new Span();
@@ -97,7 +103,7 @@ public class PeopleView extends Div implements BeforeEnterObserver {
 
         grid.addColumn(new ComponentRenderer<>(persona -> {
             if (persona instanceof Person) {
-                Button setCreditPaidButton = new Button("Set all credit as paid", event -> setCreditPaid((Person) persona));
+                Button setCreditPaidButton = new Button("Set all credit as paid", event -> this.personFacade.setCreditPaid((Person) persona, grid));
                 setCreditPaidButton.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_PRIMARY);
                 return setCreditPaidButton;
             } else return new Span();
@@ -262,48 +268,6 @@ public class PeopleView extends Div implements BeforeEnterObserver {
 
             // Add each expense as a child item under the person
             for (Expense expense : expenses) grid.getTreeData().addItem(user, expense);
-        }
-    }
-
-    //TODO: this needs to be in the person service?
-    private void setDebtPaid(Person person) {
-        try {
-            List<Expense> expenses = expenseService.findExpensesWherePayer(person).stream().toList();
-            for (Expense expense : expenses) {
-                expense.setIsPaid(true);
-                expenseService.update(expense);
-            }
-            Notification.show("All expenses marked as paid for " + person.getFirstName() + " " + person.getLastName());
-            refreshGrid();
-        } catch (Exception e) {
-            Notification n = Notification.show("Error marking expenses as paid: " + e.getMessage());
-            n.setPosition(Position.MIDDLE);
-            n.addThemeVariants(NotificationVariant.LUMO_ERROR);
-        }
-    }
-
-    //TODO: this needs to be in the expense service?
-    private void setExpensePaid(Expense expense) {
-        expense.setIsPaid(true);
-        this.expenseService.update(expense);
-        Notification.show("Expense " + expense.getName() + " set as paid" );
-        refreshGrid();
-    }
-
-    //TODO: this needs to be in the person service?
-    private void setCreditPaid(Person person) {
-        try {
-            List<Expense> expenses = expenseService.findExpensesWhereBeneficiary(person).stream().toList();
-            for (Expense expense : expenses) {
-                expense.setIsPaid(true);
-                expenseService.update(expense);
-            }
-            Notification.show("All expenses marked as paid for " + person.getFirstName() + " " + person.getLastName());
-            refreshGrid();
-        } catch (Exception e) {
-            Notification n = Notification.show("Error marking expenses as paid: " + e.getMessage());
-            n.setPosition(Position.MIDDLE);
-            n.addThemeVariants(NotificationVariant.LUMO_ERROR);
         }
     }
 }
