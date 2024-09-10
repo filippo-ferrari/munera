@@ -38,9 +38,9 @@ class PersonServiceTest {
         person2.setLastName("second");
         person2.setFirstName("person");
 
-        Person person3 = new Person();
-        person3.setLastName("third");
-        person3.setFirstName("person");
+//        Person person3 = new Person();
+//        person3.setLastName("third");
+//        person3.setFirstName("person");
 
         Expense expense1 = mock(Expense.class);
         when(expense1.getPayer()).thenReturn(person);

@@ -37,6 +37,10 @@ public class UserService {
         return null;
     }
 
+    /**
+     * Updates the user's data and its connected person entity
+     * @param user the user of which we update the data
+     */
     public void updateUser(User user) {
         userRepository.save(user);
         final var person = personRepository.findByUserId(user.getId())
@@ -46,7 +50,13 @@ public class UserService {
         personRepository.save(person);
     }
 
+    /**
+     * Saves a user and connected person entity
+     * @param user the user of which we update the data
+     */
     public void saveUserAndConnectedPerson(User user) {
+        //TODO: look if this method can substitute the one above: updateUser, they seem to do similar things
+
         // Check if the user already exists in the database
         final var existingUserOptional = userRepository.findOptionalByUsername(user.getUsername());
 

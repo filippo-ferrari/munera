@@ -183,6 +183,12 @@ public class ExpenseService {
         return (int) expenseRepository.count();
     }
 
+    /**
+     * Fetches the yearly net expenses of the user
+     * @param loggedInPerson the logged-in user
+     * @param year the year from which we want the expenses
+     * @return the list of expenses of that user in that year
+     */
     public List<Expense> fetchExpensesForDashboard(Person loggedInPerson, Year year) {
         List<Expense> totalExpenses = new ArrayList<>();
         final var yearValue = year.getValue();
@@ -218,7 +224,6 @@ public class ExpenseService {
         if (userDetails == null) {
             throw new IllegalStateException("No logged-in user found");
         }
-
         // Fetch the logged-in user
         final var loggedInUserId = userRepository.findByUsername(userDetails.getUsername()).getId();
         Person loggedInPerson = this.personRepository.findByUserId(loggedInUserId).orElse(null);
