@@ -97,6 +97,7 @@ public class PeopleView extends Div implements BeforeEnterObserver {
             } else if (persona instanceof Expense) {
                 Button setExpensePaidButton = new Button("Set as paid", event -> this.expenseFacade.setExpensePaid((Expense) persona, grid));
                 setExpensePaidButton.addThemeVariants(ButtonVariant.LUMO_SMALL);
+                if (Boolean.TRUE.equals(((Expense) persona).getIsPaid())) setExpensePaidButton.setEnabled(false);
                 return setExpensePaidButton;
             } else return new Span();
         }));
