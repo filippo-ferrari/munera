@@ -42,10 +42,9 @@ public class SecurityConfiguration extends VaadinWebSecurity {
         return new InMemoryUserDetailsManager() {
             @Override
             public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-                 com.application.munera.data.User user = userRepository.findByUsername(username);
-                if (user == null) {
-                    throw new UsernameNotFoundException("User not found");
-                }
+                final var user = userRepository.findByUsername(username)
+                        .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
                 return User.withUsername(user.getUsername())
                         .password(user.getPassword())
                         .roles(user.getRoles().split(","))

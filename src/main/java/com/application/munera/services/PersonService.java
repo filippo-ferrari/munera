@@ -6,6 +6,7 @@ import com.application.munera.repositories.PersonRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -88,7 +89,7 @@ public class PersonService {
      * @return Person entity of the logged-in user, or null if not found.
      */
     public Person getLoggedInPerson() {
-        final var user = userService.getLoggedInUser();
+        final var user = userService.getLoggedInUser().orElseThrow(() -> new UsernameNotFoundException("User not found"));
         return Objects.requireNonNull(personRepository.findByUserId(user.getId()).orElse(null));
     }
 

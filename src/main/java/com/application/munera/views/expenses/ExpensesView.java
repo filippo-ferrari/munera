@@ -31,6 +31,7 @@ import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.vaadin.klaudeta.PaginatedGrid;
 
 import java.util.Objects;
@@ -319,8 +320,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         UserDetails userDetails = SecurityUtils.getLoggedInUserDetails();
         if (userDetails != null) {
             String username = userDetails.getUsername();
-            final var user = this.userService.findByUsername(username);
-            if (user != null) {
+            final var user = this.userService.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("User not found"));
                 Optional<Person> loggedInPerson = personService.findByUserId(user.getId());
                 if (loggedInPerson.isPresent()) {
                     Person person = loggedInPerson.get();
@@ -328,7 +328,6 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
                     payer.setValue(person);
                     beneficiary.setValue(person);
                 }
-            }
         }
     }
 }

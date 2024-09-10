@@ -1,6 +1,5 @@
 package com.application.munera.views.settings;
 
-import com.application.munera.data.User;
 import com.application.munera.services.UserService;
 import com.application.munera.views.MainLayout;
 import com.vaadin.flow.component.button.Button;
@@ -17,6 +16,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 @PageTitle("Settings")
 @PermitAll
@@ -54,9 +54,8 @@ public class SettingsView extends VerticalLayout implements BeforeEnterObserver 
     }
 
     private void saveUserData() {
-        User loggedInUser = userService.getLoggedInUser();
+        final var loggedInUser = userService.getLoggedInUser().orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        // Assuming you have methods to update user details
         loggedInUser.setFirstName(firstNameField.getValue());
         loggedInUser.setLastName(lastNameField.getValue());
 
@@ -76,7 +75,7 @@ public class SettingsView extends VerticalLayout implements BeforeEnterObserver 
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
-        final var loggedInUser = userService.getLoggedInUser();
+        final var loggedInUser = userService.getLoggedInUser().orElseThrow(() -> new UsernameNotFoundException("User not found"));
         firstNameField.setValue(loggedInUser.getFirstName());
         lastNameField.setValue(loggedInUser.getLastName());
         monthlyIncomeField.setValue(""); //TODO: implement monthly income

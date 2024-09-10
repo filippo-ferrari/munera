@@ -1,16 +1,17 @@
 package com.application.munera.services;
 
-import com.application.munera.security.SecurityUtils;
 import com.application.munera.data.Expense;
 import com.application.munera.data.ExpenseType;
 import com.application.munera.data.Person;
 import com.application.munera.repositories.ExpenseRepository;
 import com.application.munera.repositories.PersonRepository;
 import com.application.munera.repositories.UserRepository;
+import com.application.munera.security.SecurityUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
@@ -225,7 +226,8 @@ public class ExpenseService {
             throw new IllegalStateException("No logged-in user found");
         }
         // Fetch the logged-in user
-        final var loggedInUserId = userRepository.findByUsername(userDetails.getUsername()).getId();
+        final var loggedInUserId = userRepository.findByUsername(userDetails.getUsername())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found")).getId();
         Person loggedInPerson = this.personRepository.findByUserId(loggedInUserId).orElse(null);
 
         if (loggedInPerson == null) throw new IllegalStateException("No associated Person entity found for logged-in user");

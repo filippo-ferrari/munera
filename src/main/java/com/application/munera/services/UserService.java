@@ -7,6 +7,8 @@ import com.application.munera.repositories.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 import static com.application.munera.security.SecurityUtils.getLoggedInUserDetails;
 
 @Service
@@ -20,15 +22,16 @@ public class UserService {
         this.personRepository = personRepository;
     }
 
-    public User findByUsername (String username) {
+    public Optional<User> findByUsername (String username) {
         return this.userRepository.findByUsername(username);
     }
 
     /**
      * Fetches the logged-in User entity.
+     *
      * @return User entity of the logged-in user, or null if not found.
      */
-    public User getLoggedInUser() {
+    public Optional<User> getLoggedInUser() {
         UserDetails userDetails = getLoggedInUserDetails();
         if (userDetails != null) {
             String username = userDetails.getUsername();
@@ -58,7 +61,7 @@ public class UserService {
         //TODO: look if this method can substitute the one above: updateUser, they seem to do similar things
 
         // Check if the user already exists in the database
-        final var existingUserOptional = userRepository.findOptionalByUsername(user.getUsername());
+        final var existingUserOptional = userRepository.findByUsername(user.getUsername());
 
         User existingUser;
 
