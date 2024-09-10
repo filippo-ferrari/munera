@@ -120,7 +120,6 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
 
         // Configure Form
         binder = new BeanValidationBinder<>(Expense.class);
-
         // Bind fields. This is where you'd define e.g. validation rules
         binder.bindInstanceFields(this);
         binder.forField(name)

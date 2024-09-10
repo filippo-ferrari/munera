@@ -8,6 +8,7 @@ import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.BeforeEnterEvent;
@@ -30,6 +31,7 @@ public class SettingsView extends VerticalLayout implements BeforeEnterObserver 
     private TextField lastNameField;
     private PasswordField passwordField;
     private TextField monthlyIncomeField;
+    private EmailField emailField;
 
     @Autowired
     public SettingsView(UserService userService) {
@@ -44,9 +46,10 @@ public class SettingsView extends VerticalLayout implements BeforeEnterObserver 
         firstNameField = new TextField("First Name");
         lastNameField = new TextField("Last Name");
         passwordField = new PasswordField("Password");
+        emailField = new EmailField("Email");
         monthlyIncomeField = new TextField("Monthly Income");
 
-        formLayout.add(firstNameField, lastNameField, passwordField, monthlyIncomeField);
+        formLayout.add(firstNameField, lastNameField, passwordField, emailField, monthlyIncomeField);
 
         Button saveButton = new Button("Save", click -> saveUserData());
 
@@ -58,18 +61,17 @@ public class SettingsView extends VerticalLayout implements BeforeEnterObserver 
 
         loggedInUser.setFirstName(firstNameField.getValue());
         loggedInUser.setLastName(lastNameField.getValue());
+        loggedInUser.setEmail(emailField.getValue());
 
         // Only update the password if it's not empty
         if (!passwordField.isEmpty()) {
             loggedInUser.setPassword(passwordField.getValue());
         }
 
-        // Handle saving the monthly income separately if needed
-        // For now, we'll just print it out
+        // TODO: implement
         String monthlyIncome = monthlyIncomeField.getValue();
-        System.out.println("Monthly Income: " + monthlyIncome);
 
-        userService.updateUser(loggedInUser);
+        userService.updateUserAndConnectedPerson(loggedInUser);
         Notification.show("User details updated successfully");
     }
 
@@ -78,6 +80,6 @@ public class SettingsView extends VerticalLayout implements BeforeEnterObserver 
         final var loggedInUser = userService.getLoggedInUser().orElseThrow(() -> new UsernameNotFoundException("User not found"));
         firstNameField.setValue(loggedInUser.getFirstName());
         lastNameField.setValue(loggedInUser.getLastName());
-        monthlyIncomeField.setValue(""); //TODO: implement monthly income
+        monthlyIncomeField.setValue("");
     }
 }

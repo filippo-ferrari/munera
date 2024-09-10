@@ -4,6 +4,7 @@ import com.application.munera.data.Person;
 import com.application.munera.data.User;
 import com.application.munera.repositories.PersonRepository;
 import com.application.munera.repositories.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -44,12 +45,14 @@ public class UserService {
      * Updates the user's data and its connected person entity
      * @param user the user of which we update the data
      */
-    public void updateUser(User user) {
+    @Transactional
+    public void updateUserAndConnectedPerson(User user) {
         userRepository.save(user);
         final var person = personRepository.findByUserId(user.getId())
                 .orElseThrow(() -> new IllegalStateException("Associated Person not found"));
         person.setFirstName(user.getFirstName());
         person.setLastName(user.getLastName());
+        person.setEmail(user.getEmail());
         personRepository.save(person);
     }
 
@@ -58,8 +61,6 @@ public class UserService {
      * @param user the user of which we update the data
      */
     public void saveUserAndConnectedPerson(User user) {
-        //TODO: look if this method can substitute the one above: updateUser, they seem to do similar things
-
         // Check if the user already exists in the database
         final var existingUserOptional = userRepository.findByUsername(user.getUsername());
 
