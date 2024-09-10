@@ -119,7 +119,7 @@ public class EventsView extends Div implements BeforeEnterObserver {
                 n.setPosition(Notification.Position.MIDDLE);
                 n.addThemeVariants(NotificationVariant.LUMO_ERROR);
             } catch (ValidationException validationException) {
-                Notification.show("Failed to update the data. Check again that all values are valid");
+                Notification.show("Failed to update the event. Check again that all values are valid");
             }
         });
 
