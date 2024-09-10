@@ -77,7 +77,7 @@ public class PeopleView extends Div implements BeforeEnterObserver {
 
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
         grid.addHierarchyColumn(this::getNodeName).setHeader("Name");
-        grid.addColumn(this::getNodeCost).setHeader("Total Expenses Value").setSortable(true);
+        grid.addColumn(this::getNodeCost).setHeader("Balance").setSortable(true);
         grid.addColumn(new ComponentRenderer<>(persona -> {
             if (persona instanceof Person) return this.viewsService.createPersonBadge(personService.calculateNetBalance((Person) persona));
             else return this.viewsService.createExpenseBadge(((Expense) persona));
