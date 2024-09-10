@@ -36,13 +36,13 @@ public class DashboardView extends Div {
 
         VerticalLayout mainLayout = new VerticalLayout();
         mainLayout.setSizeFull();
-        mainLayout.getStyle().set("padding", "10px"); // Add padding to main layout
+        mainLayout.getStyle().set("padding", "5px"); // Add padding to main layout
 
         // Create a horizontal layout for the top row
         HorizontalLayout topRowLayout = new HorizontalLayout();
         topRowLayout.setSizeFull();
         topRowLayout.setHeight("50%"); // Make sure the top row occupies half of the page height
-        topRowLayout.getStyle().set("padding", "10px"); // Add padding to top row
+        topRowLayout.getStyle().set("padding", "5px"); // Add padding to top row
 
         // Create and add the existing bar chart to the top left
         Div barChartDiv = new Div();
@@ -68,7 +68,7 @@ public class DashboardView extends Div {
         HorizontalLayout bottomRowLayout = new HorizontalLayout();
         bottomRowLayout.setSizeFull();
         bottomRowLayout.setHeight("50%"); // Make sure the bottom row occupies the other half of the page height
-        bottomRowLayout.getStyle().set("padding", "10px"); // Add padding to bottom row
+        bottomRowLayout.getStyle().set("padding", "5px"); // Add padding to bottom row
 
         // Create the bottom left chart
         Div bottomLeftChartDiv = new Div();
