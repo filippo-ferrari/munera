@@ -192,17 +192,18 @@ public class ExpenseService {
         totalExpenses.addAll(bothExpenses); // Include these regardless of isPaid status
 
         // Fetch expenses where you are the payer (you owe money), filtered by year
-        List<Expense> payerExpenses = expenseRepository.findExpensesByPayerAndYear(loggedInPerson.getId(), yearValue);
-        for (Expense expense : payerExpenses) {
+        List<Expense> beneficiaryExpenses = expenseRepository.findExpensesByBeneficiaryAndYear(loggedInPerson.getId(), yearValue);
+        for (Expense expense : beneficiaryExpenses) {
             if (!totalExpenses.contains(expense)) totalExpenses.add(expense);
         }
         // Fetch expenses where you are the beneficiary and not paid (amount owed to you), filtered by year
-        List<Expense> beneficiaryExpenses = expenseRepository.findExpensesByBeneficiaryAndYear(loggedInPerson.getId(), yearValue);
-        for (Expense expense : beneficiaryExpenses) {
+        List<Expense> payerExpenses = expenseRepository.findExpensesByPayerAndYear(loggedInPerson.getId(), yearValue);
+        for (Expense expense : payerExpenses) {
             if (Boolean.FALSE.equals(expense.getIsPaid()) && !totalExpenses.contains(expense)) totalExpenses.add(expense);
         }
         return totalExpenses;
     }
+
     // ================================
     // Private methods
     // ================================
