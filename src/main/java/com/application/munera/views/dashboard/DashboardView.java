@@ -193,7 +193,7 @@ public class DashboardView extends Div {
         final var people = personService.findAllExcludeUsers().stream()
                 .filter(person -> personService.calculateNetBalance(person).compareTo(BigDecimal.ZERO) != 0)
                 .toList();
-        if (people.isEmpty()) return generatePlaceholderChartScript("bottomLeftChart", "No Data Available");
+        if (people.isEmpty()) return generatePlaceholderChartScript("bottomLeftChart", "All Payments Settled");
 
         Map<String, Double> personData = new LinkedHashMap<>();
 
