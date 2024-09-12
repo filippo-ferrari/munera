@@ -29,6 +29,7 @@ import org.vaadin.lineawesome.LineAwesomeIcon;
 public class MainLayout extends AppLayout {
 
     private H1 viewTitle;
+    private Button exportToCSVButton;
     private final transient AuthenticationContext authContext;
     private final CSVService csvService;
     private final ExpenseService expenseService;
@@ -69,7 +70,7 @@ public class MainLayout extends AppLayout {
         logout.getStyle().set("padding", "10px"); // Add padding to the logout button
 
         // Create the Export to CSV button
-        Button exportToCSVButton = new Button("Export Expenses to CSV");
+         exportToCSVButton = new Button("Export Expenses to CSV");
         exportToCSVButton.addClickListener(event -> {
             // Call the CSV service to create the CSV resource
             StreamResource resource = this.csvService.createCSVResource(this.expenseService.findAll());
@@ -84,7 +85,8 @@ public class MainLayout extends AppLayout {
             // Programmatically click the link to start the download
             downloadLink.getElement().callJsFunction("click");
         });
-        exportToCSVButton.getStyle().set("margin", "15px"); // Add margin to the Export to CSV button
+        exportToCSVButton.getStyle().set("margin", "0 15px"); // Set margin only for the left and right
+        exportToCSVButton.setVisible(false); // Initially hidden
 
         // Create the header layout and add all elements
         HorizontalLayout header = new HorizontalLayout(userInfoLayout, logout);
@@ -128,7 +130,12 @@ public class MainLayout extends AppLayout {
     protected void afterNavigation() {
         super.afterNavigation();
         viewTitle.setText(getCurrentPageTitle());
+
+        // Show or hide the Export to CSV button based on the current view
+        boolean isExpensesView = getContent().getClass().equals(ExpensesView.class);
+        exportToCSVButton.setVisible(isExpensesView);
     }
+
 
     private String getCurrentPageTitle() {
         PageTitle title = getContent().getClass().getAnnotation(PageTitle.class);
