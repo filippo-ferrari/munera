@@ -6,6 +6,7 @@ Munera is a companion for managing expenses efficiently and effortlessly, whethe
 
 ![Dashboard](src/main/resources/pictures/dashboard.png)
 ![Grid](src/main/resources/pictures/grid.png)
+![People](src/main/resources/pictures/people.png)
 
 ### 1. Expense Management
 
