@@ -121,12 +121,19 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
 
         // Export to CSV button
-        exportToCSVButton.addClickListener(event -> {
+        exportToCSVButton.addClickListener(CSVClickEvent -> {
             StreamResource resource = createCSVResource(expenseService.findAll());
             Anchor downloadLink = new Anchor(resource, "Download CSV");
             downloadLink.getElement().setAttribute("download", true);
+
+            // Remove old download links if any
+            this.getChildren().filter(Anchor.class::isInstance)
+                    .forEach(child -> remove((Anchor) child));
+
+            // Add the new download link
             add(downloadLink);
         });
+
         add(exportToCSVButton);
 
         // when a row is selected or deselected, populate form
@@ -354,23 +361,20 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         return new StreamResource("expenses.csv", () -> {
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
             try (OutputStreamWriter writer = new OutputStreamWriter(stream, StandardCharsets.UTF_8);
-                 CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.withHeader("Name", "Cost", "Category", "Period Interval", "Period Unit", "Date", "Status"))) {
+                 CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.withHeader("Name", "Cost", "Category", "Date", "Payment date"))) {
 
                 for (Expense expense : expenses) {
                     csvPrinter.printRecord(
                             expense.getName(),
                             expense.getCost(),
                             expense.getCategory() != null ? expense.getCategory().getName() : "",
-                            expense.getPeriodInterval(),
-                            expense.getPeriodUnit(),
                             expense.getDate(),
-                            expense.getIsPaid() ? "Paid" : "Unpaid"
+                            expense.getPaymentDate() != null ? expense.getPaymentDate().toLocalDate() : "Unpaid"
                     );
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
             return new ByteArrayInputStream(stream.toByteArray());
         });
     }
