@@ -86,13 +86,13 @@ public class MainLayout extends AppLayout {
         });
 
         // Create the header layout and add all elements
-        HorizontalLayout header = new HorizontalLayout(exportToCSVButton, userInfoLayout, logout);
+        HorizontalLayout header = new HorizontalLayout(userInfoLayout, logout);
         header.setWidthFull(); // Make the header take the full width
         header.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.CENTER);
         header.setJustifyContentMode(FlexComponent.JustifyContentMode.END); // Align items to the right
         header.getStyle().set("padding", "0 10px"); // Add padding around the header
 
-        addToNavbar(true, toggle, viewTitle);
+        addToNavbar(true, toggle, viewTitle, exportToCSVButton);
         addToNavbar(header);
     }
 
