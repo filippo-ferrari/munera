@@ -1,7 +1,7 @@
 package com.application.munera.views.expenses;
 
-import com.application.munera.security.SecurityUtils;
 import com.application.munera.data.*;
+import com.application.munera.security.SecurityUtils;
 import com.application.munera.services.*;
 import com.application.munera.views.MainLayout;
 import com.vaadin.flow.component.UI;
@@ -13,6 +13,7 @@ import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.GridVariant;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.notification.Notification;
@@ -27,13 +28,22 @@ import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.data.converter.StringToBigDecimalConverter;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.*;
+import com.vaadin.flow.server.StreamResource;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.csv.CSVFormat;
+
 import org.vaadin.klaudeta.PaginatedGrid;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -52,6 +62,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
     private final Button cancel = new Button("Cancel");
     private final Button save = new Button("Save");
     private final Button delete = new Button("Delete");
+    private final Button exportToCSVButton = new Button("Export to CSV");
     private final BeanValidationBinder<Expense> binder;
 
     private Expense expense;
@@ -108,6 +119,15 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         grid.setPaginatorSize(5);
         grid.setPageSize(22); // setting page size
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
+
+        // Export to CSV button
+        exportToCSVButton.addClickListener(event -> {
+            StreamResource resource = createCSVResource(expenseService.findAll());
+            Anchor downloadLink = new Anchor(resource, "Download CSV");
+            downloadLink.getElement().setAttribute("download", true);
+            add(downloadLink);
+        });
+        add(exportToCSVButton);
 
         // when a row is selected or deselected, populate form
         grid.asSingleSelect().addValueChangeListener(event -> {
@@ -328,5 +348,30 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
                     beneficiary.setValue(person);
                 }
         }
+    }
+
+    private StreamResource createCSVResource(List<Expense> expenses) {
+        return new StreamResource("expenses.csv", () -> {
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            try (OutputStreamWriter writer = new OutputStreamWriter(stream, StandardCharsets.UTF_8);
+                 CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.withHeader("Name", "Cost", "Category", "Period Interval", "Period Unit", "Date", "Status"))) {
+
+                for (Expense expense : expenses) {
+                    csvPrinter.printRecord(
+                            expense.getName(),
+                            expense.getCost(),
+                            expense.getCategory() != null ? expense.getCategory().getName() : "",
+                            expense.getPeriodInterval(),
+                            expense.getPeriodUnit(),
+                            expense.getDate(),
+                            expense.getIsPaid() ? "Paid" : "Unpaid"
+                    );
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            return new ByteArrayInputStream(stream.toByteArray());
+        });
     }
 }
