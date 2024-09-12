@@ -2,87 +2,103 @@
 
 ## Overview
 
-Munera is a companion for managing expenses efficiently and effortlessly, whether you're tracking daily expenditures, managing recurring expenses, or keeping tabs on creditors and debtors.
+**Munera** is your go-to companion for managing expenses efficiently and effortlessly, whether you're tracking daily expenditures, managing recurring expenses, or keeping tabs on creditors and debtors.
 
-Dashboard:
+Munera is built using **Java** with the **Spring** framework. It utilizes **Vaadin Flow** for creating modern web applications. The application uses a **PostgreSQL** database for data storage. **Maven** is employed as the build tool, while **JUnit** and **Mockito** are used for unit testing. **Spring Security** handles authentication, and **Apache Commons** to export data.
+
+### Dashboard
+
 ![Dashboard](src/main/resources/pictures/dashboard.png)
-Expenses grid:
-![Grid](src/main/resources/pictures/grid.png)
-People grid:
-![People](src/main/resources/pictures/people.png)
+
+### Expenses Grid
+
+![Expenses Grid](src/main/resources/pictures/grid.png)
+
+### People Grid
+
+![People Grid](src/main/resources/pictures/people.png)
+
+## Features
 
 ### 1. Expense Management
 
-- Create, read, update, and delete expenses with the following details:
-    - Name
-    - Date
-    - Category
-    - Cost
-    - Description
-    - Period Interval (1, 2, 3, etc)
-    - Period Unit (days, weeks, months)
-    - Creditors and debtors
-    - Status
-    - 
-- Create, read, update and delete categories
-- Create, read, update and delete people
-- Create, read, update and delete events
+Easily create, read, update, and delete expenses with comprehensive details, including:
 
-- Graphs are now available!
+- **Name**: The name of the expense.
+- **Date**: The date the expense occurred.
+- **Category**: Assign categories to expenses for easier tracking.
+- **Cost**: The amount spent.
+- **Description**: Additional notes or details about the expense.
+- **Period Interval**: Set the recurrence interval (e.g., 1, 2, 3, etc.).
+- **Period Unit**: Specify the unit for the period interval (days, weeks, months).
+- **Payer and Beneficiary**: Record who paid and who benefited from the expense.
+- **Date of Payment**: The date when the payment was made.
+- **Status of Expense**: Track the status of the expense (e.g., "Paid to Me", "Owed to Me", "Paid by Me", "Owed by Me").
 
-## Completed Features
-- [x] Create categories with CRUD operations
-- [x] Create concept of creditors and debtors for each expense
-- [x] Insert expenses of the past and of the future
-- [x] Have an option to set up recurring expenses
-- [x] Creditors and debtors total expenses 
-- [x] Setup status for each expense
-- [x] Create mechanism to change status when expense gets paid
-- [x] Create labels to show if a person is in debit or credit with you
-- [x] First tries with widgets in a dashboard view
-- [x] An expense cant have the same person as both creditor and debtors
-## Next Steps
+### 2. Category Management
 
-1. **Filtering and Sorting**
-    - Keep implementing sorting on more columns, start implementing filtering
-    - Specification
-   
-2. **Weekly and Monthly Summaries**
-    - Create functionality to generate weekly and monthly summaries, including filtering and sorting options.
-    - ~~Create a dashboard or log of "next expenses" that lists the next recurring expenses that you expect to receive~~
+- Manage categories for better organization of expenses.
+- Default categories are initialized on the first build of the application.
 
-3. **Reports for Creditors and Debtors**
-    - ~~Develop reports outlining debts or credits for each creditor and debtor to provide users with a comprehensive overview.~~
-    - ~~CRUD operations for creditors and debtors~~
+### 3. People Management
 
-4. **Create a way to set the currency of each expense**
-    - It should be possible in the form of an expense
-    - The symbol should be added to the cost column
-    - If possible, the calculations should take into account the different currencies
+- Track expenses related to people and generate reports on amounts owed or owing.
 
-5. **Events**
-    - ~~Options to create events in which to put expenses (vacations, congress, etc.)~~
-    - ~~Each event has a number of people connected to it, expenses can be added to these people~~
-    - A reports tells which people need to give/take money to which people in order to be even
+### 4. Reporting and Analysis
 
-6. **Misc**
-    - PeriodUnit and Interval need to be implemented with a scheduler
-    - Graphs could use more work, maybe some filtering?
-    - More validation in form
-    - ~~Login page~~
-    - email setup
-    - Migration tool for DB changes in prod
+- Generate reports to view expenses and debts by category or person.
+- Visualize your expenses with built-in graphs.
 
-7. **Deployment**
-    - Improve the Dockerfile and docker-compose.yml
-    - Improve the deploy.yml
-    - Fix known bugs in the pipeline
+### 5. Data Export
 
-## Known Issues
+- Export your expense data to CSV format for external use and backup.
 
-- PeopleVIew doesn't refresh after an edit operation anymore
-- Form still needs more validation when empty, some entities can be created with all null values, even the ones that have constraints throw SQL errors, they need to be gracefully handled.
-- Errors need to be caught and handled
-- Graphs still need ~~a lot of~~ **some** improvements
-- ~~ExpenseView doesn't refresh after an edit operation anymore~~
-- Deployment must be improved
+### 6. Upcoming Features
+
+- **Income Tracking**: An upcoming feature to manage and track income efficiently.
+
+## Installation
+
+You can self-host Munera in two ways:
+
+### Option 1: Manual Installation
+
+1. **Compile and Run**: Download the source code, compile, and run the application manually with your preferred SQL database.
+2. **Default Setup**: The first build will automatically create default categories and an admin user, as specified in the `application.properties` file.
+
+### Option 2: Docker Installation
+
+1. **Dockerized Setup**: Use the provided `Dockerfile` and `docker-compose.yml` files to deploy Munera using Docker.
+2. **Configuration**: The first build will set up default categories and an admin user based on the environment variables in `docker-compose.yml`.
+
+## Getting Started
+
+Follow the steps below to get started with Munera:
+
+1. **Clone the Repository**:
+    ```bash
+    git clone https://github.com/yourusername/munera.git
+    cd munera
+    ```
+
+2. **Manual Installation**:
+
+    - Configure your SQL database.
+    - Adjust settings in `application.properties`.
+   - Build and run the application with Maven:
+     ```bash
+     mvn clean install
+     mvn spring-boot:run
+     ```
+
+3. **Docker Installation**:
+
+    - Ensure Docker is installed and running.
+    - Use Docker Compose to set up Munera:
+      ```bash
+      docker-compose up --build
+      ```
+
+## Feedback and Contributions
+
+Contributions and feedback are welcome! Feel free to submit a pull request or open an issue on the [GitHub repository](https://github.com/filippo-ferrari/munera).
