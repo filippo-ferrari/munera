@@ -98,6 +98,10 @@ Follow the steps below to get started with Munera:
       ```bash
       docker-compose up --build
       ```
+      
+## License
+
+Munera is licensed under the **GNU Affero General Public License** (AGPL) Version 3. See the LICENSE file for details.
 
 ## Feedback and Contributions
 
