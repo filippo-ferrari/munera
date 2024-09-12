@@ -206,7 +206,7 @@ public class DashboardView extends Div {
         StringBuilder data = new StringBuilder("[");
         for (Map.Entry<String, Double> entry : personData.entrySet()) {
             double value = entry.getValue();
-            String color = value >= 0 ? "#90EE90" : "#FF9999"; // Green for positive, red for negative
+            String color = value >= 0 ? "#FF9999" : "#90EE90"; // Green for positive, red for negative
             data.append("{ y: ").append(value).append(", color: '").append(color).append("' },");
         }
         data.setCharAt(data.length() - 1, ']'); // Replace last comma with closing bracket
