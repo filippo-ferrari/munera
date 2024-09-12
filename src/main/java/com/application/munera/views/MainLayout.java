@@ -66,16 +66,23 @@ public class MainLayout extends AppLayout {
 
         // Create the logout button
         Button logout = new Button("Logout", click -> this.authContext.logout());
-        logout.getStyle().set("padding", "10px"); // add padding to the logout button
+        logout.getStyle().set("padding", "10px"); // Add padding to the logout button
 
         // Create the Export to CSV button
         Button exportToCSVButton = new Button("Export to CSV");
         exportToCSVButton.addClickListener(event -> {
-            // Call a method in ExpensesView to handle CSV creation
+            // Call the CSV service to create the CSV resource
             StreamResource resource = this.csvService.createCSVResource(this.expenseService.findAll());
-            Anchor downloadLink = new Anchor(resource, "Download CSV");
+            resource.setCacheTime(0); // Disable caching to ensure fresh download each time
+
+            // Create a temporary link to trigger the download
+            Anchor downloadLink = new Anchor(resource, "");
             downloadLink.getElement().setAttribute("download", true);
-            addToNavbar(downloadLink); // Add the download link to the navbar
+            downloadLink.getElement().setAttribute("hidden", true); // Make the link invisible
+            getElement().appendChild(downloadLink.getElement());
+
+            // Programmatically click the link to start the download
+            downloadLink.getElement().callJsFunction("click");
         });
 
         // Create the header layout and add all elements
