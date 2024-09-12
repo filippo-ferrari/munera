@@ -207,8 +207,7 @@ public class DashboardView extends Div {
         StringBuilder data = new StringBuilder("[");
         for (Map.Entry<String, Double> entry : personData.entrySet()) {
             double value = entry.getValue();
-            // Green for positive (credits) and red for negative (debits)
-            String color = value >= 0 ? "#90EE90" : "#FF9999";
+            String color = value >= 0 ? "#90EE90" : "#FF9999"; // Green for positive, red for negative
             data.append("{ y: ").append(value).append(", color: '").append(color).append("' },");
         }
         data.setCharAt(data.length() - 1, ']'); // Replace the last comma with a closing bracket
@@ -237,14 +236,22 @@ public class DashboardView extends Div {
                 "plotOptions: {" +
                 "column: {" +
                 "pointWidth: 50," +
-                "threshold: 0" + // Ensure columns are drawn correctly from the zero line
+                "threshold: 0" +
+                "}" +
+                "}," +
+                "tooltip: {" + // Combine default point format with a custom label
+                "useHTML: true," +
+                "formatter: function() {" +
+                "var label = this.y >= 0 ? 'Credit: ' : 'Debit: '; " +
+                "return '<span style=\"color:' + this.point.color + '\">\u25CF</span> ' + '<b>' + this.x + '</b><br/>' + label + Math.abs(this.y);" +
                 "}" +
                 "}," +
                 "series: [{" +
                 "name: 'Balance'," +
-                "data: " + data + // Use the data fetched from DB
+                "data: " + data +
                 "}]" +
-                "});";    }
+                "});";
+    }
 
     private String generatePlaceholderChartScript(String divId, String title) {
         return "Highcharts.chart('" + divId + "', {" +
