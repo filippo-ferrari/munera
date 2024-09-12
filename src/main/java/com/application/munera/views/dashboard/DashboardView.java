@@ -199,28 +199,30 @@ public class DashboardView extends Div {
 
         for (Person person : people) {
             BigDecimal balance = personService.calculateNetBalance(person);
-            personData.put(person.getFirstName(), balance.doubleValue());
+            // Invert the balance value
+            personData.put(person.getFirstName(), balance.negate().doubleValue());
         }
 
         // Prepare series data for Highcharts with conditional coloring
         StringBuilder data = new StringBuilder("[");
         for (Map.Entry<String, Double> entry : personData.entrySet()) {
             double value = entry.getValue();
-            String color = value >= 0 ? "#FF9999" : "#90EE90"; // Green for positive, red for negative
+            // Green for positive (credits) and red for negative (debits)
+            String color = value >= 0 ? "#90EE90" : "#FF9999";
             data.append("{ y: ").append(value).append(", color: '").append(color).append("' },");
         }
-        data.setCharAt(data.length() - 1, ']'); // Replace last comma with closing bracket
+        data.setCharAt(data.length() - 1, ']'); // Replace the last comma with a closing bracket
 
         // Generate JavaScript initialization
         return "Highcharts.chart('bottomLeftChart', {" +
                 "chart: {" +
-                "type: 'column'," + // Specify the chart type as column
+                "type: 'column'," +
                 "}," +
                 "title: {" +
                 "text: 'Net Balances by Person'" +
                 "}," +
                 "xAxis: {" +
-                "categories: " + new Gson().toJson(personData.keySet()) + // Categories are the person names
+                "categories: " + new Gson().toJson(personData.keySet()) +
                 "}," +
                 "yAxis: {" +
                 "title: {" +
@@ -232,9 +234,10 @@ public class DashboardView extends Div {
                 "color: '#808080'" +
                 "}]" +
                 "}," +
-                "plotOptions: {" + // Add plotOptions to configure the column width
+                "plotOptions: {" +
                 "column: {" +
-                "pointWidth: 50" + // Adjust the width of the columns (in pixels)
+                "pointWidth: 50," +
+                "threshold: 0" + // Ensure columns are drawn correctly from the zero line
                 "}" +
                 "}," +
                 "series: [{" +
