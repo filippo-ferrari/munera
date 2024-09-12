@@ -3,9 +3,11 @@
 ## Overview
 
 Munera is a companion for managing expenses efficiently and effortlessly, whether you're tracking daily expenditures, managing recurring expenses, or keeping tabs on creditors and debtors.
-
+Dashboard:
 ![Dashboard](src/main/resources/pictures/dashboard.png)
+Expenses grid:
 ![Grid](src/main/resources/pictures/grid.png)
+People grid:
 ![People](src/main/resources/pictures/people.png)
 
 ### 1. Expense Management
