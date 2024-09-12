@@ -2,7 +2,7 @@
 
 ## Overview
 
-Munera is a companion for managing expenses efficiently and effortlessly, whether you're tracking daily expenditures, managing recurring expenses, or keeping tabs on creditors and debtors.\
+Munera is a companion for managing expenses efficiently and effortlessly, whether you're tracking daily expenditures, managing recurring expenses, or keeping tabs on creditors and debtors.
 
 Dashboard:
 ![Dashboard](src/main/resources/pictures/dashboard.png)
