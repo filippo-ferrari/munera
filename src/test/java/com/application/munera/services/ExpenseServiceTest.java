@@ -41,7 +41,7 @@ class ExpenseServiceTest {
     }
 
     @Test
-    public void testFetchExpensesForDashboard_NoExpenses() {
+    void testFetchExpensesForDashboard_NoExpenses() {
         when(expenseRepository.findExpensesByPayerAndBeneficiaryAndYear(loggedInPerson.getId(), year.getValue()))
                 .thenReturn(new ArrayList<>());
         when(expenseRepository.findExpensesByBeneficiaryAndYear(loggedInPerson.getId(), year.getValue()))
