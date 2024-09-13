@@ -34,6 +34,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.vaadin.klaudeta.PaginatedGrid;
 
+import java.math.BigDecimal;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -129,8 +130,8 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         binder.forField(cost)
                 .asRequired("Cost is required")
                 .withConverter(new StringToBigDecimalConverter("Invalid cost"))
+                .withValidator(costValue -> costValue.compareTo(BigDecimal.ONE) > 0, "Cost must be greater than 1")
                 .bind(Expense::getCost, Expense::setCost);
-
         binder.forField(category)
                 .asRequired("Category is required")
                 .bind(Expense::getCategory, Expense::setCategory);
