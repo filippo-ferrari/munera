@@ -8,6 +8,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 import static com.application.munera.security.SecurityUtils.getLoggedInUserDetails;
@@ -21,6 +22,14 @@ public class UserService {
     public UserService(UserRepository userRepository, PersonRepository personRepository) {
         this.userRepository = userRepository;
         this.personRepository = personRepository;
+    }
+
+    public List<User> findAll() {
+        return this.userRepository.findAll();
+    }
+
+    public Optional<User> findById(final Long id) {
+        return this.userRepository.findById(id);
     }
 
     public Optional<User> findByUsername (String username) {
@@ -86,5 +95,11 @@ public class UserService {
 
     public Long count() {
         return  this.userRepository.count();
+    }
+
+    public void delete(final User user) {
+        this.userRepository.delete(user);
+        final var person = this.personRepository.findByUserId(user.getId());
+        person.ifPresent(this.personRepository::delete);
     }
 }

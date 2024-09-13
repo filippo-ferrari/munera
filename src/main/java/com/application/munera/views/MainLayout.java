@@ -8,6 +8,7 @@ import com.application.munera.views.events.EventsView;
 import com.application.munera.views.expenses.ExpensesView;
 import com.application.munera.views.people.PeopleView;
 import com.application.munera.views.settings.SettingsView;
+import com.application.munera.views.users.UsersView;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.button.Button;
@@ -117,6 +118,7 @@ public class MainLayout extends AppLayout {
         nav.addItem(new SideNavItem("People", PeopleView.class, LineAwesomeIcon.USER.create()));
         nav.addItem(new SideNavItem("Events", EventsView.class, LineAwesomeIcon.BANDCAMP.create()));
         nav.addItem(new SideNavItem("Dashboard", DashboardView.class, LineAwesomeIcon.CHART_LINE_SOLID.create()));
+        nav.addItem(new SideNavItem("Users", UsersView.class, LineAwesomeIcon.USER_LOCK_SOLID.create()));
         nav.addItem(new SideNavItem("Settings", SettingsView.class, LineAwesomeIcon.COG_SOLID.create()));
 
         return nav;
