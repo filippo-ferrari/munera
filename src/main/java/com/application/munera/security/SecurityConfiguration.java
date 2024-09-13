@@ -45,9 +45,13 @@ public class SecurityConfiguration extends VaadinWebSecurity {
                 final var user = userRepository.findByUsername(username)
                         .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
+                // Assume roles are stored in the database with prefix, ex: "ROLE_ADMIN"
+                String[] roles = user.getRoles().split(",");
+
+                // Use authorities instead of roles to prevent automatic prefixing
                 return User.withUsername(user.getUsername())
                         .password(user.getPassword())
-                        .roles(user.getRoles().split(","))
+                        .authorities(roles)  // Set roles directly as authorities
                         .build();
             }
         };
