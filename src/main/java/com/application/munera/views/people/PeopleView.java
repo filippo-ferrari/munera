@@ -84,27 +84,33 @@ public class PeopleView extends Div implements BeforeEnterObserver {
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
         grid.addHierarchyColumn(this::getNodeName).setHeader("Name");
         grid.addColumn(this::getNodeCost).setHeader("Balance").setSortable(true);
-        grid.addColumn(new ComponentRenderer<>(persona -> {
-            if (persona instanceof Person) return this.viewsService.createPersonBadge(personService.calculateNetBalance((Person) persona));
-            else return this.viewsService.createExpenseBadge(((Expense) persona));
+        grid.addColumn(new ComponentRenderer<>(personEntry -> {
+            if (personEntry instanceof Person person1) return this.viewsService.createPersonBadge(personService.calculateNetBalance(person1));
+            else return this.viewsService.createExpenseBadge(((Expense) personEntry));
         })).setHeader("Balance Status");
 
         grid.addColumn(new ComponentRenderer<>(persona -> {
-            if (persona instanceof Person) {
-                Button setDebtPaidButton = new Button("Set all debt as paid", event -> this.personFacade.setDebtPaid((Person) persona, grid));
-                setDebtPaidButton.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_PRIMARY);
-                return setDebtPaidButton;
-            } else if (persona instanceof Expense) {
-                Button setExpensePaidButton = new Button("Set as paid", event -> this.expenseFacade.setExpensePaid((Expense) persona, grid));
-                setExpensePaidButton.addThemeVariants(ButtonVariant.LUMO_SMALL);
-                if (Boolean.TRUE.equals(((Expense) persona).getIsPaid())) setExpensePaidButton.setEnabled(false);
-                return setExpensePaidButton;
-            } else return new Span();
+            switch (persona) {
+                case Person person1 -> {
+                    Button setDebtPaidButton = new Button("Set all debt as paid", event -> this.personFacade.setDebtPaid(person1, grid));
+                    setDebtPaidButton.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_PRIMARY);
+                    return setDebtPaidButton;
+                }
+                case Expense expense -> {
+                    Button setExpensePaidButton = new Button("Set as paid", event -> this.expenseFacade.setExpensePaid(expense, grid));
+                    setExpensePaidButton.addThemeVariants(ButtonVariant.LUMO_SMALL);
+                    if (Boolean.TRUE.equals((expense).getIsPaid())) setExpensePaidButton.setEnabled(false);
+                    return setExpensePaidButton;
+                }
+                default -> {
+                    return new Span();
+                }
+            }
         }));
 
         grid.addColumn(new ComponentRenderer<>(persona -> {
-            if (persona instanceof Person) {
-                Button setCreditPaidButton = new Button("Set all credit as paid", event -> this.personFacade.setCreditPaid((Person) persona, grid));
+            if (persona instanceof Person person1) {
+                Button setCreditPaidButton = new Button("Set all credit as paid", event -> this.personFacade.setCreditPaid(person1, grid));
                 setCreditPaidButton.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_PRIMARY);
                 return setCreditPaidButton;
             } else return new Span();
@@ -175,14 +181,14 @@ public class PeopleView extends Div implements BeforeEnterObserver {
     }
 
     private String getNodeName(Object node) {
-        if (node instanceof Person) return ((Person) node).getFirstName() + " " + ((Person) node).getLastName();
-        else if (node instanceof Expense) return ((Expense) node).getName();
+        if (node instanceof Person person1) return (person1).getFirstName() + " " + (person1).getLastName();
+        else if (node instanceof Expense expense1) return (expense1).getName();
         return "";
     }
 
     private String getNodeCost(Object node) {
-        if (node instanceof Person) return this.personService.calculateNetBalance((Person) node) + " €";
-        else if (node instanceof Expense) return ((Expense) node).getCost().toString() + " €";
+        if (node instanceof Person person1) return this.personService.calculateNetBalance(person1) + " €";
+        else if (node instanceof Expense expense1) return (expense1).getCost().toString() + " €";
         return "";
     }
 
@@ -196,9 +202,7 @@ public class PeopleView extends Div implements BeforeEnterObserver {
                 Notification.show(
                         String.format("The requested person was not found, ID = %s", personId.get()), 3000,
                         Position.BOTTOM_START);
-                // when a row is selected but the data is no longer available,
-                // refresh grid
-                refreshGrid();
+                refreshGrid(); // when a row is selected but the data is no longer available refresh grid
                 event.forwardTo(PeopleView.class);
             }
         }
@@ -207,7 +211,6 @@ public class PeopleView extends Div implements BeforeEnterObserver {
     private void createEditorLayout(SplitLayout splitLayout) {
         Div editorLayoutDiv = new Div();
         editorLayoutDiv.setClassName("editor-layout");
-
         Div editorDiv = new Div();
         editorDiv.setClassName("editor");
         editorLayoutDiv.add(editorDiv);
