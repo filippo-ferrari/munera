@@ -15,6 +15,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Year;
 import java.util.ArrayList;
@@ -144,7 +145,7 @@ public class ExpenseService {
      * @param entity the expense to update
      */
     public void update(Expense entity) {
-        if (Boolean.TRUE.equals(entity.getIsPaid())) entity.setPaymentDate(LocalDateTime.now());
+        if (Boolean.TRUE.equals(entity.getIsPaid())) entity.setPaymentDate(LocalDate.now());
         this.setExpenseType(entity);
         expenseRepository.save(entity);
     }

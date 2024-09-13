@@ -27,7 +27,7 @@ public class CSVService {
                             expense.getCost(),
                             expense.getCategory() != null ? expense.getCategory().getName() : "",
                             expense.getDate(),
-                            expense.getPaymentDate() != null ? expense.getPaymentDate().toLocalDate() : "Unpaid"
+                            expense.getPaymentDate() != null ? expense.getPaymentDate() : "Unpaid"
                     );
                 }
             } catch (Exception e) {

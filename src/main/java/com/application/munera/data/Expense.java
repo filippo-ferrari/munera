@@ -60,7 +60,7 @@ public class Expense {
     private LocalDate date;
 
     @Column(name = "PaymentDate")
-    private LocalDateTime paymentDate;
+    private LocalDate paymentDate;
 
     @Column(name = "isPaid", nullable = false)
     private Boolean isPaid = false;
