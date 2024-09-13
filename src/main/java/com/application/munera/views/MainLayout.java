@@ -2,6 +2,7 @@ package com.application.munera.views;
 
 import com.application.munera.services.CSVService;
 import com.application.munera.services.ExpenseService;
+import com.application.munera.services.UserService;
 import com.application.munera.views.categories.CategoriesView;
 import com.application.munera.views.dashboard.DashboardView;
 import com.application.munera.views.events.EventsView;
@@ -22,6 +23,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
 /**
@@ -34,11 +36,13 @@ public class MainLayout extends AppLayout {
     private final transient AuthenticationContext authContext;
     private final CSVService csvService;
     private final ExpenseService expenseService;
+    private final UserService userService;
 
-    public MainLayout(AuthenticationContext authContext, CSVService csvService, ExpenseService expenseService) {
+    public MainLayout(AuthenticationContext authContext, CSVService csvService, ExpenseService expenseService, UserService userService) {
         this.authContext = authContext;
         this.csvService = csvService;
         this.expenseService = expenseService;
+        this.userService = userService;
         setPrimarySection(Section.DRAWER);
         addDrawerContent();
         addHeaderContent();
@@ -71,7 +75,7 @@ public class MainLayout extends AppLayout {
         logout.getStyle().set("padding", "10px"); // Add padding to the logout button
 
         // Create the Export to CSV button
-         exportToCSVButton = new Button("Export Expenses to CSV");
+        exportToCSVButton = new Button("Export Expenses to CSV");
         exportToCSVButton.addClickListener(event -> {
             // Call the CSV service to create the CSV resource
             StreamResource resource = this.csvService.createCSVResource(this.expenseService.findAll());
@@ -112,16 +116,24 @@ public class MainLayout extends AppLayout {
 
     private SideNav createNavigation() {
         SideNav nav = new SideNav();
-
+        // Common menu items
         nav.addItem(new SideNavItem("Expenses", ExpensesView.class, LineAwesomeIcon.MONEY_BILL_SOLID.create()));
         nav.addItem(new SideNavItem("Categories", CategoriesView.class, LineAwesomeIcon.FOLDER.create()));
         nav.addItem(new SideNavItem("People", PeopleView.class, LineAwesomeIcon.USER.create()));
         nav.addItem(new SideNavItem("Events", EventsView.class, LineAwesomeIcon.BANDCAMP.create()));
         nav.addItem(new SideNavItem("Dashboard", DashboardView.class, LineAwesomeIcon.CHART_LINE_SOLID.create()));
-        nav.addItem(new SideNavItem("Users", UsersView.class, LineAwesomeIcon.USER_LOCK_SOLID.create()));
-        nav.addItem(new SideNavItem("Settings", SettingsView.class, LineAwesomeIcon.COG_SOLID.create()));
 
+        // Check user roles before adding sensitive menu items
+        if (isUserAdmin())
+            nav.addItem(new SideNavItem("Users", UsersView.class, LineAwesomeIcon.USER_LOCK_SOLID.create()));
+
+        nav.addItem(new SideNavItem("Settings", SettingsView.class, LineAwesomeIcon.COG_SOLID.create()));
         return nav;
+    }
+
+    private boolean isUserAdmin() {
+        final var user = userService.getLoggedInUser().orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        return user.getRoles().contains("ROLE_ADMIN");
     }
 
     private Footer createFooter() {
@@ -137,7 +149,6 @@ public class MainLayout extends AppLayout {
         boolean isExpensesView = getContent().getClass().equals(ExpensesView.class);
         exportToCSVButton.setVisible(isExpensesView);
     }
-
 
     private String getCurrentPageTitle() {
         PageTitle title = getContent().getClass().getAnnotation(PageTitle.class);
