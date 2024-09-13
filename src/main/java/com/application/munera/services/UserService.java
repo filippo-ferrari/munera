@@ -93,6 +93,7 @@ public class UserService {
             userToSave.setEmail(user.getEmail());
             userToSave.setUsername(user.getUsername());
             userToSave.setPassword(user.getPassword());
+            userToSave.setRoles(user.getRoles());
         } else {
             // If user does not exist, save the new user entity
             userToSave = user;
