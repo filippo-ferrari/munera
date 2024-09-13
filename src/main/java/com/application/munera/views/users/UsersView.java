@@ -1,12 +1,7 @@
 package com.application.munera.views.users;
 
 import com.application.munera.data.User;
-import com.application.munera.facades.ExpenseFacade;
-import com.application.munera.facades.PersonFacade;
-import com.application.munera.services.ExpenseService;
-import com.application.munera.services.PersonService;
 import com.application.munera.services.UserService;
-import com.application.munera.services.ViewsService;
 import com.application.munera.views.MainLayout;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -30,14 +25,14 @@ import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import jakarta.annotation.security.PermitAll;
+import jakarta.annotation.security.RolesAllowed;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
 import java.util.Optional;
 
 
 @PageTitle("Users")
-@PermitAll
+@RolesAllowed("ADMIN")
 @Route(value = "users/:userID?/:action?(edit)", layout = MainLayout.class)
 @Uses(Icon.class)
 public class UsersView extends Div implements BeforeEnterObserver {
@@ -62,7 +57,7 @@ public class UsersView extends Div implements BeforeEnterObserver {
     private PasswordField password;
     private EmailField email;
 
-    public UsersView(PersonService personService, ExpenseService expenseService, ViewsService viewsService, PersonFacade personFacade, ExpenseFacade expenseFacade, UserService userService) {
+    public UsersView(UserService userService) {
         this.userService = userService;
         addClassNames("expenses-view");
 
@@ -118,7 +113,7 @@ public class UsersView extends Div implements BeforeEnterObserver {
             try {
                 if (this.user == null) this.user = new User();
                 binder.writeBean(this.user);
-                this.userService.saveUserAndConnectedPerson(this.user);
+                this.userService.saveOrUpdateUserAndConnectedPerson(this.user);
                 clearForm();
                 refreshGrid();
                 Notification.show("Data updated");

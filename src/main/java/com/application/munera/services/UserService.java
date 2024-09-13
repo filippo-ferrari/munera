@@ -50,47 +50,54 @@ public class UserService {
         return null;
     }
 
-    /**
-     * Updates the user's data and its connected person entity
-     * @param user the user of which we update the data
-     */
     @Transactional
-    public void updateUserAndConnectedPerson(User user) {
-        userRepository.save(user);
-        final var person = personRepository.findByUserId(user.getId())
-                .orElseThrow(() -> new IllegalStateException("Associated Person not found"));
-        person.setFirstName(user.getFirstName());
-        person.setLastName(user.getLastName());
-        person.setEmail(user.getEmail());
-        personRepository.save(person);
-    }
-
-    /**
-     * Saves a user and connected person entity
-     * @param user the user of which we update the data
-     */
-    public void saveUserAndConnectedPerson(User user) {
+    public void saveOrUpdateUserAndConnectedPerson(User user) {
         // Check if the user already exists in the database
         final var existingUserOptional = userRepository.findByUsername(user.getUsername());
+        User userToSave = getUser(user, existingUserOptional);
 
-        User existingUser;
-
-        // Save the new user entity if he doesn't exist yet
-        existingUser = existingUserOptional.orElseGet(() -> userRepository.save(user));
+        // Save the user entity
+        userRepository.save(userToSave);
 
         // Check if the associated person exists for the user
-        final var existingPerson = personRepository.findByUserId(existingUser.getId());
+        final var existingPersonOptional = personRepository.findByUserId(userToSave.getId());
 
-        if (existingPerson.isEmpty()) {
+        if (existingPersonOptional.isPresent()) {
+            // If person exists, update the person entity
+            Person personToUpdate = existingPersonOptional.get();
+            personToUpdate.setFirstName(userToSave.getFirstName());
+            personToUpdate.setLastName(userToSave.getLastName());
+            personToUpdate.setUsername(user.getUsername());
+            personToUpdate.setEmail(userToSave.getEmail());
+            personRepository.save(personToUpdate);
+        } else {
             // If no person is associated with the user, create a new Person entity and link it to the User
-            Person person = new Person();
-            person.setUsername(existingUser.getUsername());
-            person.setFirstName(existingUser.getFirstName());
-            person.setLastName(existingUser.getLastName());
-            person.setEmail(existingUser.getEmail());
-            person.setUserId(existingUser.getId());
-            personRepository.save(person);
+            Person newPerson = new Person();
+            newPerson.setFirstName(userToSave.getFirstName());
+            newPerson.setLastName(userToSave.getLastName());
+            newPerson.setEmail(userToSave.getEmail());
+            newPerson.setUsername(userToSave.getUsername());
+            newPerson.setUserId(userToSave.getId());
+            personRepository.save(newPerson);
         }
+    }
+
+    private User getUser(User user, Optional<User> existingUserOptional) {
+        User userToSave;
+
+        if (existingUserOptional.isPresent()) {
+            // If user exists, update the user entity
+            userToSave = existingUserOptional.get();
+            userToSave.setFirstName(user.getFirstName());
+            userToSave.setLastName(user.getLastName());
+            userToSave.setEmail(user.getEmail());
+            userToSave.setUsername(user.getUsername());
+            userToSave.setPassword(user.getPassword());
+        } else {
+            // If user does not exist, save the new user entity
+            userToSave = user;
+        }
+        return userToSave;
     }
 
     public Long count() {

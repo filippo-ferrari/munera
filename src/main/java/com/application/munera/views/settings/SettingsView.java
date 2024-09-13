@@ -104,7 +104,7 @@ public class SettingsView extends VerticalLayout implements BeforeEnterObserver 
         // TODO: implement
         String monthlyIncome = this.monthlyIncome.getValue();
 
-        userService.updateUserAndConnectedPerson(loggedInUser);
+        userService.saveOrUpdateUserAndConnectedPerson(loggedInUser);
     }
 
     @Override

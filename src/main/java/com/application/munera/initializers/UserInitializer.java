@@ -26,7 +26,7 @@ public class UserInitializer {
             adminUser.setLastName(adminProperties.getLastName());
             adminUser.setRoles(adminProperties.getRoles());
             adminUser.setEmail(adminProperties.getEmail());
-            userService.saveUserAndConnectedPerson(adminUser);
+            userService.saveOrUpdateUserAndConnectedPerson(adminUser);
         }
     }
 }
