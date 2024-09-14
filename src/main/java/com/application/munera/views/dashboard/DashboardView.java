@@ -5,10 +5,10 @@ import com.application.munera.data.Person;
 import com.application.munera.data.User;
 import com.application.munera.facades.PersonFacade;
 import com.application.munera.services.ExpenseService;
-import com.application.munera.services.PersonService;
 import com.application.munera.services.UserService;
 import com.application.munera.views.MainLayout;
 import com.nimbusds.jose.shaded.gson.Gson;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -34,6 +34,7 @@ public class DashboardView extends Div {
     private final PersonFacade personFacade;
     private final User loggedUser;
     private final Person loggedPerson;
+    private final ComboBox<Integer> yearComboBox;
 
     public DashboardView(ExpenseService expenseService, UserService userService, PersonFacade personFacade) {
         this.expenseService = expenseService;
@@ -42,7 +43,24 @@ public class DashboardView extends Div {
         loggedPerson = personFacade.getLoggedInPerson();
         addClassName("highcharts-view"); // Optional CSS class for styling
 
+        // Fetch available years from the database
+        List<Integer> availableYears = List.of(Integer.valueOf("2024"), Integer.valueOf("2023"));
+
+        // Initialize the ComboBox for year selection
+        yearComboBox = new ComboBox<>("Select Year");
+        yearComboBox.setItems(availableYears);
+        yearComboBox.setValue(Year.now().getValue()); // Default to current year
+        yearComboBox.setWidth("200px");
+
+        // Add listener to update charts when a new year is selected
+        yearComboBox.addValueChangeListener(event -> {
+            if (event.getValue() != null) {
+                updateCharts(Year.of(event.getValue()));
+            }
+        });
+
         VerticalLayout mainLayout = new VerticalLayout();
+        mainLayout.add(yearComboBox);
         mainLayout.setSizeFull();
         mainLayout.getStyle().set("padding", "5px"); // Add padding to main layout
 
@@ -100,20 +118,25 @@ public class DashboardView extends Div {
 
         add(mainLayout);
 
-        String barChartJs = generateBarChartScript();
-        String pieChartJs = generatePieChartScript();
-        String negativeColumnChartJs = generateNegativeColumnChartScript();
-        String expensesOverTimeByCategoryChart = generateExpensesOverTimeByCategoryScript();
+        updateCharts(Year.now());
+    }
 
-        // Execute the JavaScript to initialize the charts
+    // Update the charts based on the selected year
+    private void updateCharts(Year year) {
+        String barChartJs = generateBarChartScript(year);
+        String pieChartJs = generatePieChartScript(year);
+        String negativeColumnChartJs = generateNegativeColumnChartScript();
+        String expensesOverTimeByCategoryChart = generateExpensesOverTimeByCategoryScript(year);
+
+        // Execute the JavaScript to update the charts
         getElement().executeJs(barChartJs);
         getElement().executeJs(pieChartJs);
         getElement().executeJs(negativeColumnChartJs);
         getElement().executeJs(expensesOverTimeByCategoryChart);
     }
 
-    private String generateBarChartScript() {
-        List<Expense> expenses = expenseService.fetchExpensesForDashboard(loggedPerson, Year.now());
+    private String generateBarChartScript(Year year) {
+        List<Expense> expenses = expenseService.fetchExpensesForDashboard(loggedPerson, year);
 
         // Create a map to store data by month and category
         Map<String, Map<String, Double>> monthlyCategoryData = new LinkedHashMap<>();
@@ -205,8 +228,8 @@ public class DashboardView extends Div {
                 "});";
     }
 
-    private String generatePieChartScript() {
-        List<Expense> expenses = expenseService.fetchExpensesForDashboard(loggedPerson, Year.now());
+    private String generatePieChartScript(Year year) {
+        List<Expense> expenses = expenseService.fetchExpensesForDashboard(loggedPerson, year);
 
         // Group expenses by category name and sum their costs
         Map<String, Double> categoryData = expenses.stream()
@@ -327,8 +350,8 @@ public class DashboardView extends Div {
                 "});";
     }
 
-    private String generateExpensesOverTimeByCategoryScript() {
-        List<Expense> expenses = expenseService.fetchExpensesForDashboard(loggedPerson, Year.now());
+    private String generateExpensesOverTimeByCategoryScript(Year year) {
+        List<Expense> expenses = expenseService.fetchExpensesForDashboard(loggedPerson, year);
 
         // Group expenses by category and by month
         Map<String, Map<String, Double>> categoryMonthlyData = new LinkedHashMap<>();
