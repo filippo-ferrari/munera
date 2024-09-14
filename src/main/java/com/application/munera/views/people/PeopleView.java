@@ -60,19 +60,15 @@ public class PeopleView extends Div implements BeforeEnterObserver {
     private Person person;
     private User loggedUser;
     private Long userId;
-    private final PersonService personService;
+    private final UserService userService;
     private final PersonFacade personFacade;
     private final ExpenseFacade expenseFacade;
-    private final ExpenseService expenseService;
     private final ViewsService viewsService;
-    private final UserService userService;
     private TextField firstName;
     private TextField lastName;
     private EmailField email;
 
-    public PeopleView(PersonService personService, ExpenseService expenseService, ViewsService viewsService, PersonFacade personFacade, ExpenseFacade expenseFacade, UserService userService) {
-        this.personService = personService;
-        this.expenseService = expenseService;
+    public PeopleView(ViewsService viewsService, PersonFacade personFacade, ExpenseFacade expenseFacade, UserService userService) {
         this.viewsService = viewsService;
         this.personFacade = personFacade;
         this.expenseFacade = expenseFacade;
@@ -93,7 +89,7 @@ public class PeopleView extends Div implements BeforeEnterObserver {
         grid.addHierarchyColumn(this::getNodeName).setHeader("Name");
         grid.addColumn(this::getNodeCost).setHeader("Balance").setSortable(true);
         grid.addColumn(new ComponentRenderer<>(personEntry -> {
-            if (personEntry instanceof Person person1) return this.viewsService.createPersonBadge(personService.calculateNetBalance(person1));
+            if (personEntry instanceof Person person1) return this.viewsService.createPersonBadge(personFacade.calculateNetBalance(person1));
             else return this.viewsService.createExpenseBadge(((Expense) personEntry));
         })).setHeader("Balance Status");
 
@@ -124,7 +120,7 @@ public class PeopleView extends Div implements BeforeEnterObserver {
             } else return new Span();
         }));
 
-        List<Person> people =  personService.findAllExcludeLoggedUser(loggedUser);
+        List<Person> people =  personFacade.findAllExcludeLoggedUser(loggedUser);
 
         this.setGridData(people);
 
@@ -156,7 +152,7 @@ public class PeopleView extends Div implements BeforeEnterObserver {
             try {
                 if (this.person == null) this.person = new Person();
                 binder.writeBean(this.person);
-                personService.update(this.person, userId);
+                personFacade.update(this.person, userId);
                 clearForm();
                 refreshGrid();
                 Notification.show("Data updated");
@@ -174,7 +170,7 @@ public class PeopleView extends Div implements BeforeEnterObserver {
         delete.addClickListener(e -> {
             try {
                 if (this.person == null) throw new RuntimeException("The person is null!"); //TODO: create proper exception
-                personService.delete(this.person.getId());
+                personFacade.delete(this.person.getId());
                 clearForm();
                 refreshGrid();
                 Notification.show("Data delete");
@@ -195,7 +191,7 @@ public class PeopleView extends Div implements BeforeEnterObserver {
     }
 
     private String getNodeCost(Object node) {
-        if (node instanceof Person person1) return this.personService.calculateNetBalance(person1) + " €";
+        if (node instanceof Person person1) return this.personFacade.calculateNetBalance(person1) + " €";
         else if (node instanceof Expense expense1) return (expense1).getCost().toString() + " €";
         return "";
     }
@@ -204,7 +200,7 @@ public class PeopleView extends Div implements BeforeEnterObserver {
     public void beforeEnter(BeforeEnterEvent event) {
         Optional<Long> personId = event.getRouteParameters().get(PERSON_ID).map(Long::parseLong);
         if (personId.isPresent()) {
-            Optional<Person> personFromBackend = personService.get(personId.get());
+            Optional<Person> personFromBackend = personFacade.findById(personId.get());
             if (personFromBackend.isPresent()) populateForm(personFromBackend.get());
             else {
                 Notification.show(
@@ -276,7 +272,7 @@ public class PeopleView extends Div implements BeforeEnterObserver {
             grid.getTreeData().addItem(null, person);
 
             // Fetch expenses for the current person
-            List<Expense> expenses =  expenseService.findExpensesByPerson(person);
+            List<Expense> expenses =  expenseFacade.findExpensesByPerson(person);
 
             // Add each expense as a child item under the person
             for (Expense expense : expenses) grid.getTreeData().addItem(person, expense);
