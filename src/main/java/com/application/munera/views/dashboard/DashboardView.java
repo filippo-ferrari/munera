@@ -181,13 +181,22 @@ public class DashboardView extends Div {
                 "title: { text: 'Total Expense' }, " +
                 "stackLabels: { " +
                 "enabled: true, " +
-                "style: { fontWeight: 'bold', color: 'gray' } " +
+                "style: { fontWeight: 'bold', color: 'gray' }, " +
+                "formatter: function() { " +
+                "   if (this.total > 0) { return this.total; } else { return ''; }" +  // Only show total if greater than 0
+                "}" +
                 "} " +
                 "}, " +
                 "plotOptions: { " +
                 "column: { " +
                 "stacking: 'normal', " +
-                "dataLabels: { enabled: true } " +
+                "dataLabels: { " +
+                "enabled: true, " +
+                "formatter: function() { " +
+                "   if (this.y > 0) { return this.y; } else { return ''; }" +  // Only show data label if value > 0
+                "}," +
+                "color: 'black'" + // Set label color
+                "} " +
                 "} " +
                 "}, " +
                 "series: " + seriesData.toString() + " " +
