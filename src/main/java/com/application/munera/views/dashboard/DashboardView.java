@@ -47,16 +47,14 @@ public class DashboardView extends Div {
         List<Integer> availableYears = this.expenseService.getAvailableExpenseYearsForUser(loggedUser.getId());
 
         // Initialize the ComboBox for year selection
-        yearComboBox = new ComboBox<>("Select Year");
+        yearComboBox = new ComboBox<>();
         yearComboBox.setItems(availableYears);
         yearComboBox.setValue(Year.now().getValue()); // Default to current year
         yearComboBox.setWidth("200px");
 
         // Add listener to update charts when a new year is selected
         yearComboBox.addValueChangeListener(event -> {
-            if (event.getValue() != null) {
-                updateCharts(Year.of(event.getValue()));
-            }
+            if (event.getValue() != null) updateCharts(Year.of(event.getValue()));
         });
 
         VerticalLayout mainLayout = new VerticalLayout();
