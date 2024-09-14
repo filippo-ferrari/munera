@@ -17,6 +17,7 @@ import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 
 import java.math.BigDecimal;
+import java.time.Month;
 import java.time.Year;
 import java.time.YearMonth;
 import java.time.format.TextStyle;
@@ -114,45 +115,82 @@ public class DashboardView extends Div {
     private String generateBarChartScript() {
         List<Expense> expenses = expenseService.fetchExpensesForDashboard(loggedPerson, Year.now());
 
-        // Prepare data for Highcharts
-        Map<String, Double> monthlyData = new LinkedHashMap<>();
-        YearMonth currentYearMonth = YearMonth.now().withMonth(1); // Start from January
+        // Create a map to store data by month and category
+        Map<String, Map<String, Double>> monthlyCategoryData = new LinkedHashMap<>();
 
+        // Initialize all months (from January to December) for each category
+        List<String> monthNames = new ArrayList<>();
         for (int i = 1; i <= 12; i++) {
-            String monthName = currentYearMonth.getMonth().getDisplayName(TextStyle.SHORT, Locale.ENGLISH);
-            monthlyData.put(monthName, 0.0);
-            currentYearMonth = currentYearMonth.plusMonths(1); // Move to the next month
+            String monthName = Month.of(i).getDisplayName(TextStyle.SHORT, Locale.ENGLISH);
+            monthNames.add(monthName);
+            monthlyCategoryData.putIfAbsent(monthName, new LinkedHashMap<>());
         }
 
-        // Populate map with actual data
+        // Populate the map with actual expense data
         for (Expense expense : expenses) {
             String monthName = expense.getDate().getMonth().getDisplayName(TextStyle.SHORT, Locale.ENGLISH);
+            String categoryName = expense.getCategory().getName();
             Double amount = expense.getCost().doubleValue();
-            monthlyData.put(monthName, monthlyData.get(monthName) + amount);
+
+            monthlyCategoryData.putIfAbsent(monthName, new LinkedHashMap<>());
+            Map<String, Double> categoryData = monthlyCategoryData.get(monthName);
+            categoryData.put(categoryName, categoryData.getOrDefault(categoryName, 0.0) + amount);
         }
 
-        // Prepare series data for Highcharts
-        StringBuilder data = new StringBuilder("[");
-        for (Map.Entry<String, Double> entry : monthlyData.entrySet()) {
-            data.append(entry.getValue()).append(",");
-        }
-        data.setCharAt(data.length() - 1, ']'); // Replace last comma with closing bracket
+        // Prepare series data for Highcharts, with each category being a separate series
+        Map<String, Map<String, Double>> categoryMonthlyData = new LinkedHashMap<>();
+        for (String monthName : monthNames) {
+            Map<String, Double> monthData = monthlyCategoryData.getOrDefault(monthName, new LinkedHashMap<>());
+            for (Map.Entry<String, Double> entry : monthData.entrySet()) {
+                String categoryName = entry.getKey();
+                Double amount = entry.getValue();
 
-        // Generate JavaScript initialization
+                categoryMonthlyData.putIfAbsent(categoryName, new LinkedHashMap<>());
+                categoryMonthlyData.get(categoryName).put(monthName, amount);
+            }
+        }
+
+        // Build the series data for each category
+        StringBuilder seriesData = new StringBuilder("[");
+        for (Map.Entry<String, Map<String, Double>> entry : categoryMonthlyData.entrySet()) {
+            String categoryName = entry.getKey();
+            Map<String, Double> monthData = entry.getValue();
+
+            seriesData.append("{");
+            seriesData.append("name: '").append(categoryName).append("',");
+            seriesData.append("data: [");
+
+            for (String monthName : monthNames) {
+                seriesData.append(monthData.getOrDefault(monthName, 0.0)).append(",");
+            }
+
+            seriesData.setLength(seriesData.length() - 1); // Remove trailing comma
+            seriesData.append("], stack: 'expenses'");
+            seriesData.append("},");
+        }
+        seriesData.setLength(seriesData.length() - 1); // Remove trailing comma
+        seriesData.append("]");
+
+        // Generate the JavaScript for the stacked column chart
         return "Highcharts.chart('barChart', {" +
-                "chart: {" +
-                "type: 'column'" +
-                "}," +
-                "title: {" +
-                "text: 'Monthly Expenses for " + Year.now().getValue() + "'" +
-                "}," +
-                "xAxis: {" +
-                "categories: " + new Gson().toJson(monthlyData.keySet()) + // Categories are the month names
-                "}," +
-                "series: [{" +
-                "name: 'Expenses'," +
-                "data: " + data + // Use the data fetched from DB
-                "}]" +
+                "chart: { type: 'column' }, " +
+                "title: { text: 'Monthly Expenses by Category for " + Year.now().getValue() + "' }, " +
+                "xAxis: { categories: " + new Gson().toJson(monthNames) + " }, " +
+                "yAxis: { " +
+                "min: 0, " +
+                "title: { text: 'Total Expense' }, " +
+                "stackLabels: { " +
+                "enabled: true, " +
+                "style: { fontWeight: 'bold', color: 'gray' } " +
+                "} " +
+                "}, " +
+                "plotOptions: { " +
+                "column: { " +
+                "stacking: 'normal', " +
+                "dataLabels: { enabled: true } " +
+                "} " +
+                "}, " +
+                "series: " + seriesData.toString() + " " +
                 "});";
     }
 
