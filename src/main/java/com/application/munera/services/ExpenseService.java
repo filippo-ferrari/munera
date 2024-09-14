@@ -122,15 +122,6 @@ public class ExpenseService {
     }
 
     /**
-     * Finds expenses by year excluding those marked as credit and paid.
-     * @param year the year for which to find expenses
-     * @return the list of expenses found
-     */
-    public List<Expense> findExpensesByYearExcludingCreditPaid(int year) {
-        return expenseRepository.findByYearAndFilterCreditPaid(year, ExpenseType.CREDIT);
-    }
-
-    /**
      * Checks if an expense has been paid.
      * @param expense the expense to check
      * @return true if the expense has been paid, false otherwise

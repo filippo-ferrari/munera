@@ -32,12 +32,14 @@ public class DashboardView extends Div {
     private final PersonService personService;
     private final UserService userService;
     private final User loggedUser;
+    private final Person loggedPerson;
 
     public DashboardView(final ExpenseService expenseService, final PersonService personService, UserService userService) {
         this.expenseService = expenseService;
         this.personService = personService;
         this.userService = userService;
         loggedUser = userService.getLoggedInUser();
+        loggedPerson = personService.getLoggedInPerson();
         addClassName("highcharts-view"); // Optional CSS class for styling
 
         VerticalLayout mainLayout = new VerticalLayout();
@@ -100,19 +102,18 @@ public class DashboardView extends Div {
 
         String barChartJs = generateBarChartScript();
         String pieChartJs = generatePieChartScript();
-        String bottomLeftChartJs = generateNegativeColumnChartScript();
-        String bottomRightChartJs = generateExpensesOverTimeByCategoryScript();
+        String negativeColumnChartJs = generateNegativeColumnChartScript();
+        String expensesOverTimeByCategoryChart = generateExpensesOverTimeByCategoryScript();
 
         // Execute the JavaScript to initialize the charts
         getElement().executeJs(barChartJs);
         getElement().executeJs(pieChartJs);
-        getElement().executeJs(bottomLeftChartJs);
-        getElement().executeJs(bottomRightChartJs);
+        getElement().executeJs(negativeColumnChartJs);
+        getElement().executeJs(expensesOverTimeByCategoryChart);
     }
 
     private String generateBarChartScript() {
-        final var loggedInPerson = this.personService.getLoggedInPerson();
-        List<Expense> expenses = expenseService.fetchExpensesForDashboard(loggedInPerson, Year.now());
+        List<Expense> expenses = expenseService.fetchExpensesForDashboard(loggedPerson, Year.now());
 
         // Prepare data for Highcharts
         Map<String, Double> monthlyData = new LinkedHashMap<>();
@@ -157,7 +158,7 @@ public class DashboardView extends Div {
     }
 
     private String generatePieChartScript() {
-        List<Expense> expenses = expenseService.findExpensesByYearExcludingCreditPaid(Year.now().getValue());
+        List<Expense> expenses = expenseService.fetchExpensesForDashboard(loggedPerson, Year.now());
 
         // Group expenses by category name and sum their costs
         Map<String, Double> categoryData = expenses.stream()
@@ -275,7 +276,7 @@ public class DashboardView extends Div {
     }
 
     private String generateExpensesOverTimeByCategoryScript() {
-        List<Expense> expenses = expenseService.findExpensesByYearExcludingCreditPaid(Year.now().getValue());
+        List<Expense> expenses = expenseService.fetchExpensesForDashboard(loggedPerson, Year.now());
 
         // Group expenses by category and by month
         Map<String, Map<String, Double>> categoryMonthlyData = new LinkedHashMap<>();

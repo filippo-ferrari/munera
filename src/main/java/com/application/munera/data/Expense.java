@@ -34,11 +34,11 @@ public class Expense {
     @Column(name = "Description")
     private String description;
 
-    @Column(name = "PeriodicExpense", nullable = false)
+    @Column(name = "Periodic", nullable = false)
     private Boolean isPeriodic;
 
     @Enumerated(EnumType.ORDINAL)
-    @Column(name = "PeriodUnit")
+    @Column(name = "Period")
     private PeriodUnit periodUnit;
 
     @Column(name = "PeriodInterval")
@@ -62,7 +62,7 @@ public class Expense {
     private Boolean isPaid = false;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "expenseType", nullable = false)
+    @Column(name = "type", nullable = false)
     private ExpenseType expenseType;
 
     @Column(name = "userId", nullable = false)
