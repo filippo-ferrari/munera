@@ -2,22 +2,70 @@ package com.application.munera.facades;
 
 import com.application.munera.data.Expense;
 import com.application.munera.data.Person;
+import com.application.munera.data.User;
 import com.application.munera.services.ExpenseService;
+import com.application.munera.services.PersonService;
+import com.application.munera.services.UserService;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.treegrid.TreeGrid;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 
 @Component
 public class PersonFacade {
 
     private final ExpenseService expenseService;
+    private final UserService userService;
+    private final PersonService personService;
 
-    public PersonFacade(ExpenseService expenseService) {
+    public PersonFacade(ExpenseService expenseService, UserService userService, PersonService personService) {
         this.expenseService = expenseService;
+        this.userService = userService;
+        this.personService = personService;
     }
+
+    /**
+     * Fetches the {@code Person} entity associated with the currently logged-in user.
+     *
+     * @return the {@code Person} entity of the logged-in user, or {@code null} if not found
+     */
+    public Person getLoggedInPerson() {
+        final var user = userService.getLoggedInUser();
+        return Objects.requireNonNull(personService.findByUsername(user.getUsername()));
+    }
+
+    /**
+     * Finds all {@code Person} entities associated with the logged-in user, excluding the logged-in user.
+     *
+     * @param user the logged-in user whose associated persons are to be retrieved
+     * @return a {@code List} of {@code Person} entities excluding the logged-in user
+     */
+    public List<Person> findAllExcludeLoggedUser(final User user) {
+        return this.personService.findAllExcludeLoggedUser(user);
+    }
+
+    /**
+     * Calculates the net balance for a given {@code Person}.
+     *
+     * @param person the {@code Person} for whom the net balance is to be calculated
+     * @return the net balance as a {@code BigDecimal}
+     */
+    public BigDecimal calculateNetBalance(final Person person) {
+        return this.personService.calculateNetBalance(person);
+    }
+
+    /**
+     * Marks all expenses as paid for the given {@code Person} where the person is the payer.
+     * Updates the user interface to reflect the changes and provides notifications for success or failure.
+     *
+     * @param person the {@code Person} whose expenses are to be marked as paid
+     * @param grid the {@code TreeGrid} component to refresh after updating expenses
+     * @param userId the ID of the user performing the update
+     */
     public void setDebtPaid(Person person, TreeGrid<Object> grid, Long userId) {
         try {
             List<Expense> expenses = expenseService.findExpensesWherePayer(person).stream().toList();
@@ -35,6 +83,14 @@ public class PersonFacade {
         }
     }
 
+    /**
+     * Marks all expenses as paid for the given {@code Person} where the person is the beneficiary.
+     * Updates the user interface to reflect the changes and provides notifications for success or failure.
+     *
+     * @param person the {@code Person} whose expenses are to be marked as paid
+     * @param grid the {@code TreeGrid} component to refresh after updating expenses
+     * @param userId the ID of the user performing the update
+     */
     public void setCreditPaid(Person person, TreeGrid<Object> grid, Long userId) {
         try {
             List<Expense> expenses = expenseService.findExpensesWhereBeneficiary(person).stream().toList();

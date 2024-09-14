@@ -3,7 +3,9 @@ package com.application.munera.services;
 import com.application.munera.data.Expense;
 import com.application.munera.data.Person;
 import com.application.munera.data.User;
+import com.application.munera.repositories.ExpenseRepository;
 import com.application.munera.repositories.PersonRepository;
+import com.application.munera.repositories.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -17,14 +19,14 @@ import java.util.Optional;
 @Service
 public class PersonService {
 
-    private final UserService userService;
     private final PersonRepository personRepository;
-    private final ExpenseService expenseService;
+    private final UserRepository userRepository;
+    private final ExpenseRepository expenseRepository;
 
-    public PersonService(PersonRepository personRepository, ExpenseService expenseService, UserService userService) {
+    public PersonService(PersonRepository personRepository, ExpenseRepository expenseRepository, UserRepository userRepository) {
         this.personRepository = personRepository;
-        this.expenseService = expenseService;
-        this.userService = userService;
+        this.userRepository = userRepository;
+        this.expenseRepository = expenseRepository;
     }
 
     /**
@@ -85,15 +87,6 @@ public class PersonService {
         return (int) this.personRepository.count();
     }
 
-    /**
-     * Fetches the Person entity connected to the currently logged-in user.
-     *
-     * @return Person entity of the logged-in user, or null if not found.
-     */
-    public Person getLoggedInPerson() {
-        final var user = userService.getLoggedInUser();
-        return Objects.requireNonNull(personRepository.findByUsername(user.getUsername()));
-    }
 
     /**
      * Updates a person in the repository.
@@ -118,7 +111,7 @@ public class PersonService {
      * @return the total debt amount
      */
     public BigDecimal calculateDebt(final Person person) {
-        return this.expenseService.findExpensesWherePayer(person).stream()
+        return this.expenseRepository.findExpensesByPayer(person.getId()).stream()
                 .filter(expense -> !expense.getBeneficiary().equals(person) && Boolean.FALSE.equals(expense.getIsPaid()))
                 .map(Expense::getCost)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -130,7 +123,7 @@ public class PersonService {
      * @return the total credit amount
      */
     public BigDecimal calculateCredit(final Person person) {
-        return this.expenseService.findExpensesWhereBeneficiary(person).stream()
+        return this.expenseRepository.findExpensesByBeneficiary(person.getId()).stream()
                 .filter(expense -> !expense.getPayer().equals(person) && Boolean.FALSE.equals(expense.getIsPaid()))
                 .map(Expense::getCost)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
