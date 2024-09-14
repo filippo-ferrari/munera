@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Component
 public class PersonFacade {
@@ -36,6 +37,37 @@ public class PersonFacade {
     public Person getLoggedInPerson() {
         final var user = userService.getLoggedInUser();
         return Objects.requireNonNull(personService.findByUsername(user.getUsername()));
+    }
+
+    /**
+     * Finds a {@link Person} entity by its ID.
+     *
+     * @param id the ID of the person to find
+     * @return an {@link Optional} containing the person if found, or an empty {@link Optional} if not found
+     */
+    public Optional<Person> findById(Long id) {
+        return this.personService.findById(id);
+    }
+
+    /**
+     * Updates the details of a {@link Person} entity and associates it with a specific user.
+     * This method will save the updated person details and associate it with the given user ID.
+     *
+     * @param person the {@link Person} entity to update
+     * @param userId the ID of the user associated with the person
+     */
+    public void update(Person person, Long userId) {
+        this.personService.update(person, userId);
+    }
+
+    /**
+     * Deletes a {@link Person} entity by its ID.
+     * This method removes the person from the system based on the provided ID.
+     *
+     * @param id the ID of the person to delete
+     */
+    public void delete(Long id) {
+        this.personService.delete(id);
     }
 
     /**
