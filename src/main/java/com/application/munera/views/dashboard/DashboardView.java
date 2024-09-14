@@ -44,7 +44,7 @@ public class DashboardView extends Div {
         addClassName("highcharts-view"); // Optional CSS class for styling
 
         // Fetch available years from the database
-        List<Integer> availableYears = List.of(Integer.valueOf("2024"), Integer.valueOf("2023"));
+        List<Integer> availableYears = this.expenseService.getAvailableExpenseYearsForUser(loggedUser.getId());
 
         // Initialize the ComboBox for year selection
         yearComboBox = new ComboBox<>("Select Year");
@@ -115,9 +115,7 @@ public class DashboardView extends Div {
         bottomRowLayout.add(bottomRightChartDiv);
 
         mainLayout.add(bottomRowLayout);
-
         add(mainLayout);
-
         updateCharts(Year.now());
     }
 

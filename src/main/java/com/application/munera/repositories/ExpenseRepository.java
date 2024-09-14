@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Set;
 
 public interface ExpenseRepository extends JpaRepository<Expense, Long>, JpaSpecificationExecutor<Expense> {
+    @Query("SELECT DISTINCT YEAR(e.date) FROM Expense e WHERE e.userId = :userId ORDER BY YEAR(e.date)")
+    List<Integer> findExpenseYearsByUserId(@Param("userId") Long userId);
 
     // Find expenses where the payer is a specific person
     @Query("SELECT e FROM Expense e WHERE e.payer.id = :personId")

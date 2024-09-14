@@ -10,7 +10,6 @@ import com.application.munera.security.SecurityUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -202,6 +201,15 @@ public class ExpenseService {
             if (Boolean.FALSE.equals(expense.getIsPaid()) && !totalExpenses.contains(expense)) totalExpenses.add(expense);
         }
         return totalExpenses;
+    }
+
+    /**
+     * Gets the list of years in which at least one expense has been made
+     * @param userId the user from which to look into the expenses
+     * @return the list of years found
+     */
+    public List<Integer> getAvailableExpenseYearsForUser(Long userId) {
+        return expenseRepository.findExpenseYearsByUserId(userId);
     }
 
     // ================================
