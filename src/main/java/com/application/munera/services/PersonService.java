@@ -5,7 +5,6 @@ import com.application.munera.data.Person;
 import com.application.munera.data.User;
 import com.application.munera.repositories.ExpenseRepository;
 import com.application.munera.repositories.PersonRepository;
-import com.application.munera.repositories.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -13,7 +12,6 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -32,7 +30,7 @@ public class PersonService {
      * @param id the ID of the person
      * @return an optional containing the person if found, otherwise empty
      */
-    public Optional<Person> get(Long id) {
+    public Optional<Person> findById(Long id) {
         return personRepository.findById(id);
     }
 
