@@ -23,22 +23,40 @@ public class UserService {
         this.personRepository = personRepository;
     }
 
+    /**
+     * Retrieves all {@link User} entities.
+     *
+     * @return a list of all users
+     */
     public List<User> findAll() {
         return this.userRepository.findAll();
     }
 
+    /**
+     * Finds a {@link User} entity by its ID.
+     *
+     * @param id the ID of the user to find
+     * @return an {@link Optional} containing the user if found, or an empty {@link Optional} if not found
+     */
     public Optional<User> findById(final Long id) {
         return this.userRepository.findById(id);
     }
 
-    public Optional<User> findByUsername (String username) {
+    /**
+     * Finds a {@link User} entity by its username.
+     *
+     * @param username the username of the user to find
+     * @return an {@link Optional} containing the user if found, or an empty {@link Optional} if not found
+     */
+    public Optional<User> findByUsername(String username) {
         return this.userRepository.findByUsername(username);
     }
 
     /**
-     * Fetches the logged-in User entity.
+     * Fetches the {@link User} entity of the currently logged-in user.
      *
-     * @return User entity of the logged-in user, or null if not found.
+     * @return the logged-in {@link User} entity
+     * @throws IllegalStateException if the user is not logged in or not found
      */
     public User getLoggedInUser() {
         final var userDetails = getLoggedInUserDetails();
@@ -48,6 +66,13 @@ public class UserService {
                 .orElseThrow(() -> new IllegalStateException("User not found: " + username));
     }
 
+    /**
+     * Saves or updates a {@link User} entity and its associated {@link Person} entity.
+     * If the user already exists, it updates the user and the associated person.
+     * If the user does not exist, it creates a new user and a new person entity.
+     *
+     * @param user the {@link User} entity to save or update
+     */
     @Transactional
     public void saveOrUpdateUserAndConnectedPerson(User user) {
         // Check if the user already exists in the database
@@ -80,9 +105,35 @@ public class UserService {
         }
     }
 
+    /**
+     * Counts the total number of {@link User} entities.
+     *
+     * @return the total number of users
+     */
+    public Long count() {
+        return this.userRepository.count();
+    }
+
+    /**
+     * Deletes the specified {@link User} entity and its associated {@link Person} entity.
+     *
+     * @param user the {@link User} entity to delete
+     */
+    public void delete(final User user) {
+        this.userRepository.delete(user);
+        final var person = this.personRepository.findByUsername(user.getUsername());
+        this.personRepository.delete(person);
+    }
+
+    /**
+     * Determines whether a user exists and creates or updates the {@link User} entity accordingly.
+     *
+     * @param user the {@link User} entity to save or update
+     * @param existingUserOptional an {@link Optional} containing an existing user if found
+     * @return the user to be saved
+     */
     private User getUser(User user, Optional<User> existingUserOptional) {
         User userToSave;
-
         if (existingUserOptional.isPresent()) {
             // If user exists, update the user entity
             userToSave = existingUserOptional.get();
@@ -93,19 +144,8 @@ public class UserService {
             userToSave.setPassword(user.getPassword());
             userToSave.setRoles(user.getRoles());
         } else {
-            // If user does not exist, save the new user entity
-            userToSave = user;
+            userToSave = user; // If user does not exist, save the new user entity
         }
         return userToSave;
-    }
-
-    public Long count() {
-        return  this.userRepository.count();
-    }
-
-    public void delete(final User user) {
-        this.userRepository.delete(user);
-        final var person = this.personRepository.findByUsername(user.getUsername());
-        this.personRepository.delete(person);
     }
 }

@@ -20,12 +20,10 @@ import java.util.Optional;
 public class PersonService {
 
     private final PersonRepository personRepository;
-    private final UserRepository userRepository;
     private final ExpenseRepository expenseRepository;
 
-    public PersonService(PersonRepository personRepository, ExpenseRepository expenseRepository, UserRepository userRepository) {
+    public PersonService(PersonRepository personRepository, ExpenseRepository expenseRepository) {
         this.personRepository = personRepository;
-        this.userRepository = userRepository;
         this.expenseRepository = expenseRepository;
     }
 
