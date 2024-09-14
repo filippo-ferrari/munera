@@ -5,7 +5,6 @@ import com.application.munera.services.ExpenseService;
 import com.application.munera.services.UserService;
 import com.application.munera.views.categories.CategoriesView;
 import com.application.munera.views.dashboard.DashboardView;
-import com.application.munera.views.events.EventsView;
 import com.application.munera.views.expenses.ExpensesView;
 import com.application.munera.views.people.PeopleView;
 import com.application.munera.views.settings.SettingsView;
@@ -120,7 +119,6 @@ public class MainLayout extends AppLayout {
         nav.addItem(new SideNavItem("Expenses", ExpensesView.class, LineAwesomeIcon.MONEY_BILL_SOLID.create()));
         nav.addItem(new SideNavItem("Categories", CategoriesView.class, LineAwesomeIcon.FOLDER.create()));
         nav.addItem(new SideNavItem("People", PeopleView.class, LineAwesomeIcon.USER.create()));
-        nav.addItem(new SideNavItem("Events", EventsView.class, LineAwesomeIcon.BANDCAMP.create()));
         nav.addItem(new SideNavItem("Dashboard", DashboardView.class, LineAwesomeIcon.CHART_LINE_SOLID.create()));
 
         // Check user roles before adding sensitive menu items

@@ -14,7 +14,7 @@ import java.util.Set;
 @Getter
 @Setter
 @Table(name = "people")
-public class Person extends AbstractEntity {
+public class Person {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -45,9 +45,6 @@ public class Person extends AbstractEntity {
 
     @OneToMany(mappedBy = "beneficiary")
     private Set<Expense> expensesAsBeneficiary;
-
-    @ManyToMany(mappedBy = "participants")
-    private Set<Event> events;
 
     @Column(name = "Username", unique = true)
     private String username; // This field will link to the User entity

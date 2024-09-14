@@ -52,10 +52,6 @@ public class Expense {
     @JoinColumn(name = "DebtorId")
     private Person beneficiary;
 
-    @ManyToOne
-    @JoinColumn(name = "EventId")
-    private Event event;
-
     @Column(name = "Date", nullable = false, columnDefinition = "DATE DEFAULT CURRENT_DATE")
     private LocalDate date;
 

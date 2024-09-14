@@ -60,7 +60,6 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
     private final ExpenseService expenseService;
     private final CategoryService categoryService;
     private final PersonService personService;
-    private final EventService eventService;
     private final ViewsService viewsService;
     private final UserService userService;
     private TextField name;
@@ -74,14 +73,12 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
     private DatePicker date;
     private ComboBox<Person> payer;
     private ComboBox<Person> beneficiary;
-    private ComboBox<Event> event;
 
     @Autowired
-    public ExpensesView(ExpenseService expenseService, CategoryService categoryService, PersonService personService, EventService eventService, ViewsService viewsService, UserService userService) {
+    public ExpensesView(ExpenseService expenseService, CategoryService categoryService, PersonService personService, ViewsService viewsService, UserService userService) {
         this.expenseService = expenseService;
         this.categoryService = categoryService;
         this.personService = personService;
-        this.eventService = eventService;
         this.viewsService = viewsService;
         this.userService =  userService;
         addClassNames("expenses-view");
@@ -101,7 +98,6 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         grid.addColumn(Expense::getPeriodInterval).setHeader("Period Interval").setSortable(true);
         grid.addColumn(Expense::getPeriodUnit).setHeader("Period Unit").setSortable(true);
         grid.addColumn(Expense::getDate).setHeader("Date").setSortable(true).setSortProperty("date");
-        // grid.addColumn(expenseEvent -> expenseEvent.getEvent().getName()).setHeader("Event").setSortable(true);
         grid.addColumn(new ComponentRenderer<>(this.viewsService::createExpenseBadge)).setHeader("Status").setSortable(true);
         grid.getColumns().forEach(col -> col.setAutoWidth(true));
 
@@ -259,9 +255,6 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         payer = new ComboBox<>("Payer");
         payer.setItems(people);
         payer.setItemLabelGenerator(person -> person.getFirstName() + " " + person.getLastName());
-        event = new ComboBox<>("Event");
-        event.setItems(eventService.findAll());
-        event.setItemLabelGenerator(Event::getName);
         beneficiary = new ComboBox<>("Beneficiary");
         beneficiary.setItems(people);
         beneficiary.setItemLabelGenerator(person -> person.getFirstName() + " " + person.getLastName());
@@ -273,7 +266,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         isPaid = new Checkbox("Paid");
         checkboxLayout.add(isPeriodic, isPaid);
 
-        formLayout.add(name, cost, category, description, checkboxLayout, periodUnit, periodInterval, date, payer, beneficiary, event);
+        formLayout.add(name, cost, category, description, checkboxLayout, periodUnit, periodInterval, date, payer, beneficiary);
         editorDiv.add(formLayout);
         createButtonLayout(editorLayoutDiv);
 
