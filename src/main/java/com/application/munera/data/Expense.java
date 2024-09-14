@@ -64,4 +64,7 @@ public class Expense {
     @Enumerated(EnumType.STRING)
     @Column(name = "expenseType", nullable = false)
     private ExpenseType expenseType;
+
+    @Column(name = "userId", nullable = false, unique = true)
+    private Long userId;
 }

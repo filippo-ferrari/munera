@@ -146,6 +146,7 @@ public class ExpenseService {
      */
     public void update(Expense entity) {
         if (Boolean.TRUE.equals(entity.getIsPaid())) entity.setPaymentDate(LocalDate.now());
+        else entity.setPaymentDate(null);
         this.setExpenseType(entity);
         expenseRepository.save(entity);
     }
