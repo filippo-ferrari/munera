@@ -2,11 +2,11 @@ package com.application.munera.services;
 
 import com.application.munera.data.Expense;
 import com.application.munera.data.Person;
+import com.application.munera.data.User;
 import com.application.munera.repositories.PersonRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -40,20 +40,22 @@ public class PersonService {
      * Finds all persons.
      * @return a collection of all persons
      */
-    public List<Person> findAll() {
-        return this.personRepository.findAll();
+    public List<Person> findAllByUserId(Long userId) {
+        return this.personRepository.findByUserId(userId);
     }
 
-    public Optional<Person> findByUserId(Long id) {
-        return this.personRepository.findByUserId(id);
+    public Person findByUsername(String username) {
+        return this.personRepository.findByUsername(username);
     }
 
     /**
      * Finds all people excluding the users'ones.
      * @return a collection of all persons
      */
-    public List<Person> findAllExcludeUsers() {
-        return this.personRepository.findAllExcludeUser();
+    public List<Person> findAllExcludeLoggedUser(User user) {
+        final var userId = user.getId();
+        final var username = user.getUsername();
+        return this.personRepository.findAllByUserIdExcludingPerson(userId, username);
     }
 
     /**
@@ -90,14 +92,15 @@ public class PersonService {
      */
     public Person getLoggedInPerson() {
         final var user = userService.getLoggedInUser();
-        return Objects.requireNonNull(personRepository.findByUserId(user.getId()).orElse(null));
+        return Objects.requireNonNull(personRepository.findByUsername(user.getUsername()));
     }
 
     /**
      * Updates a person in the repository.
      * @param person the person to update
      */
-    public void update(Person person) {
+    public void update(Person person, Long userId) {
+        person.setUserId(userId);
         this.personRepository.save(person);
     }
 

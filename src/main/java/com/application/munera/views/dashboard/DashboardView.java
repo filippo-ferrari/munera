@@ -2,8 +2,10 @@ package com.application.munera.views.dashboard;
 
 import com.application.munera.data.Expense;
 import com.application.munera.data.Person;
+import com.application.munera.data.User;
 import com.application.munera.services.ExpenseService;
 import com.application.munera.services.PersonService;
+import com.application.munera.services.UserService;
 import com.application.munera.views.MainLayout;
 import com.nimbusds.jose.shaded.gson.Gson;
 import com.vaadin.flow.component.html.Div;
@@ -28,10 +30,14 @@ public class DashboardView extends Div {
 
     private final ExpenseService expenseService;
     private final PersonService personService;
+    private final UserService userService;
+    private final User loggedUser;
 
-    public DashboardView(final ExpenseService expenseService, final PersonService personService) {
+    public DashboardView(final ExpenseService expenseService, final PersonService personService, UserService userService) {
         this.expenseService = expenseService;
         this.personService = personService;
+        this.userService = userService;
+        loggedUser = userService.getLoggedInUser();
         addClassName("highcharts-view"); // Optional CSS class for styling
 
         VerticalLayout mainLayout = new VerticalLayout();
@@ -190,7 +196,7 @@ public class DashboardView extends Div {
     }
 
     private String generateNegativeColumnChartScript() {
-        final var people = personService.findAllExcludeUsers().stream()
+        final var people = personService.findAllExcludeLoggedUser(loggedUser).stream()
                 .filter(person -> personService.calculateNetBalance(person).compareTo(BigDecimal.ZERO) != 0)
                 .toList();
         if (people.isEmpty()) return generatePlaceholderChartScript("bottomLeftChart", "All Payments Settled");

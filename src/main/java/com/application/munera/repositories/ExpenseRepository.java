@@ -56,5 +56,5 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long>, JpaSpec
     boolean existsByIdAndIsPaidTrue(Long id);
 
     // Find all expenses ordered by date descending
-    List<Expense> findAllByOrderByDateDesc();
+    List<Expense> findByUserIdOrderByDateDesc(Long userId);
 }

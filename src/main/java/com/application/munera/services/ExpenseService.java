@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.Year;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -83,11 +82,11 @@ public class ExpenseService {
     }
 
     /**
-     * Finds all expenses related to a user, both where the user is a payer and a beneficiary.
-     * @param person the user of the expenses
+     * Finds all expenses related to a person, both where the person is a payer and a beneficiary.
+     * @param person the person of the expenses
      * @return the list of expenses found
      */
-    public List<Expense> findExpensesByUser(final Person person) {
+    public List<Expense> findExpensesByPerson(final Person person) {
         // Retrieve expenses where the person is the payer
         final var payerExpenses = this.findExpensesWherePayer(person);
         // Retrieve expenses where the person is the beneficiary
@@ -118,8 +117,8 @@ public class ExpenseService {
      * Fetches all expenses ordered by date in descending order.
      * @return the list of expenses found
      */
-    public List<Expense> findAllOrderByDateDescending() {
-        return this.expenseRepository.findAllByOrderByDateDesc();
+    public List<Expense> findAllOrderByDateDescending(Long userId) {
+        return this.expenseRepository.findByUserIdOrderByDateDesc(userId);
     }
 
     /**
@@ -144,7 +143,8 @@ public class ExpenseService {
      * Updates an existing expense.
      * @param entity the expense to update
      */
-    public void update(Expense entity) {
+    public void update(Expense entity, Long userId) {
+        entity.setUserId(userId);
         if (Boolean.TRUE.equals(entity.getIsPaid())) entity.setPaymentDate(LocalDate.now());
         else entity.setPaymentDate(null);
         this.setExpenseType(entity);
@@ -223,14 +223,12 @@ public class ExpenseService {
      */
     private void setExpenseType(final @Nonnull Expense expense) {
         // Get the currently logged-in user
-        UserDetails userDetails = SecurityUtils.getLoggedInUserDetails();
-        if (userDetails == null) {
-            throw new IllegalStateException("No logged-in user found");
-        }
+        final var userDetails = SecurityUtils.getLoggedInUserDetails();
+        if (userDetails == null) throw new IllegalStateException("No logged-in user found");
         // Fetch the logged-in user
-        final var loggedInUserId = userRepository.findByUsername(userDetails.getUsername())
-                .orElseThrow(() -> new UsernameNotFoundException("User not found")).getId();
-        Person loggedInPerson = this.personRepository.findByUserId(loggedInUserId).orElse(null);
+        final var loggedInUser = userRepository.findByUsername(userDetails.getUsername())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        Person loggedInPerson = this.personRepository.findByUsername(loggedInUser.getUsername());
 
         if (loggedInPerson == null) throw new IllegalStateException("No associated Person entity found for logged-in user");
 

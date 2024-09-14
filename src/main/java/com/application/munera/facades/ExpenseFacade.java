@@ -14,9 +14,9 @@ public class ExpenseFacade {
         this.expenseService = expenseService;
     }
 
-    public void setExpensePaid(Expense expense, TreeGrid<Object> grid) {
+    public void setExpensePaid(Expense expense, TreeGrid<Object> grid, Long userId) {
         expense.setIsPaid(true);
-        this.expenseService.update(expense);
+        this.expenseService.update(expense, userId);
         Notification.show("Expense " + expense.getName() + " set as paid" );
         grid.select(null);
         grid.getDataProvider().refreshAll();

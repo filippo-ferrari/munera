@@ -18,12 +18,12 @@ public class PersonFacade {
     public PersonFacade(ExpenseService expenseService) {
         this.expenseService = expenseService;
     }
-    public void setDebtPaid(Person person, TreeGrid<Object> grid) {
+    public void setDebtPaid(Person person, TreeGrid<Object> grid, Long userId) {
         try {
             List<Expense> expenses = expenseService.findExpensesWherePayer(person).stream().toList();
             for (Expense expense : expenses) {
                 expense.setIsPaid(true);
-                expenseService.update(expense);
+                expenseService.update(expense, userId);
             }
             Notification.show("All expenses marked as paid for " + person.getFirstName() + " " + person.getLastName());
             grid.select(null);
@@ -35,12 +35,12 @@ public class PersonFacade {
         }
     }
 
-    public void setCreditPaid(Person person, TreeGrid<Object> grid) {
+    public void setCreditPaid(Person person, TreeGrid<Object> grid, Long userId) {
         try {
             List<Expense> expenses = expenseService.findExpensesWhereBeneficiary(person).stream().toList();
             for (Expense expense : expenses) {
                 expense.setIsPaid(true);
-                expenseService.update(expense);
+                expenseService.update(expense, userId);
             }
             Notification.show("All expenses marked as paid for " + person.getFirstName() + " " + person.getLastName());
             grid.select(null);

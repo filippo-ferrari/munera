@@ -5,7 +5,6 @@ import com.application.munera.data.User;
 import com.application.munera.repositories.PersonRepository;
 import com.application.munera.repositories.UserRepository;
 import jakarta.transaction.Transactional;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -59,7 +58,7 @@ public class UserService {
         userRepository.save(userToSave);
 
         // Check if the associated person exists for the user
-        final var existingPersonOptional = personRepository.findByUserId(userToSave.getId());
+        final var existingPersonOptional = personRepository.findOptionalByUsername(userToSave.getUsername());
 
         if (existingPersonOptional.isPresent()) {
             // If person exists, update the person entity
@@ -106,7 +105,7 @@ public class UserService {
 
     public void delete(final User user) {
         this.userRepository.delete(user);
-        final var person = this.personRepository.findByUserId(user.getId());
-        person.ifPresent(this.personRepository::delete);
+        final var person = this.personRepository.findByUsername(user.getUsername());
+        this.personRepository.delete(person);
     }
 }

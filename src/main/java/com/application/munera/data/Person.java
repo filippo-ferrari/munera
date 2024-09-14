@@ -49,7 +49,7 @@ public class Person {
     @Column(name = "Username", unique = true)
     private String username; // This field will link to the User entity
 
-    @Column(name = "UserId", unique = true, nullable = false)
+    @Column(name = "UserId", nullable = false)
     private Long userId; // Reference to the User entity
 
     @Override

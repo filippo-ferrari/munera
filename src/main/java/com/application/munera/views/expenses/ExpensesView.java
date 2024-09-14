@@ -56,6 +56,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
     private final BeanValidationBinder<Expense> binder;
 
     private Expense expense;
+    private Long userId;
 
     private final ExpenseService expenseService;
     private final CategoryService categoryService;
@@ -81,6 +82,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         this.personService = personService;
         this.viewsService = viewsService;
         this.userService =  userService;
+        this.userId = userService.getLoggedInUser().getId();
         addClassNames("expenses-view");
 
         // Create UI
@@ -101,7 +103,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         grid.addColumn(new ComponentRenderer<>(this.viewsService::createExpenseBadge)).setHeader("Status").setSortable(true);
         grid.getColumns().forEach(col -> col.setAutoWidth(true));
 
-        grid.setItems(this.expenseService.findAllOrderByDateDescending());
+        grid.setItems(this.expenseService.findAllOrderByDateDescending(userId));
         grid.setPaginatorSize(5);
         grid.setPageSize(22); // setting page size
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
@@ -180,7 +182,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
             try {
                 if (this.expense == null) this.expense = new Expense();
                 binder.writeBean(this.expense);
-                expenseService.update(this.expense);
+                expenseService.update(this.expense, userId);
                 clearForm();
                 refreshGrid();
                 Notification.show("Data updated");
@@ -235,13 +237,12 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
     }
 
     private void createEditorLayout(SplitLayout splitLayout) {
-        final var userId = this.userService.getLoggedInUser().getId();
         Div editorLayoutDiv = new Div();
         editorLayoutDiv.setClassName("editor-layout");
         Div editorDiv = new Div();
         editorDiv.setClassName("editor");
         editorLayoutDiv.add(editorDiv);
-        final var people = this.personService.findAll();
+        final var people = this.personService.findAllByUserId(userId);
 
         FormLayout formLayout = new FormLayout();
         name = new TextField("Name");
@@ -292,7 +293,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
     }
 
     private void refreshGrid() {
-        grid.setItems(this.expenseService.findAllOrderByDateDescending());
+        grid.setItems(this.expenseService.findAllOrderByDateDescending(userId));
         grid.select(null);
         grid.getDataProvider().refreshAll();
     }
@@ -309,19 +310,18 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         periodInterval.setVisible(isPeriodicChecked);
     }
 
+    //TODO: check and improve this mess pls
     private void initializeComboBoxes() {
         // Fetch the logged-in user's Person entity
         UserDetails userDetails = SecurityUtils.getLoggedInUserDetails();
         if (userDetails != null) {
             String username = userDetails.getUsername();
             final var user = this.userService.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("User not found"));
-                Optional<Person> loggedInPerson = personService.findByUserId(user.getId());
-                if (loggedInPerson.isPresent()) {
-                    Person person = loggedInPerson.get();
+                final var loggedInPerson = personService.findByUsername(user.getUsername());
                     // Set default values for payer and beneficiary ComboBoxes
-                    payer.setValue(person);
-                    beneficiary.setValue(person);
-                }
+                    payer.setValue(loggedInPerson);
+                    beneficiary.setValue(loggedInPerson);
+
         }
     }
 }

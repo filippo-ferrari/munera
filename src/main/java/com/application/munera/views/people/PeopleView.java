@@ -2,10 +2,12 @@ package com.application.munera.views.people;
 
 import com.application.munera.data.Expense;
 import com.application.munera.data.Person;
+import com.application.munera.data.User;
 import com.application.munera.facades.ExpenseFacade;
 import com.application.munera.facades.PersonFacade;
 import com.application.munera.services.ExpenseService;
 import com.application.munera.services.PersonService;
+import com.application.munera.services.UserService;
 import com.application.munera.services.ViewsService;
 import com.application.munera.views.MainLayout;
 import com.vaadin.flow.component.UI;
@@ -56,21 +58,27 @@ public class PeopleView extends Div implements BeforeEnterObserver {
     private final BeanValidationBinder<Person> binder;
 
     private Person person;
+    private User loggedUser;
+    private Long userId;
     private final PersonService personService;
     private final PersonFacade personFacade;
     private final ExpenseFacade expenseFacade;
     private final ExpenseService expenseService;
     private final ViewsService viewsService;
+    private final UserService userService;
     private TextField firstName;
     private TextField lastName;
     private EmailField email;
 
-    public PeopleView(PersonService personService, ExpenseService expenseService, ViewsService viewsService, PersonFacade personFacade, ExpenseFacade expenseFacade) {
+    public PeopleView(PersonService personService, ExpenseService expenseService, ViewsService viewsService, PersonFacade personFacade, ExpenseFacade expenseFacade, UserService userService) {
         this.personService = personService;
         this.expenseService = expenseService;
         this.viewsService = viewsService;
         this.personFacade = personFacade;
         this.expenseFacade = expenseFacade;
+        this.userService = userService;
+        loggedUser = userService.getLoggedInUser();
+        userId = loggedUser.getId();
         addClassNames("expenses-view");
 
         // Create UI
@@ -92,12 +100,12 @@ public class PeopleView extends Div implements BeforeEnterObserver {
         grid.addColumn(new ComponentRenderer<>(persona -> {
             switch (persona) {
                 case Person person1 -> {
-                    Button setDebtPaidButton = new Button("Set all debt as paid", event -> this.personFacade.setDebtPaid(person1, grid));
+                    Button setDebtPaidButton = new Button("Set all debt as paid", event -> this.personFacade.setDebtPaid(person1, grid, userId));
                     setDebtPaidButton.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_PRIMARY);
                     return setDebtPaidButton;
                 }
                 case Expense expense -> {
-                    Button setExpensePaidButton = new Button("Set as paid", event -> this.expenseFacade.setExpensePaid(expense, grid));
+                    Button setExpensePaidButton = new Button("Set as paid", event -> this.expenseFacade.setExpensePaid(expense, grid, userId));
                     setExpensePaidButton.addThemeVariants(ButtonVariant.LUMO_SMALL);
                     if (Boolean.TRUE.equals((expense).getIsPaid())) setExpensePaidButton.setEnabled(false);
                     return setExpensePaidButton;
@@ -110,13 +118,13 @@ public class PeopleView extends Div implements BeforeEnterObserver {
 
         grid.addColumn(new ComponentRenderer<>(persona -> {
             if (persona instanceof Person person1) {
-                Button setCreditPaidButton = new Button("Set all credit as paid", event -> this.personFacade.setCreditPaid(person1, grid));
+                Button setCreditPaidButton = new Button("Set all credit as paid", event -> this.personFacade.setCreditPaid(person1, grid, userId));
                 setCreditPaidButton.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_PRIMARY);
                 return setCreditPaidButton;
             } else return new Span();
         }));
 
-        List<Person> people =  personService.findAllExcludeUsers();
+        List<Person> people =  personService.findAllExcludeLoggedUser(loggedUser);
 
         this.setGridData(people);
 
@@ -148,7 +156,7 @@ public class PeopleView extends Div implements BeforeEnterObserver {
             try {
                 if (this.person == null) this.person = new Person();
                 binder.writeBean(this.person);
-                personService.update(this.person);
+                personService.update(this.person, userId);
                 clearForm();
                 refreshGrid();
                 Notification.show("Data updated");
@@ -263,15 +271,15 @@ public class PeopleView extends Div implements BeforeEnterObserver {
     }
 
     public void setGridData(List<Person> people) {
-        for (Person user : people) {
+        for (Person person : people) {
             // Add the person as a root item
-            grid.getTreeData().addItem(null, user);
+            grid.getTreeData().addItem(null, person);
 
             // Fetch expenses for the current person
-            List<Expense> expenses =  expenseService.findExpensesByUser(user);
+            List<Expense> expenses =  expenseService.findExpensesByPerson(person);
 
             // Add each expense as a child item under the person
-            for (Expense expense : expenses) grid.getTreeData().addItem(user, expense);
+            for (Expense expense : expenses) grid.getTreeData().addItem(person, expense);
         }
     }
 }
