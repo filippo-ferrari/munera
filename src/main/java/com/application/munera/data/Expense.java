@@ -65,6 +65,6 @@ public class Expense {
     @Column(name = "expenseType", nullable = false)
     private ExpenseType expenseType;
 
-    @Column(name = "userId", nullable = false, unique = true)
+    @Column(name = "userId", nullable = false)
     private Long userId;
 }

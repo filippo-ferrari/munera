@@ -41,13 +41,12 @@ public class UserService {
      *
      * @return User entity of the logged-in user, or null if not found.
      */
-    public Optional<User> getLoggedInUser() {
-        UserDetails userDetails = getLoggedInUserDetails();
-        if (userDetails != null) {
-            String username = userDetails.getUsername();
-            return userRepository.findByUsername(username);
-        }
-        return null;
+    public User getLoggedInUser() {
+        final var userDetails = getLoggedInUserDetails();
+        if (userDetails == null) throw new IllegalStateException("User is not logged in.");
+        final var username = userDetails.getUsername();
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalStateException("User not found: " + username));
     }
 
     @Transactional

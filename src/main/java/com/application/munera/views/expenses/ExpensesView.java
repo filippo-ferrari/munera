@@ -235,6 +235,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
     }
 
     private void createEditorLayout(SplitLayout splitLayout) {
+        final var userId = this.userService.getLoggedInUser().getId();
         Div editorLayoutDiv = new Div();
         editorLayoutDiv.setClassName("editor-layout");
         Div editorDiv = new Div();
@@ -246,7 +247,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         name = new TextField("Name");
         cost = new TextField("Cost");
         category = new ComboBox<>("Category");
-        category.setItems(categoryService.findAll());
+        category.setItems(categoryService.findAllByUserId(userId));
         category.setItemLabelGenerator(Category::getName);
         description = new TextArea("Description");
         periodUnit = new ComboBox<>("Period Unit");

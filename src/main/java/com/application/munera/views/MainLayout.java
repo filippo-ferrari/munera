@@ -130,7 +130,7 @@ public class MainLayout extends AppLayout {
     }
 
     private boolean isUserAdmin() {
-        final var user = userService.getLoggedInUser().orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        final var user = userService.getLoggedInUser();
         return user.getRoles().contains("ROLE_ADMIN");
     }
 

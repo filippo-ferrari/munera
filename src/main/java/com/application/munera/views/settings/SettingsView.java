@@ -47,7 +47,7 @@ public class SettingsView extends VerticalLayout implements BeforeEnterObserver 
 
         createForm();
 
-        loggedInUser = userService.getLoggedInUser().orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        loggedInUser = userService.getLoggedInUser();
 
         binder = new BeanValidationBinder<>(User.class);
         // Bind fields. This is where you'd define e.g. validation rules
@@ -109,11 +109,11 @@ public class SettingsView extends VerticalLayout implements BeforeEnterObserver 
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
-        final var loggedInUser = userService.getLoggedInUser().orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        firstName.setValue(loggedInUser.getFirstName());
-        lastName.setValue(loggedInUser.getLastName());
-        password.setValue(loggedInUser.getPassword());
-        email.setValue(loggedInUser.getEmail());
+        final var getLoggedInUser = userService.getLoggedInUser();
+        firstName.setValue(getLoggedInUser.getFirstName());
+        lastName.setValue(getLoggedInUser.getLastName());
+        password.setValue(getLoggedInUser.getPassword());
+        email.setValue(getLoggedInUser.getEmail());
         monthlyIncome.setValue("");
     }
 }

@@ -2,6 +2,7 @@ package com.application.munera.views.categories;
 
 import com.application.munera.data.Category;
 import com.application.munera.services.CategoryService;
+import com.application.munera.services.UserService;
 import com.application.munera.views.MainLayout;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -50,20 +51,18 @@ public class CategoriesView extends Div implements BeforeEnterObserver {
 
     private Category category;
     private final CategoryService categoryService;
+    private final UserService userService;
     private TextField name;
 
-    private TextArea description;
-
-    public CategoriesView(CategoryService categoryService) {
+    public CategoriesView(CategoryService categoryService, UserService userService) {
         this.categoryService = categoryService;
+        this.userService = userService;
         addClassNames("expenses-view");
 
         // Create UI
         SplitLayout splitLayout = new SplitLayout();
-
         createGridLayout(splitLayout);
         createEditorLayout(splitLayout);
-
         add(splitLayout);
 
         // Configure Grid
@@ -71,9 +70,7 @@ public class CategoriesView extends Div implements BeforeEnterObserver {
         grid.addColumn(Category::getDescription).setHeader("Description").setSortable(true);
         grid.getColumns().forEach(col -> col.setAutoWidth(true));
 
-        grid.setItems(query -> categoryService.list(
-                        PageRequest.of(query.getPage(), query.getPageSize(), VaadinSpringDataHelpers.toSpringDataSort(query)))
-                .stream());
+        grid.setItems(this.categoryService.findAllByUserId(this.userService.getLoggedInUser().getId()));
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
 
         // when a row is selected or deselected, populate form
@@ -158,6 +155,7 @@ public class CategoriesView extends Div implements BeforeEnterObserver {
     }
 
     private void createEditorLayout(SplitLayout splitLayout) {
+        TextArea description;
         Div editorLayoutDiv = new Div();
         editorLayoutDiv.setClassName("editor-layout");
 
