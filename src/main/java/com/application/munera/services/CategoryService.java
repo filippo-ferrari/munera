@@ -26,8 +26,9 @@ public class CategoryService {
         return categoryRepository.findByUserId(userId);
     }
 
-    public void update(Category category) {
-        categoryRepository.save(category);
+    public void update(Category category, Long userId) {
+        category.setUserId(userId);
+        categoryRepository.save(category );
     }
 
     public void delete(Category category) {
