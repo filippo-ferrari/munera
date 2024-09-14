@@ -40,6 +40,15 @@ public class PersonFacade {
     }
 
     /**
+     * Fetches all the people related to the user
+     * @param userId the id of the user related to the people
+     * @return the list of people found related to the id of the user
+     */
+    public List<Person> findAllByUserId(Long userId) {
+        return this.personService.findAllByUserId(userId);
+    }
+
+    /**
      * Finds a {@link Person} entity by its ID.
      *
      * @param id the ID of the person to find

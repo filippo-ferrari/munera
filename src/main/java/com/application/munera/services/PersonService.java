@@ -35,7 +35,7 @@ public class PersonService {
     }
 
     /**
-     * Finds all persons.
+     * Finds all people.
      * @return a collection of all persons
      */
     public List<Person> findAllByUserId(Long userId) {

@@ -1,8 +1,14 @@
 package com.application.munera.views.expenses;
 
-import com.application.munera.data.*;
-import com.application.munera.security.SecurityUtils;
-import com.application.munera.services.*;
+import com.application.munera.data.Category;
+import com.application.munera.data.Expense;
+import com.application.munera.data.PeriodUnit;
+import com.application.munera.data.Person;
+import com.application.munera.facades.PersonFacade;
+import com.application.munera.services.CategoryService;
+import com.application.munera.services.ExpenseService;
+import com.application.munera.services.UserService;
+import com.application.munera.services.ViewsService;
 import com.application.munera.views.MainLayout;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -30,8 +36,6 @@ import com.vaadin.flow.router.*;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.vaadin.klaudeta.PaginatedGrid;
 
 import java.math.BigDecimal;
@@ -59,8 +63,8 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
     private Long userId;
 
     private final ExpenseService expenseService;
+    private final PersonFacade personFacade;
     private final CategoryService categoryService;
-    private final PersonService personService;
     private final ViewsService viewsService;
     private final UserService userService;
     private TextField name;
@@ -76,13 +80,13 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
     private ComboBox<Person> beneficiary;
 
     @Autowired
-    public ExpensesView(ExpenseService expenseService, CategoryService categoryService, PersonService personService, ViewsService viewsService, UserService userService) {
+    public ExpensesView(ExpenseService expenseService, CategoryService categoryService, ViewsService viewsService, UserService userService, PersonFacade personFacade) {
         this.expenseService = expenseService;
         this.categoryService = categoryService;
-        this.personService = personService;
         this.viewsService = viewsService;
         this.userService =  userService;
-        this.userId = userService.getLoggedInUser().getId();
+        this.personFacade = personFacade;
+        this.userId = this.userService.getLoggedInUser().getId();
         addClassNames("expenses-view");
 
         // Create UI
@@ -242,7 +246,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         Div editorDiv = new Div();
         editorDiv.setClassName("editor");
         editorLayoutDiv.add(editorDiv);
-        final var people = this.personService.findAllByUserId(userId);
+        final var people = this.personFacade.findAllByUserId(userId);
 
         FormLayout formLayout = new FormLayout();
         name = new TextField("Name");
@@ -310,18 +314,9 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         periodInterval.setVisible(isPeriodicChecked);
     }
 
-    //TODO: check and improve this mess pls
     private void initializeComboBoxes() {
-        // Fetch the logged-in user's Person entity
-        UserDetails userDetails = SecurityUtils.getLoggedInUserDetails();
-        if (userDetails != null) {
-            String username = userDetails.getUsername();
-            final var user = this.userService.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("User not found"));
-                final var loggedInPerson = personService.findByUsername(user.getUsername());
-                    // Set default values for payer and beneficiary ComboBoxes
-                    payer.setValue(loggedInPerson);
-                    beneficiary.setValue(loggedInPerson);
-
-        }
+        final var loggedInPerson = this.personFacade.getLoggedInPerson();
+        payer.setValue(loggedInPerson);
+        beneficiary.setValue(loggedInPerson);
     }
 }
