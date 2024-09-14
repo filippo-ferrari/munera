@@ -3,6 +3,7 @@ package com.application.munera.views.dashboard;
 import com.application.munera.data.Expense;
 import com.application.munera.data.Person;
 import com.application.munera.data.User;
+import com.application.munera.facades.PersonFacade;
 import com.application.munera.services.ExpenseService;
 import com.application.munera.services.PersonService;
 import com.application.munera.services.UserService;
@@ -29,17 +30,15 @@ import java.util.stream.Collectors;
 public class DashboardView extends Div {
 
     private final ExpenseService expenseService;
-    private final PersonService personService;
-    private final UserService userService;
+    private final PersonFacade personFacade;
     private final User loggedUser;
     private final Person loggedPerson;
 
-    public DashboardView(final ExpenseService expenseService, final PersonService personService, UserService userService) {
+    public DashboardView(ExpenseService expenseService, UserService userService, PersonFacade personFacade) {
         this.expenseService = expenseService;
-        this.personService = personService;
-        this.userService = userService;
+        this.personFacade = personFacade;
         loggedUser = userService.getLoggedInUser();
-        loggedPerson = personService.getLoggedInPerson();
+        loggedPerson = personFacade.getLoggedInPerson();
         addClassName("highcharts-view"); // Optional CSS class for styling
 
         VerticalLayout mainLayout = new VerticalLayout();
@@ -197,18 +196,22 @@ public class DashboardView extends Div {
     }
 
     private String generateNegativeColumnChartScript() {
-        final var people = personService.findAllExcludeLoggedUser(loggedUser).stream()
-                .filter(person -> personService.calculateNetBalance(person).compareTo(BigDecimal.ZERO) != 0)
-                .toList();
-        if (people.isEmpty()) return generatePlaceholderChartScript("bottomLeftChart", "All Payments Settled");
-
-        Map<String, Double> personData = new LinkedHashMap<>();
-
-        for (Person person : people) {
-            BigDecimal balance = personService.calculateNetBalance(person);
-            // Invert the balance value
-            personData.put(person.getFirstName(), balance.negate().doubleValue());
-        }
+        final var people = personFacade.findAllExcludeLoggedUser(loggedUser);
+        // Create a map to store person names and their balances
+        Map<String, Double> personData = people.stream()
+                .map(person -> {
+                    BigDecimal balance = personFacade.calculateNetBalance(person);
+                    // Return an array with the person’s first name and the balance
+                    return new Object[]{person.getFirstName(), balance};
+                })
+                .filter(entry -> ((BigDecimal) entry[1]).compareTo(BigDecimal.ZERO) != 0)
+                .collect(Collectors.toMap(
+                        entry -> (String) entry[0],
+                        entry -> ((BigDecimal) entry[1]).negate().doubleValue(),
+                        (existing, replacement) -> existing,
+                        LinkedHashMap::new // Preserves insertion order
+                ));
+        if (personData.isEmpty()) return generatePlaceholderChartScript("bottomLeftChart", "All Payments Settled");
 
         // Prepare series data for Highcharts with conditional coloring
         StringBuilder data = new StringBuilder("[");
