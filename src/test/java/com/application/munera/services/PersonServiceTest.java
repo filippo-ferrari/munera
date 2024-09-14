@@ -2,6 +2,7 @@ package com.application.munera.services;
 
 import com.application.munera.data.Expense;
 import com.application.munera.data.Person;
+import com.application.munera.repositories.ExpenseRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -23,16 +24,16 @@ import static org.mockito.Mockito.when;
 class PersonServiceTest {
 
     @Mock
-    private ExpenseService expenseService;
-
+    private ExpenseRepository expenseRepository;
     @InjectMocks
     private PersonService personService;
 
     @Test
-    public void calculateDeb_whenExpensesAreMixed() {
+    void calculateDeb_whenExpensesAreMixed() {
         Person person = new Person();
         person.setLastName("first");
         person.setFirstName("person");
+        person.setId(1L);
 
         Person person2 = new Person();
         person2.setLastName("second");
@@ -56,7 +57,7 @@ class PersonServiceTest {
         when(expense3.getCost()).thenReturn(new BigDecimal("50.00"));
         when(expense3.getIsPaid()).thenReturn(true);
 
-        when(expenseService.findExpensesWherePayer(person)).thenReturn(List.of(expense1, expense2, expense3));
+        when(expenseRepository.findExpensesByPayer(person.getId())).thenReturn(List.of(expense1, expense2, expense3));
 
         BigDecimal totalDebt = personService.calculateDebt(person);
 
@@ -66,7 +67,8 @@ class PersonServiceTest {
     void calculateDebt_NoExpenses() {
         // Arrange
         Person person = new Person();
-        when(expenseService.findExpensesWherePayer(person)).thenReturn(Collections.emptyList());
+        person.setId(1L);
+        when(expenseRepository.findExpensesByPayer(person.getId())).thenReturn(Collections.emptyList());
 
         // Act
         BigDecimal totalDebt = personService.calculateDebt(person);
@@ -79,6 +81,7 @@ class PersonServiceTest {
     void calculateDebt_AllExpensesPaid() {
         // Arrange
         Person person = new Person();
+        person.setId(1L);
 
         Expense expense1 = mock(Expense.class);
         when(expense1.getPayer()).thenReturn(person);
@@ -92,7 +95,7 @@ class PersonServiceTest {
         when(expense2.getCost()).thenReturn(new BigDecimal("50.00"));
         when(expense2.getIsPaid()).thenReturn(true);
 
-        when(expenseService.findExpensesWherePayer(person)).thenReturn(List.of(expense1, expense2));
+        when(expenseRepository.findExpensesByPayer(person.getId())).thenReturn(List.of(expense1, expense2));
 
         // Act
         BigDecimal totalDebt = personService.calculateDebt(person);
@@ -105,6 +108,7 @@ class PersonServiceTest {
     void calculateDebt_ExpensesWithSamePayerAndBeneficiary() {
         // Arrange
         Person person = new Person();
+        person.setId(1L);
 
         Expense expense1 = mock(Expense.class);
         when(expense1.getPayer()).thenReturn(person);
@@ -112,7 +116,7 @@ class PersonServiceTest {
         when(expense1.getCost()).thenReturn(new BigDecimal("100.00"));
         when(expense1.getIsPaid()).thenReturn(false);
 
-        when(expenseService.findExpensesWherePayer(person)).thenReturn(List.of(expense1));
+        when(expenseRepository.findExpensesByPayer(person.getId())).thenReturn(List.of(expense1));
 
         // Act
         BigDecimal totalDebt = personService.calculateDebt(person);
@@ -125,6 +129,7 @@ class PersonServiceTest {
     void calculateDebt_ExpensesWithNullAttributes() {
         // Arrange
         Person person = new Person();
+        person.setId(1L);
 
         Expense expense1 = mock(Expense.class);
         when(expense1.getPayer()).thenReturn(person);
@@ -132,7 +137,7 @@ class PersonServiceTest {
         when(expense1.getCost()).thenReturn(null); // Null cost
         when(expense1.getIsPaid()).thenReturn(false);
 
-        when(expenseService.findExpensesWherePayer(person)).thenReturn(List.of(expense1));
+        when(expenseRepository.findExpensesByPayer(person.getId())).thenReturn(List.of(expense1));
 
         // Act
         BigDecimal totalDebt = personService.calculateDebt(person);
