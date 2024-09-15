@@ -1,8 +1,10 @@
 package com.application.munera.services;
 
 import com.application.munera.data.BadgeMessage;
+import com.application.munera.data.Category;
 import com.application.munera.data.Expense;
 import com.application.munera.data.ExpenseType;
+import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.textfield.TextField;
 import org.springframework.stereotype.Service;
@@ -47,8 +49,8 @@ public class ViewsService {
         return badge;
     }
 
-    public void applyFilter(TextField nameFilter, Long userId, PaginatedGrid<Expense, Objects> grid) {
-        String filterValue = nameFilter.getValue().trim();
+    public void applyNameFilter(TextField nameFilter, Long userId, PaginatedGrid<Expense, Objects> grid) {
+        final var filterValue = nameFilter.getValue().trim();
         List<Expense> filteredExpenses;
         if (filterValue.isEmpty()) filteredExpenses = expenseService.findAllOrderByDateDescending(userId); // If the filter is empty, return all expenses
         else {
@@ -56,6 +58,20 @@ public class ViewsService {
             filteredExpenses = expenseService.findAllOrderByDateDescending(userId)
                     .stream()
                     .filter(expense -> expense.getName().toLowerCase().contains(filterValue.toLowerCase())).toList();
+        }
+        grid.setItems(filteredExpenses);
+    }
+
+    public void applyCategoryFilter(MultiSelectComboBox<Category> categoryFilter, Long userId, PaginatedGrid<Expense, Objects> grid) {
+        final var selectedCategories = categoryFilter.getValue();
+        List<Expense> filteredExpenses;
+        if (selectedCategories.isEmpty()) filteredExpenses = expenseService.findAllOrderByDateDescending(userId); // If no categories are selected, return all expenses
+        else {
+            // Apply the filter by selected categories
+            filteredExpenses = expenseService.findAllOrderByDateDescending(userId)
+                    .stream()
+                    .filter(expense1 -> selectedCategories.contains(expense1.getCategory()))
+                    .toList();
         }
         grid.setItems(filteredExpenses);
     }

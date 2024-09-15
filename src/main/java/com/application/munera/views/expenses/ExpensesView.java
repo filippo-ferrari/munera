@@ -15,6 +15,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.formlayout.FormLayout;
@@ -24,6 +25,7 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
@@ -56,6 +58,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
 
     private final PaginatedGrid<Expense, Objects> grid = new PaginatedGrid<>();
     private final TextField nameFilter = new TextField();
+    private final MultiSelectComboBox<Category> categoryFilter = new MultiSelectComboBox<>();
     private final Button cancel = new Button("Cancel");
     private final Button save = new Button("Save");
     private final Button delete = new Button("Delete");
@@ -86,7 +89,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         this.expenseService = expenseService;
         this.categoryService = categoryService;
         this.viewsService = viewsService;
-        this.userService =  userService;
+        this.userService = userService;
         this.personFacade = personFacade;
         this.userId = this.userService.getLoggedInUser().getId();
         addClassNames("expenses-view");
@@ -114,27 +117,38 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         grid.setPageSize(22); // setting page size
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
 
-        // Filtering setup
+        // Filtering setup - Name
         nameFilter.setPlaceholder("Filter by Name...");
         nameFilter.setClearButtonVisible(true);
         nameFilter.setValueChangeMode(ValueChangeMode.LAZY);
-        nameFilter.addValueChangeListener(e -> this.viewsService.applyFilter(nameFilter, userId, grid));
+        nameFilter.addValueChangeListener(e -> this.viewsService.applyNameFilter(nameFilter, userId, grid));
 
-        // Add nameFilter field to layout (above the grid)
+        // Filtering setup - Category
+        categoryFilter.setPlaceholder("Filter by Category...");
+        categoryFilter.setClearButtonVisible(true);
+        categoryFilter.setItems(categoryService.findAllByUserId(userId));
+        categoryFilter.setItemLabelGenerator(Category::getName);
+        categoryFilter.addValueChangeListener(e -> this.viewsService.applyCategoryFilter(categoryFilter, userId, grid));
+
+        // Add filter fields to layout (above the grid)
         VerticalLayout layout = new VerticalLayout();
-        layout.add(nameFilter, grid);
+        HorizontalLayout filterLayout = new HorizontalLayout(nameFilter, categoryFilter);
+        filterLayout.setSpacing(true);
+        filterLayout.setAlignItems(FlexComponent.Alignment.BASELINE);
+        layout.add(filterLayout, grid);
         splitLayout.addToPrimary(layout);
 
         // when a row is selected or deselected, populate form
         grid.asSingleSelect().addValueChangeListener(event -> {
-            if (event.getValue() != null) UI.getCurrent().navigate(String.format(EXPENSE_EDIT_ROUTE_TEMPLATE, event.getValue().getId()));
-            else {
+            if (event.getValue() != null) {
+                UI.getCurrent().navigate(String.format(EXPENSE_EDIT_ROUTE_TEMPLATE, event.getValue().getId()));
+            } else {
                 clearForm();
                 UI.getCurrent().navigate(ExpensesView.class);
             }
         });
 
-        // Bind fields. This is where you'd define e.g. validation rules
+        // Configure Form
         binder = new BeanValidationBinder<>(Expense.class);
         binder.bindInstanceFields(this);
         binder.forField(name)
@@ -170,22 +184,6 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
                 periodInterval.clear();
             }
         });
-
-//        TODO:// Event listeners that will remove the selected creditors from the debtors list and vice versa
-//        // Done so that the user cant create an expense with the same person as creditor and debtor
-//        payer.addValueChangeListener(event -> {
-//            Person selectedDebtors = event.getValue();
-//            final var creditorsSet = new HashSet<>(personService.findAllWithoutUser());
-//            creditorsSet.removeIf(creditorsSet::contains);
-//            payer.setItems(creditorsSet);
-//        });
-//
-//        beneficiary.addValueChangeListener(event -> {
-//            Person selectedCreditors = event.getValue();
-//            final var debtorsSet = new HashSet<>(personService.findAllWithoutUser());
-//            debtorsSet.removeIf(debtorsSet::contains);
-//            beneficiary.setItems(debtorsSet);
-//        });
 
         cancel.addClickListener(e -> {
             clearForm();
@@ -227,7 +225,6 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
             }
         });
 
-        // Initialize ComboBox with the logged-in user's Person entity as default
         initializeComboBoxes();
     }
 
@@ -242,8 +239,6 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
                 Notification.show(
                         String.format("The requested expense was not found, ID = %s", expenseId.get()), 3000,
                         Notification.Position.BOTTOM_START);
-                // when a row is selected but the data is no longer available,
-                // refresh grid
                 refreshGrid();
                 event.forwardTo(ExpensesView.class);
             }
