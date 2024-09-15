@@ -41,7 +41,6 @@ import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.vaadin.klaudeta.PaginatedGrid;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -119,7 +118,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         nameFilter.setPlaceholder("Filter by Name...");
         nameFilter.setClearButtonVisible(true);
         nameFilter.setValueChangeMode(ValueChangeMode.LAZY);
-        nameFilter.addValueChangeListener(e -> applyFilter());
+        nameFilter.addValueChangeListener(e -> this.viewsService.applyFilter(nameFilter, userId, grid));
 
         // Add nameFilter field to layout (above the grid)
         VerticalLayout layout = new VerticalLayout();
@@ -332,20 +331,5 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         final var loggedInPerson = this.personFacade.getLoggedInPerson();
         payer.setValue(loggedInPerson);
         beneficiary.setValue(loggedInPerson);
-    }
-    private void applyFilter() {
-        String filterValue = nameFilter.getValue().trim();
-        List<Expense> filteredExpenses;
-
-        if (filterValue.isEmpty()) {
-            // If the filter is empty, return all expenses
-            filteredExpenses = expenseService.findAllOrderByDateDescending(userId);
-        } else {
-            filteredExpenses = expenseService.findAllOrderByDateDescending(userId)
-                    .stream()
-                    .filter(expense1 -> expense1.getName().toLowerCase().contains(filterValue.toLowerCase()))
-                    .toList();
-        }
-        grid.setItems(filteredExpenses);
     }
 }

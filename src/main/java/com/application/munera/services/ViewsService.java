@@ -4,9 +4,13 @@ import com.application.munera.data.BadgeMessage;
 import com.application.munera.data.Expense;
 import com.application.munera.data.ExpenseType;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.textfield.TextField;
 import org.springframework.stereotype.Service;
+import org.vaadin.klaudeta.PaginatedGrid;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.Objects;
 
 @Service
 public class ViewsService {
@@ -41,6 +45,19 @@ public class ViewsService {
             badge.getElement().getThemeList().add("badge contrast");
         }
         return badge;
+    }
+
+    public void applyFilter(TextField nameFilter, Long userId, PaginatedGrid<Expense, Objects> grid) {
+        String filterValue = nameFilter.getValue().trim();
+        List<Expense> filteredExpenses;
+        if (filterValue.isEmpty()) filteredExpenses = expenseService.findAllOrderByDateDescending(userId); // If the filter is empty, return all expenses
+        else {
+            // Apply the filter (e.g., by name)
+            filteredExpenses = expenseService.findAllOrderByDateDescending(userId)
+                    .stream()
+                    .filter(expense -> expense.getName().toLowerCase().contains(filterValue.toLowerCase())).toList();
+        }
+        grid.setItems(filteredExpenses);
     }
 
     private BadgeMessage determineBadgeMessage(ExpenseType type, boolean isPaid) {
