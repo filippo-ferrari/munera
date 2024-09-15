@@ -1,11 +1,13 @@
 package com.application.munera.views.users;
 
+import com.application.munera.data.Role;
 import com.application.munera.data.User;
 import com.application.munera.services.UserService;
 import com.application.munera.views.MainLayout;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
@@ -21,6 +23,7 @@ import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.ValidationException;
+import com.vaadin.flow.data.validator.EmailValidator;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
@@ -28,6 +31,8 @@ import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.RolesAllowed;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Optional;
 
 
@@ -53,9 +58,9 @@ public class UsersView extends Div implements BeforeEnterObserver {
     private TextField firstName;
     private TextField lastName;
     private TextField username;
-    private TextField roles;
     private PasswordField password;
     private EmailField email;
+    private MultiSelectComboBox<Role> roles;  // Updated to MultiSelectComboBox
 
     public UsersView(UserService userService) {
         this.userService = userService;
@@ -88,10 +93,8 @@ public class UsersView extends Div implements BeforeEnterObserver {
             }
         });
 
-        // Configure Form
         binder = new BeanValidationBinder<>(User.class);
-        // Bind fields. This is where you'd define e.g. validation rules
-        binder.bindInstanceFields(this);
+        // Bind fields with validation rules
         binder.forField(firstName)
                 .asRequired("First name is required")
                 .bind(User::getFirstName, User::setFirstName);
@@ -104,11 +107,25 @@ public class UsersView extends Div implements BeforeEnterObserver {
                 .asRequired("Username is required")
                 .bind(User::getUsername, User::setUsername);
 
+        binder.forField(password)
+                .asRequired("Password is required")
+                .bind(User::getPassword, User::setPassword);
+
+        binder.forField(email)
+                .withValidator(
+                        new EmailValidator("Please enter a valid email address"))
+                .bind(User::getEmail, User::setEmail);
+
+        binder.forField(roles)
+                .bind(user1 -> new HashSet<>(user.getRoleList()),   // Getter to convert roles string to list
+                     (user1, roles) -> user.setRoleList(new ArrayList<>(roles)));  // Setter to convert list back to string
+
+
+        // Button listeners
         cancel.addClickListener(e -> {
             clearForm();
             refreshGrid();
         });
-
         save.addClickListener(e -> {
             try {
                 if (this.user == null) this.user = new User();
@@ -127,7 +144,6 @@ public class UsersView extends Div implements BeforeEnterObserver {
                 Notification.show("Failed to update the user. Check again that all values are valid");
             }
         });
-
         delete.addClickListener(e -> {
             try {
                 if (this.user == null) throw new IllegalStateException("The user is null!");
@@ -174,8 +190,10 @@ public class UsersView extends Div implements BeforeEnterObserver {
         lastName = new TextField("Last Name");
         username = new TextField("Username");
         password = new PasswordField("Password");
-        roles = new TextField("Roles");
         email = new EmailField("Email");
+        roles = new MultiSelectComboBox<>("Roles");
+        roles.setItems(Role.values());  // Set the enum values as options
+        roles.setItemLabelGenerator(Role::getRoleName);  // Define how to display roles
 
         // We set the maximum parallel columns to 1
         formLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
@@ -216,6 +234,5 @@ public class UsersView extends Div implements BeforeEnterObserver {
     private void populateForm(User value) {
         this.user = value;
         binder.readBean(this.user);
-
     }
 }

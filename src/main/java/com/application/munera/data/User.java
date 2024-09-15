@@ -5,6 +5,11 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Entity
 @Data
 @Table(name = "users")
@@ -38,4 +43,18 @@ public class User {
     @Size(max = 100)
     @Column(name = "email")
     private String email;
+
+    // Helper methods to handle roles as a list of enum values
+    public List<Role> getRoleList() {
+        if (roles == null || roles.isEmpty()) return new ArrayList<>();  // Return an empty list if roles are null or empty
+        return Arrays.stream(roles.split(","))
+                .map(Role::valueOf)
+                .toList();
+    }
+
+    public void setRoleList(List<Role> roleList) {
+        this.roles = roleList.stream()
+                .map(Role::name)
+                .collect(Collectors.joining(","));
+    }
 }
