@@ -5,8 +5,6 @@ import com.application.munera.data.Person;
 import com.application.munera.data.User;
 import com.application.munera.facades.ExpenseFacade;
 import com.application.munera.facades.PersonFacade;
-import com.application.munera.services.ExpenseService;
-import com.application.munera.services.PersonService;
 import com.application.munera.services.UserService;
 import com.application.munera.services.ViewsService;
 import com.application.munera.views.MainLayout;
@@ -35,6 +33,7 @@ import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
 import java.util.List;
@@ -179,6 +178,11 @@ public class PeopleView extends Div implements BeforeEnterObserver {
                 Notification n = Notification.show(
                         "Error updating the data. Somebody else has updated the record while you were making changes.");
                 n.setPosition(Position.MIDDLE);
+                n.addThemeVariants(NotificationVariant.LUMO_ERROR);
+            } catch (DataIntegrityViolationException ex) {
+                Notification n = Notification.show(
+                        "Cannot delete this person as it is associated with existing expenses.");
+                n.setPosition(Notification.Position.MIDDLE);
                 n.addThemeVariants(NotificationVariant.LUMO_ERROR);
             }
         });
