@@ -130,7 +130,7 @@ public class UsersView extends Div implements BeforeEnterObserver {
 
         delete.addClickListener(e -> {
             try {
-                if (this.user == null) throw new RuntimeException("The user is null!"); //TODO: create proper exception
+                if (this.user == null) throw new IllegalStateException("The user is null!");
                 userService.delete(this.user);
                 clearForm();
                 refreshGrid();

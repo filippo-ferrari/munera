@@ -203,7 +203,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
 
         delete.addClickListener(e -> {
             try {
-                if (Objects.isNull(this.expense)) throw new RuntimeException("Expense is null!"); //TODO: create proper exception
+                if (Objects.isNull(this.expense)) throw new IllegalStateException("Expense is null!");
                 expenseService.delete(this.expense.getId());
                 clearForm();
                 refreshGrid();

@@ -121,7 +121,7 @@ public class CategoriesView extends Div implements BeforeEnterObserver {
 
         delete.addClickListener(e -> {
             try {
-                if (this.category == null) throw new RuntimeException("Category is null!"); //TODO: create proper exception
+                if (this.category == null) throw new IllegalStateException("Category is null!");
                 categoryService.delete(this.category);
                 clearForm();
                 refreshGrid();

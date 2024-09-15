@@ -168,7 +168,7 @@ public class PeopleView extends Div implements BeforeEnterObserver {
 
         delete.addClickListener(e -> {
             try {
-                if (this.person == null) throw new RuntimeException("The person is null!"); //TODO: create proper exception
+                if (this.person == null) throw new IllegalStateException("The person is null!");
                 personFacade.delete(this.person.getId());
                 clearForm();
                 refreshGrid();
