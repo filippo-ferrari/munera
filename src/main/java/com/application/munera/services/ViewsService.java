@@ -65,7 +65,6 @@ public class ViewsService {
             case CREDIT -> isPaid ? BadgeMessage.PAID_TO_ME : BadgeMessage.OWED_TO_ME;
             case DEBIT -> isPaid ? BadgeMessage.PAID_BY_ME : BadgeMessage.OWED_BY_ME;
             case NONE -> isPaid ? BadgeMessage.PAID : BadgeMessage.NOT_PAID;
-            default -> BadgeMessage.UNKNOWN;
         };
     }
 }

@@ -134,14 +134,12 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
             }
         });
 
-        // Configure Form
-        binder = new BeanValidationBinder<>(Expense.class);
         // Bind fields. This is where you'd define e.g. validation rules
+        binder = new BeanValidationBinder<>(Expense.class);
         binder.bindInstanceFields(this);
         binder.forField(name)
                 .asRequired("Name is required")
                 .bind(Expense::getName, Expense::setName);
-
         binder.forField(cost)
                 .asRequired("Cost is required")
                 .withConverter(new StringToBigDecimalConverter("Invalid cost"))
@@ -150,7 +148,6 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         binder.forField(category)
                 .asRequired("Category is required")
                 .bind(Expense::getCategory, Expense::setCategory);
-
         binder.forField(date)
                 .asRequired("Date is required")
                 .bind(Expense::getDate, Expense::setDate);
