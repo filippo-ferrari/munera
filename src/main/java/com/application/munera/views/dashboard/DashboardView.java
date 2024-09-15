@@ -220,7 +220,7 @@ public class DashboardView extends Div {
                 "} " +
                 "} " +
                 "}, " +
-                "series: " + seriesData.toString() + " " +
+                "series: " + seriesData + " " +
                 "});";
     }
 

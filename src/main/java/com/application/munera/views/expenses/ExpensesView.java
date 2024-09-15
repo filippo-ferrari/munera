@@ -60,7 +60,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
     private final BeanValidationBinder<Expense> binder;
 
     private Expense expense;
-    private Long userId;
+    private final Long userId;
 
     private final ExpenseService expenseService;
     private final PersonFacade personFacade;

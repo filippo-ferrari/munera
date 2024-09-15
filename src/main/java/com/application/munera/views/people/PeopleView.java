@@ -57,8 +57,8 @@ public class PeopleView extends Div implements BeforeEnterObserver {
     private final BeanValidationBinder<Person> binder;
 
     private Person person;
-    private User loggedUser;
-    private Long userId;
+    private final User loggedUser;
+    private final Long userId;
     private final UserService userService;
     private final PersonFacade personFacade;
     private final ExpenseFacade expenseFacade;
