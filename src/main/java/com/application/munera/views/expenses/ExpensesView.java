@@ -25,6 +25,7 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
@@ -32,6 +33,7 @@ import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.data.converter.StringToBigDecimalConverter;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.*;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +41,7 @@ import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.vaadin.klaudeta.PaginatedGrid;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -53,7 +56,7 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
     private static final String EXPENSE_EDIT_ROUTE_TEMPLATE = "/%s/edit";
 
     private final PaginatedGrid<Expense, Objects> grid = new PaginatedGrid<>();
-
+    private final TextField nameFilter = new TextField();
     private final Button cancel = new Button("Cancel");
     private final Button save = new Button("Save");
     private final Button delete = new Button("Delete");
@@ -111,6 +114,17 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         grid.setPaginatorSize(5);
         grid.setPageSize(22); // setting page size
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
+
+        // Filtering setup
+        nameFilter.setPlaceholder("Filter by Name...");
+        nameFilter.setClearButtonVisible(true);
+        nameFilter.setValueChangeMode(ValueChangeMode.LAZY);
+        nameFilter.addValueChangeListener(e -> applyFilter());
+
+        // Add nameFilter field to layout (above the grid)
+        VerticalLayout layout = new VerticalLayout();
+        layout.add(nameFilter, grid);
+        splitLayout.addToPrimary(layout);
 
         // when a row is selected or deselected, populate form
         grid.asSingleSelect().addValueChangeListener(event -> {
@@ -318,5 +332,20 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         final var loggedInPerson = this.personFacade.getLoggedInPerson();
         payer.setValue(loggedInPerson);
         beneficiary.setValue(loggedInPerson);
+    }
+    private void applyFilter() {
+        String filterValue = nameFilter.getValue().trim();
+        List<Expense> filteredExpenses;
+
+        if (filterValue.isEmpty()) {
+            // If the filter is empty, return all expenses
+            filteredExpenses = expenseService.findAllOrderByDateDescending(userId);
+        } else {
+            filteredExpenses = expenseService.findAllOrderByDateDescending(userId)
+                    .stream()
+                    .filter(expense1 -> expense1.getName().toLowerCase().contains(filterValue.toLowerCase()))
+                    .toList();
+        }
+        grid.setItems(filteredExpenses);
     }
 }
