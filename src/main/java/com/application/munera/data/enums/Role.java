@@ -1,4 +1,4 @@
-package com.application.munera.data;
+package com.application.munera.data.enums;
 
 import lombok.Getter;
 

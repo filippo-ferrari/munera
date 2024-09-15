@@ -1,6 +1,6 @@
 package com.application.munera.views.users;
 
-import com.application.munera.data.Role;
+import com.application.munera.data.enums.Role;
 import com.application.munera.data.User;
 import com.application.munera.services.UserService;
 import com.application.munera.views.MainLayout;

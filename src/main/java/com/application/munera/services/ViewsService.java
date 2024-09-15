@@ -1,9 +1,9 @@
 package com.application.munera.services;
 
-import com.application.munera.data.BadgeMessage;
+import com.application.munera.data.enums.BadgeMessage;
 import com.application.munera.data.Category;
 import com.application.munera.data.Expense;
-import com.application.munera.data.ExpenseType;
+import com.application.munera.data.enums.ExpenseType;
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.textfield.TextField;

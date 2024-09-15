@@ -2,7 +2,7 @@ package com.application.munera.views.expenses;
 
 import com.application.munera.data.Category;
 import com.application.munera.data.Expense;
-import com.application.munera.data.PeriodUnit;
+import com.application.munera.data.enums.PeriodUnit;
 import com.application.munera.data.Person;
 import com.application.munera.facades.PersonFacade;
 import com.application.munera.services.CategoryService;

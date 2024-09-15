@@ -2,7 +2,7 @@ package com.application.munera.repositories;
 
 
 import com.application.munera.data.Expense;
-import com.application.munera.data.ExpenseType;
+import com.application.munera.data.enums.ExpenseType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;

@@ -1,7 +1,7 @@
 package com.application.munera.services;
 
 import com.application.munera.data.Expense;
-import com.application.munera.data.ExpenseType;
+import com.application.munera.data.enums.ExpenseType;
 import com.application.munera.data.Person;
 import com.application.munera.repositories.ExpenseRepository;
 import com.application.munera.repositories.PersonRepository;

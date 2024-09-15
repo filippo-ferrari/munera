@@ -1,5 +1,7 @@
 package com.application.munera.data;
 
+import com.application.munera.data.enums.ExpenseType;
+import com.application.munera.data.enums.PeriodUnit;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -7,7 +9,6 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Entity
 @Getter
