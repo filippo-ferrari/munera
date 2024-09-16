@@ -12,6 +12,12 @@ import java.util.List;
 import java.util.Set;
 
 public interface ExpenseRepository extends JpaRepository<Expense, Long>, JpaSpecificationExecutor<Expense> {
+    @Query(value = "SELECT DISTINCT e FROM Expense e " +
+            "WHERE (e.payer.id = :userId AND e.beneficiary.id = :userId AND YEAR(e.date) = :year) " +
+            "OR (e.beneficiary.id = :userId AND YEAR(e.date) = :year) " +
+            "OR (e.payer.id = :userId AND e.isPaid = false AND YEAR(e.date) = :year)")
+    List<Expense> findExpensesForDashboard(@Param("userId") Long userId, @Param("year") int year);
+
     @Query("SELECT DISTINCT YEAR(e.date) FROM Expense e WHERE e.userId = :userId ORDER BY YEAR(e.date)")
     List<Integer> findExpenseYearsByUserId(@Param("userId") Long userId);
 

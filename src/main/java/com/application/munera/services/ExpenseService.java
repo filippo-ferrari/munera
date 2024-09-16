@@ -1,8 +1,8 @@
 package com.application.munera.services;
 
 import com.application.munera.data.Expense;
-import com.application.munera.data.enums.ExpenseType;
 import com.application.munera.data.Person;
+import com.application.munera.data.enums.ExpenseType;
 import com.application.munera.repositories.ExpenseRepository;
 import com.application.munera.repositories.PersonRepository;
 import com.application.munera.repositories.UserRepository;
@@ -16,10 +16,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Nonnull;
 import java.time.LocalDate;
 import java.time.Year;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 
 @Service
@@ -183,24 +180,7 @@ public class ExpenseService {
      * @return the list of expenses of that user in that year
      */
     public List<Expense> fetchExpensesForDashboard(Person loggedInPerson, Year year) {
-        List<Expense> totalExpenses = new ArrayList<>();
-        final var yearValue = year.getValue();
-
-        // Fetch expenses where you are the payer and beneficiary (self-expenses) for the given year
-        List<Expense> bothExpenses = expenseRepository.findExpensesByPayerAndBeneficiaryAndYear(loggedInPerson.getId(), yearValue);
-        totalExpenses.addAll(bothExpenses); // Include these regardless of isPaid status
-
-        // Fetch expenses where you are the payer (you owe money), filtered by year
-        List<Expense> beneficiaryExpenses = expenseRepository.findExpensesByBeneficiaryAndYear(loggedInPerson.getId(), yearValue);
-        for (Expense expense : beneficiaryExpenses) {
-            if (!totalExpenses.contains(expense)) totalExpenses.add(expense);
-        }
-        // Fetch expenses where you are the beneficiary and not paid (amount owed to you), filtered by year
-        List<Expense> payerExpenses = expenseRepository.findExpensesByPayerAndYear(loggedInPerson.getId(), yearValue);
-        for (Expense expense : payerExpenses) {
-            if (Boolean.FALSE.equals(expense.getIsPaid()) && !totalExpenses.contains(expense)) totalExpenses.add(expense);
-        }
-        return totalExpenses;
+        return this.expenseRepository.findExpensesForDashboard(loggedInPerson.getUserId(), year.getValue());
     }
 
     /**

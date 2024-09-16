@@ -4,6 +4,7 @@ import com.application.munera.data.enums.ExpenseType;
 import com.application.munera.data.enums.PeriodUnit;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,6 +14,7 @@ import java.time.LocalDate;
 @Entity
 @Getter
 @Setter
+@EqualsAndHashCode
 @Table(name = "expenses")
 public class Expense {
 
