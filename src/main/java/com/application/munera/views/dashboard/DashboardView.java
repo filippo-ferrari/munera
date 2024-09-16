@@ -242,7 +242,7 @@ public class DashboardView extends Div {
         }
         data.setCharAt(data.length() - 1, ']'); // Replace last comma with closing bracket
 
-        // Generate JavaScript initialization
+        // Generate JavaScript initialization with percentage tooltip
         return "Highcharts.chart('pieChart', {" +
                 "chart: {" +
                 "type: 'pie'" +
@@ -250,9 +250,16 @@ public class DashboardView extends Div {
                 "title: {" +
                 "text: 'Expenses by Category for " + Year.now().getValue() + "'" +
                 "}," +
+                "tooltip: {" +  // Tooltip configuration to show percentage
+                "pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b> ({point.y:.2f})'" +
+                "}," +
                 "plotOptions: {" +
                 "pie: {" +
-                "size: '80%'" + // Adjust size to make the pie chart larger
+                "size: '80%'," +  // Adjust size to make the pie chart larger
+                "dataLabels: {" +  // Enable data labels
+                "enabled: true," +
+                "format: '{point.name}: {point.percentage:.1f}%'" + // Show percentage next to each slice
+                "}" +
                 "}" +
                 "}," +
                 "series: [{" +
