@@ -143,6 +143,7 @@ public class UserService {
             userToSave.setUsername(user.getUsername());
             userToSave.setPassword(user.getPassword());
             userToSave.setRoles(user.getRoles());
+            userToSave.setMonthlyIncome(user.getMonthlyIncome());
         } else {
             userToSave = user; // If user does not exist, save the new user entity
         }

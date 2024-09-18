@@ -45,6 +45,9 @@ public class User {
     @Column(name = "email")
     private String email;
 
+    @Column(name = "monthlyIncome")
+    private Double monthlyIncome;
+
     // Helper methods to handle roles as a list of enum values
     public List<Role> getRoleList() {
         if (roles == null || roles.isEmpty()) return new ArrayList<>();  // Return an empty list if roles are null or empty

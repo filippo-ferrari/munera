@@ -11,6 +11,7 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.EmailField;
+import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
@@ -22,7 +23,6 @@ import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 @PageTitle("Settings")
 @PermitAll
@@ -35,7 +35,7 @@ public class SettingsView extends VerticalLayout implements BeforeEnterObserver 
     private TextField firstName;
     private TextField lastName;
     private PasswordField password;
-    private TextField monthlyIncome;
+    private NumberField monthlyIncome;
     private EmailField email;
     private final BeanValidationBinder<User> binder;
     private final Button save = new Button("Save");
@@ -44,25 +44,25 @@ public class SettingsView extends VerticalLayout implements BeforeEnterObserver 
     @Autowired
     public SettingsView(UserService userService) {
         this.userService = userService;
-
         createForm();
-
         loggedInUser = userService.getLoggedInUser();
 
-        binder = new BeanValidationBinder<>(User.class);
         // Bind fields. This is where you'd define e.g. validation rules
+        binder = new BeanValidationBinder<>(User.class);
         binder.bindInstanceFields(this);
         binder.forField(firstName)
                 .asRequired("First name is required")
                 .bind(User::getFirstName, User::setFirstName);
-
         binder.forField(lastName)
                 .asRequired("Last name is required")
                 .bind(User::getLastName, User::setLastName);
-
         binder.forField(password)
                 .asRequired("Password is required")
                 .bind(User::getPassword, User::setPassword);
+        binder.forField(monthlyIncome)
+                .withNullRepresentation(0.0) // 0.0 if the field is empty
+                .withValidator(value -> value != null, "Must be a valid number")
+                .bind(User::getMonthlyIncome, User::setMonthlyIncome);
 
         save.addClickListener(e -> {
             try {
@@ -87,7 +87,7 @@ public class SettingsView extends VerticalLayout implements BeforeEnterObserver 
         lastName = new TextField("Last Name");
         password = new PasswordField("Password");
         email = new EmailField("Email");
-        monthlyIncome = new TextField("Monthly Income");
+        monthlyIncome = new NumberField("Monthly Income");
 
         formLayout.add(firstName, lastName, password, email, monthlyIncome);
 
@@ -95,15 +95,11 @@ public class SettingsView extends VerticalLayout implements BeforeEnterObserver 
     }
 
     private void saveUserData() {
-
         loggedInUser.setFirstName(firstName.getValue());
         loggedInUser.setLastName(lastName.getValue());
         loggedInUser.setEmail(email.getValue());
         loggedInUser.setPassword(password.getValue());
-
-        // TODO: implement
-        String monthlyIncome = this.monthlyIncome.getValue();
-
+        loggedInUser.setMonthlyIncome(monthlyIncome.getValue());
         userService.saveOrUpdateUserAndConnectedPerson(loggedInUser);
     }
 
@@ -114,6 +110,6 @@ public class SettingsView extends VerticalLayout implements BeforeEnterObserver 
         lastName.setValue(getLoggedInUser.getLastName());
         password.setValue(getLoggedInUser.getPassword());
         email.setValue(getLoggedInUser.getEmail());
-        monthlyIncome.setValue("");
+        monthlyIncome.setValue(getLoggedInUser.getMonthlyIncome());
     }
 }
