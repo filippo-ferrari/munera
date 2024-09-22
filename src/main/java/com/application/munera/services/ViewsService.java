@@ -23,6 +23,12 @@ public class ViewsService {
         this.expenseService = expenseService;
     }
 
+    /**
+     * Creates a badge (Vaadin {@link Span}) based on the type of the expense and its payment status.
+     *
+     * @param expense the expense for which the badge is being created.
+     * @return a {@link Span} object representing the expense status badge.
+     */
     public Span createExpenseBadge(final Expense expense) {
         final var isExpensePaid = Boolean.TRUE.equals(this.expenseService.isExpensePaid(expense));
         final var badgeMessage = determineBadgeMessage(expense.getExpenseType(), isExpensePaid);
@@ -34,6 +40,13 @@ public class ViewsService {
         return badge;
     }
 
+    /**
+     * Creates a badge (Vaadin {@link Span}) that reflects a person's financial balance status
+     * based on the net balance provided.
+     *
+     * @param netBalance the net balance of the person.
+     * @return a {@link Span} object representing the person's financial status badge.
+     */
     public Span createPersonBadge(BigDecimal netBalance) {
         Span badge = new Span();
         if (netBalance.compareTo(BigDecimal.ZERO) < 0) {
@@ -49,6 +62,15 @@ public class ViewsService {
         return badge;
     }
 
+    /**
+     * Applies a name-based filter on the expenses displayed in the provided grid.
+     * If the filter value is empty, all expenses are displayed; otherwise, expenses
+     * whose names match the filter are shown.
+     *
+     * @param nameFilter the {@link TextField} containing the name filter value.
+     * @param userId     the ID of the user whose expenses are being filtered.
+     * @param grid       the {@link PaginatedGrid} that displays the expenses.
+     */
     public void applyNameFilter(TextField nameFilter, Long userId, PaginatedGrid<Expense, Objects> grid) {
         final var filterValue = nameFilter.getValue().trim();
         List<Expense> filteredExpenses;
@@ -62,6 +84,15 @@ public class ViewsService {
         grid.setItems(filteredExpenses);
     }
 
+    /**
+     * Applies a category-based filter on the expenses displayed in the provided grid.
+     * If no categories are selected, all expenses are shown; otherwise, only expenses
+     * that match the selected categories are displayed.
+     *
+     * @param categoryFilter the {@link MultiSelectComboBox} containing the selected categories.
+     * @param userId         the ID of the user whose expenses are being filtered.
+     * @param grid           the {@link PaginatedGrid} that displays the expenses.
+     */
     public void applyCategoryFilter(MultiSelectComboBox<Category> categoryFilter, Long userId, PaginatedGrid<Expense, Objects> grid) {
         final var selectedCategories = categoryFilter.getValue();
         List<Expense> filteredExpenses;
@@ -76,6 +107,13 @@ public class ViewsService {
         grid.setItems(filteredExpenses);
     }
 
+    /**
+     * Determines the message and theme for a badge based on the expense type and its payment status.
+     *
+     * @param type    the type of the expense (CREDIT, DEBIT, or NONE).
+     * @param isPaid  boolean indicating whether the expense has been paid.
+     * @return a {@link BadgeMessage} object containing the text and theme for the badge.
+     */
     private BadgeMessage determineBadgeMessage(ExpenseType type, boolean isPaid) {
         return switch (type) {
             case CREDIT -> isPaid ? BadgeMessage.PAID_TO_ME : BadgeMessage.OWED_TO_ME;
