@@ -106,8 +106,6 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
         grid.addColumn(Expense::getName).setHeader("Name").setSortable(true).setSortProperty("name");
         grid.addColumn(Expense::getCost).setHeader("Amount").setSortable(true).setSortProperty("cost");
         grid.addColumn(expenseCategory -> expenseCategory.getCategory().getName()).setHeader("Category").setSortable(true).setSortProperty("category");
-//        grid.addColumn(Expense::getPeriodInterval).setHeader("Period Interval").setSortable(true);
-//        grid.addColumn(Expense::getPeriodUnit).setHeader("Period Unit").setSortable(true);
         grid.addColumn(Expense::getDate).setHeader("Date").setSortable(true).setSortProperty("date");
         grid.addColumn(new ComponentRenderer<>(this.viewsService::createExpenseBadge)).setHeader("Status").setSortable(true);
         grid.getColumns().forEach(col -> col.setAutoWidth(true));
@@ -140,9 +138,8 @@ public class ExpensesView extends Div implements BeforeEnterObserver {
 
         // when a row is selected or deselected, populate form
         grid.asSingleSelect().addValueChangeListener(event -> {
-            if (event.getValue() != null) {
-                UI.getCurrent().navigate(String.format(EXPENSE_EDIT_ROUTE_TEMPLATE, event.getValue().getId()));
-            } else {
+            if (event.getValue() != null) UI.getCurrent().navigate(String.format(EXPENSE_EDIT_ROUTE_TEMPLATE, event.getValue().getId()));
+             else {
                 clearForm();
                 UI.getCurrent().navigate(ExpensesView.class);
             }
