@@ -216,15 +216,8 @@ public class ExpenseService {
         Person beneficiary = expense.getBeneficiary();
 
         // Determine the expense type
-        if (payer.equals(loggedInPerson) && !beneficiary.equals(loggedInPerson)) {
-            // Logged-in user is the payer, and the beneficiary is someone else
-            expense.setExpenseType(ExpenseType.CREDIT);
-        } else if (!payer.equals(loggedInPerson) && beneficiary.equals(loggedInPerson)) {
-            // Logged-in user is the beneficiary, and the payer is someone else
-            expense.setExpenseType(ExpenseType.DEBIT);
-        } else if (payer.equals(loggedInPerson) &&  beneficiary.equals(loggedInPerson)) {
-            // Both payer and beneficiary are the logged-in user
-            expense.setExpenseType(ExpenseType.NONE);
-        }
+        if (payer.equals(loggedInPerson) && !beneficiary.equals(loggedInPerson)) expense.setExpenseType(ExpenseType.CREDIT); // Logged-in user is the payer, and the beneficiary is someone else
+         else if (!payer.equals(loggedInPerson) && beneficiary.equals(loggedInPerson)) expense.setExpenseType(ExpenseType.DEBIT); // Logged-in user is the beneficiary, and the payer is someone else
+         else if (payer.equals(loggedInPerson)) expense.setExpenseType(ExpenseType.NONE); // Both payer and beneficiary are the logged-in user
     }
 }

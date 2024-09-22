@@ -134,7 +134,7 @@ public class PersonFacade {
      */
     public void setCreditPaid(Person person, TreeGrid<Object> grid, Long userId) {
         try {
-            List<Expense> expenses = expenseService.findExpensesWhereBeneficiary(person).stream().toList();
+            List<Expense> expenses = (List<Expense>) expenseService.findExpensesWhereBeneficiary(person);
             for (Expense expense : expenses) {
                 expense.setIsPaid(true);
                 expenseService.update(expense, userId);
