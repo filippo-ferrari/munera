@@ -100,9 +100,7 @@ public class CategoriesView extends Div implements BeforeEnterObserver {
 
         save.addClickListener(e -> {
             try {
-                if (this.category == null) {
-                    this.category = new Category();
-                }
+                if (this.category == null) this.category = new Category();
                 binder.writeBean(this.category);
                 categoryService.update(this.category, userId);
                 clearForm();
@@ -146,8 +144,7 @@ public class CategoriesView extends Div implements BeforeEnterObserver {
         Optional<Long> categoryId = event.getRouteParameters().get(CATEGORY_ID).map(Long::parseLong);
         if (categoryId.isPresent()) {
             Optional<Category> categoryFromBackend = categoryService.findById(categoryId.get());
-            if (categoryFromBackend.isPresent()) {
-                populateForm(categoryFromBackend.get());
+            if (categoryFromBackend.isPresent()) {populateForm(categoryFromBackend.get());
             } else {
                 Notification.show(
                         String.format("The requested category was not found, ID = %s", categoryId.get()), 3000,
