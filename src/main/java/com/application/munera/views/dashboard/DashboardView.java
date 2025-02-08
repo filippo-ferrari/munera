@@ -35,6 +35,7 @@ public class DashboardView extends Div {
     private final User loggedUser;
     private final Person loggedPerson;
     private final ComboBox<Integer> yearComboBox;
+    private Year yearCurrentlySelected; // the year selected in the combo box
 
     public DashboardView(ExpenseService expenseService, UserService userService, PersonFacade personFacade) {
         this.expenseService = expenseService;
@@ -119,6 +120,7 @@ public class DashboardView extends Div {
 
     // Update the charts based on the selected year
     private void updateCharts(Year year) {
+        yearCurrentlySelected = year; // i update what year is currently selected to use it in the graph's titles
         String barChartJs = generateBarChartScript(year);
         String pieChartJs = generatePieChartScript(year);
         String negativeColumnChartJs = generateNegativeColumnChartScript();
@@ -193,7 +195,7 @@ public class DashboardView extends Div {
         // Generate the JavaScript for the stacked column chart
         return "Highcharts.chart('barChart', {" +
                 "chart: { type: 'column' }, " +
-                "title: { text: 'Monthly Expenses by Category for " + Year.now().getValue() + "' }, " +
+                "title: { text: 'Monthly Expenses by Category for " + yearCurrentlySelected.getValue() + "' }, " +
                 "xAxis: { categories: " + new Gson().toJson(monthNames) + " }, " +
                 "yAxis: { " +
                 "min: 0, " +
@@ -248,7 +250,7 @@ public class DashboardView extends Div {
                 "type: 'pie'" +
                 "}," +
                 "title: {" +
-                "text: 'Expenses by Category for " + Year.now().getValue() + "'" +
+                "text: 'Expenses by Category for " + yearCurrentlySelected.getValue() + "'" +
                 "}," +
                 "tooltip: {" +  // Tooltip configuration to show percentage
                 "pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b> ({point.y:.2f})'" +
@@ -403,7 +405,7 @@ public class DashboardView extends Div {
                 "type: 'line'" +
                 "}," +
                 "title: {" +
-                "text: 'Expenses Over Time by Category for " + Year.now().getValue() + "'" +
+                "text: 'Expenses Over Time by Category for " + yearCurrentlySelected.getValue() + "'" +
                 "}," +
                 "xAxis: {" +
                 "categories: " + new Gson().toJson(monthNames) +
